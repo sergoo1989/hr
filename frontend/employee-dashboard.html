@@ -347,6 +347,7 @@
                         <!-- سيتم ملء البدلات هنا -->
                     </div>
                 </div>
+                <div id="allowancesTable"></div>
             </div>
 
             <div class="section">
@@ -414,8 +415,12 @@
                 // Display employee info
                 displayEmployeeInfo(dashboardData.employee);
 
+                // Save data for allowances table
+                localStorage.setItem('leaveBalanceData', JSON.stringify(leaveBalance));
+
                 // Display allowances
                 displayAllowances(dashboardData.employee, leaveBalance);
+                displayAllowancesTable();
 
                 // Fetch and display leaves
                 const leavesResponse = await fetch(`${apiUrl}/employees/me/leaves`, { headers });
@@ -864,6 +869,55 @@
             `).join('');
 
             container.innerHTML = html;
+        }
+
+        function displayAllowancesTable() {
+            const container = document.getElementById('allowancesTable');
+            
+            // البيانات من localStorage أو الحسابات السابقة
+            const leaveBalanceData = JSON.parse(localStorage.getItem('leaveBalanceData') || '{}');
+            const employeeData = JSON.parse(localStorage.getItem('user') || '{}');
+            
+            const allowances = [
+                {
+                    type: 'بدل إجازة سنوية',
+                    amount: Math.round(leaveBalanceData.leaveBalance || 0),
+                    status: 'متاح',
+                    date: new Date().toLocaleDateString('ar-SA'),
+                    reason: `${leaveBalanceData.remainingDays || 0} يوم × ${Math.round((employeeData.basicSalary || 0) / 30)} ريال`
+                }
+            ];
+
+            if (allowances.length === 0) {
+                container.innerHTML = '<p style="color: #999; text-align: center; padding: 20px;">لا توجد مستحقات مالية</p>';
+                return;
+            }
+
+            const table = `
+                <table>
+                    <thead>
+                        <tr>
+                            <th>نوع البدل</th>
+                            <th>المبلغ</th>
+                            <th>الحالة</th>
+                            <th>التاريخ</th>
+                            <th>التفاصيل</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${allowances.map(allowance => `
+                            <tr>
+                                <td><strong>${allowance.type}</strong></td>
+                                <td style="color: #28a745; font-weight: bold;">${allowance.amount.toLocaleString('ar-SA')} ريال</td>
+                                <td><span class="status-badge status-approved">${allowance.status}</span></td>
+                                <td>${allowance.date}</td>
+                                <td>${allowance.reason}</td>
+                            </tr>
+                        `).join('')}
+                    </tbody>
+                </table>
+            `;
+            container.innerHTML = table;
         }
 
         function logout() {
