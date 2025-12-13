@@ -2,8 +2,8 @@
 const API_CONFIG = {
     // سيتم تحديد الـ API URL حسب البيئة
     getApiUrl: function() {
-        // استخدام API المحلي دائماً
-        return 'http://localhost:3000';
+        // استخدام Replit API
+        return 'https://f87c6725-9b2c-4c75-92db-eebbde59d71-00-17npf2gkd4yj4.pike.replit.dev:3000';
     }
 };
 
