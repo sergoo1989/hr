@@ -173,9 +173,8 @@
         </div>
     </div>
 
+    <script src="config.js"></script>
     <script>
-        const API_URL = 'http://localhost:3000';
-
         document.getElementById('loginForm').addEventListener('submit', async (e) => {
             e.preventDefault();
             
@@ -233,7 +232,7 @@
                 }
             } catch (error) {
                 console.error('Login error:', error);
-                showAlert('خطأ في الاتصال بالخادم. تأكد من تشغيل الـ API على المنفذ 3000', 'error');
+                showAlert('خطأ في الاتصال. الرجاء المحاولة مرة أخرى', 'error');
             } finally {
                 loading.style.display = 'none';
                 submitBtn.disabled = false;

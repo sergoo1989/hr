@@ -15,15 +15,16 @@ async function bootstrap() {
   
   // Enable CORS with explicit configuration
   app.enableCors({
-    origin: '*', // Allow all origins in development
+    origin: process.env.CORS_ORIGIN || '*', // Allow configured origins or all in development
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
     credentials: true,
     allowedHeaders: 'Content-Type, Accept, Authorization',
   });
   
-  const port = 3000;
+  const port = process.env.PORT || 3000;
   await app.listen(port);
-  console.log(`🚀 HR API يعمل على: http://localhost:${port}`);
+  console.log(`🚀 HR API يعمل على المنفذ: ${port}`);
+  console.log(`🌍 البيئة: ${process.env.NODE_ENV || 'development'}`);
   console.log('📡 الخادم جاهز لاستقبال الطلبات');
 }
 bootstrap();

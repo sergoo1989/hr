@@ -3,7 +3,7 @@
     {
       "id": 1,
       "username": "admin",
-      "password": "$2b$10$k/hPBdx2TAZ73Q3at5.MluDJXNnG6lHaQqNIyWjz1Fy1ethh5Nr3q",
+      "password": "$2b$10$vBptGily4zA3/wfIRuDFDekrx/F1SA3VKHgZx9CWG0uELg2KWKxS2",
       "role": "ADMIN",
       "employeeId": 3,
       "isActive": true,
@@ -13,7 +13,7 @@
     {
       "id": 2,
       "username": "admin",
-      "password": "$2b$10$9xuTebW/SDGbq8PkDYYut.ruGNb0WTkn/Yqde8Qs5keKL0ju0RBvO",
+      "password": "$2b$10$dy7/l21B3Kn3F3JZd3IbS.ykRT.20kHDVKZes6NTD6KX91NkktrVO",
       "role": "ADMIN",
       "employeeId": 1,
       "isActive": true,
@@ -23,17 +23,7 @@
     {
       "id": 3,
       "username": "employee1",
-      "password": "$2b$10$lM2PaVe7.LuMLMHtfLkqOOAjSLyKwQOD5Zy1I/aNqVMgy5Uwa/eI2",
-      "role": "EMPLOYEE",
-      "employeeId": 4,
-      "isActive": true,
-      "mustChangePassword": false,
-      "email": "employee1@hr-system.com"
-    },
-    {
-      "id": 4,
-      "username": "employee1",
-      "password": "$2b$10$s7V0WkO/Narea4ZzcBM/nusswAxbfZNzkQVTIYAfRguFsXtBA3L42",
+      "password": "$2b$10$ooiGYBjfkDgF/meMQ/AzteIt0ntPEOUoWIhIpc5Pl0s7YTExsUpJq",
       "role": "EMPLOYEE",
       "employeeId": 2,
       "isActive": true,
@@ -86,27 +76,12 @@
       "housingAllowance": 3000,
       "transportAllowance": 1000,
       "nationality": "SAUDI"
-    },
-    {
-      "id": 4,
-      "fullName": "أحمد محمد السعيد",
-      "employeeNumber": "EMP002",
-      "nationalId": "1234567891",
-      "email": "ahmed@company.com",
-      "phone": "+966501234568",
-      "department": "تقنية المعلومات",
-      "jobTitle": "مطور برامج",
-      "hireDate": "2021-06-15T00:00:00.000Z",
-      "basicSalary": 8000,
-      "housingAllowance": 2500,
-      "transportAllowance": 800,
-      "nationality": "SAUDI"
     }
   ],
   "leaves": [
     {
       "id": 1,
-      "employeeId": 4,
+      "employeeId": 2,
       "type": "ANNUAL",
       "leaveType": "إجازة سنوية",
       "startDate": "2024-12-20T00:00:00.000Z",
@@ -119,7 +94,7 @@
     },
     {
       "id": 2,
-      "employeeId": 4,
+      "employeeId": 2,
       "type": "SICK",
       "leaveType": "إجازة مرضية",
       "startDate": "2024-11-15T00:00:00.000Z",
@@ -132,7 +107,7 @@
     },
     {
       "id": 3,
-      "employeeId": 2,
+      "employeeId": 4,
       "type": "ANNUAL",
       "leaveType": "إجازة سنوية",
       "startDate": "2024-12-20T00:00:00.000Z",
@@ -145,7 +120,7 @@
     },
     {
       "id": 4,
-      "employeeId": 2,
+      "employeeId": 4,
       "type": "SICK",
       "leaveType": "إجازة مرضية",
       "startDate": "2024-11-15T00:00:00.000Z",
@@ -160,7 +135,7 @@
   "advances": [
     {
       "id": 1,
-      "employeeId": 4,
+      "employeeId": 2,
       "amount": 5000,
       "requestDate": "2024-12-01T00:00:00.000Z",
       "status": "PENDING",
@@ -168,7 +143,7 @@
     },
     {
       "id": 2,
-      "employeeId": 4,
+      "employeeId": 2,
       "amount": 3000,
       "requestDate": "2024-11-10T00:00:00.000Z",
       "status": "APPROVED",
@@ -176,7 +151,7 @@
     },
     {
       "id": 3,
-      "employeeId": 2,
+      "employeeId": 4,
       "amount": 5000,
       "requestDate": "2024-12-01T00:00:00.000Z",
       "status": "PENDING",
@@ -184,7 +159,7 @@
     },
     {
       "id": 4,
-      "employeeId": 2,
+      "employeeId": 4,
       "amount": 3000,
       "requestDate": "2024-11-10T00:00:00.000Z",
       "status": "APPROVED",
@@ -194,7 +169,7 @@
   "assets": [
     {
       "id": 1,
-      "employeeId": 4,
+      "employeeId": 2,
       "assetType": "LAPTOP",
       "description": "Dell Latitude 5520",
       "assignedDate": "2021-06-15T00:00:00.000Z",
@@ -204,7 +179,7 @@
     },
     {
       "id": 2,
-      "employeeId": 2,
+      "employeeId": 4,
       "assetType": "LAPTOP",
       "description": "Dell Latitude 5520",
       "assignedDate": "2021-06-15T00:00:00.000Z",
@@ -217,134 +192,134 @@
     {
       "id": 1,
       "name": "الإدارة",
-      "createdAt": "2025-12-13T15:29:10.587Z"
+      "createdAt": "2025-12-13T17:17:12.287Z"
     },
     {
       "id": 2,
       "name": "تقنية المعلومات",
-      "createdAt": "2025-12-13T15:29:10.587Z"
+      "createdAt": "2025-12-13T17:17:12.287Z"
     },
     {
       "id": 3,
       "name": "الموارد البشرية",
-      "createdAt": "2025-12-13T15:29:10.587Z"
+      "createdAt": "2025-12-13T17:17:12.287Z"
     },
     {
       "id": 4,
       "name": "المالية",
-      "createdAt": "2025-12-13T15:29:10.587Z"
+      "createdAt": "2025-12-13T17:17:12.287Z"
     },
     {
       "id": 5,
       "name": "التسويق",
-      "createdAt": "2025-12-13T15:29:10.587Z"
+      "createdAt": "2025-12-13T17:17:12.287Z"
     },
     {
       "id": 6,
       "name": "المبيعات",
-      "createdAt": "2025-12-13T15:29:10.587Z"
+      "createdAt": "2025-12-13T17:17:12.287Z"
     },
     {
       "id": 7,
       "name": "الإدارة",
-      "createdAt": "2025-12-13T15:29:10.736Z"
+      "createdAt": "2025-12-13T17:17:12.289Z"
     },
     {
       "id": 8,
       "name": "تقنية المعلومات",
-      "createdAt": "2025-12-13T15:29:10.736Z"
+      "createdAt": "2025-12-13T17:17:12.289Z"
     },
     {
       "id": 9,
       "name": "الموارد البشرية",
-      "createdAt": "2025-12-13T15:29:10.736Z"
+      "createdAt": "2025-12-13T17:17:12.289Z"
     },
     {
       "id": 10,
       "name": "المالية",
-      "createdAt": "2025-12-13T15:29:10.736Z"
+      "createdAt": "2025-12-13T17:17:12.289Z"
     },
     {
       "id": 11,
       "name": "التسويق",
-      "createdAt": "2025-12-13T15:29:10.736Z"
+      "createdAt": "2025-12-13T17:17:12.289Z"
     },
     {
       "id": 12,
       "name": "المبيعات",
-      "createdAt": "2025-12-13T15:29:10.736Z"
+      "createdAt": "2025-12-13T17:17:12.289Z"
     }
   ],
   "jobTitles": [
     {
       "id": 1,
       "title": "مدير الموارد البشرية",
-      "createdAt": "2025-12-13T15:29:10.587Z"
+      "createdAt": "2025-12-13T17:17:12.288Z"
     },
     {
       "id": 2,
       "title": "مطور برامج",
-      "createdAt": "2025-12-13T15:29:10.587Z"
+      "createdAt": "2025-12-13T17:17:12.288Z"
     },
     {
       "id": 3,
       "title": "مدير مالي",
-      "createdAt": "2025-12-13T15:29:10.587Z"
+      "createdAt": "2025-12-13T17:17:12.288Z"
     },
     {
       "id": 4,
       "title": "محاسب",
-      "createdAt": "2025-12-13T15:29:10.587Z"
+      "createdAt": "2025-12-13T17:17:12.288Z"
     },
     {
       "id": 5,
       "title": "مدير تسويق",
-      "createdAt": "2025-12-13T15:29:10.587Z"
+      "createdAt": "2025-12-13T17:17:12.288Z"
     },
     {
       "id": 6,
       "title": "مندوب مبيعات",
-      "createdAt": "2025-12-13T15:29:10.587Z"
+      "createdAt": "2025-12-13T17:17:12.288Z"
     },
     {
       "id": 7,
       "title": "موظف إداري",
-      "createdAt": "2025-12-13T15:29:10.587Z"
+      "createdAt": "2025-12-13T17:17:12.288Z"
     },
     {
       "id": 8,
       "title": "مدير الموارد البشرية",
-      "createdAt": "2025-12-13T15:29:10.736Z"
+      "createdAt": "2025-12-13T17:17:12.289Z"
     },
     {
       "id": 9,
       "title": "مطور برامج",
-      "createdAt": "2025-12-13T15:29:10.736Z"
+      "createdAt": "2025-12-13T17:17:12.289Z"
     },
     {
       "id": 10,
       "title": "مدير مالي",
-      "createdAt": "2025-12-13T15:29:10.736Z"
+      "createdAt": "2025-12-13T17:17:12.289Z"
     },
     {
       "id": 11,
       "title": "محاسب",
-      "createdAt": "2025-12-13T15:29:10.736Z"
+      "createdAt": "2025-12-13T17:17:12.289Z"
     },
     {
       "id": 12,
       "title": "مدير تسويق",
-      "createdAt": "2025-12-13T15:29:10.736Z"
+      "createdAt": "2025-12-13T17:17:12.289Z"
     },
     {
       "id": 13,
       "title": "مندوب مبيعات",
-      "createdAt": "2025-12-13T15:29:10.736Z"
+      "createdAt": "2025-12-13T17:17:12.289Z"
     },
     {
       "id": 14,
       "title": "موظف إداري",
-      "createdAt": "2025-12-13T15:29:10.736Z"
+      "createdAt": "2025-12-13T17:17:12.289Z"
     }
   ],
   "companySettings": {

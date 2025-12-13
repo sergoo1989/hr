@@ -12,14 +12,15 @@ async function bootstrap() {
     console.log('   - موظف: employee1 / emp123');
     const app = await core_1.NestFactory.create(app_module_1.AppModule);
     app.enableCors({
-        origin: '*',
+        origin: process.env.CORS_ORIGIN || '*',
         methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
         credentials: true,
         allowedHeaders: 'Content-Type, Accept, Authorization',
     });
-    const port = 3000;
+    const port = process.env.PORT || 3000;
     await app.listen(port);
-    console.log(`🚀 HR API يعمل على: http://localhost:${port}`);
+    console.log(`🚀 HR API يعمل على المنفذ: ${port}`);
+    console.log(`🌍 البيئة: ${process.env.NODE_ENV || 'development'}`);
     console.log('📡 الخادم جاهز لاستقبال الطلبات');
 }
 bootstrap();
