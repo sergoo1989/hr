@@ -606,13 +606,15 @@
         }
 
         function getLeaveTypeName(type) {
+            if (!type) return '-';
+            const typeUpper = type.toString().toUpperCase();
             const types = {
                 'ANNUAL': 'سنوية',
                 'SICK': 'مرضية',
                 'EMERGENCY': 'طارئة',
                 'UNPAID': 'بدون راتب'
             };
-            return types[type] || type;
+            return types[typeUpper] || type;
         }
 
         function getStatusName(status) {
