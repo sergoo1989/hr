@@ -1058,19 +1058,26 @@
                             </tr>
                         </thead>
                         <tbody>
-                            ${leaves.map(leave => `
+                            ${leaves.map(leave => {
+                                // حساب عدد الأيام
+                                const start = new Date(leave.startDate);
+                                const end = new Date(leave.endDate);
+                                const days = Math.ceil((end - start) / (1000 * 60 * 60 * 24)) + 1;
+                                
+                                return `
                                 <tr>
-                                    <td>${leave.employee?.fullName || '-'}</td>
+                                    <td>${leave.employee?.fullName || 'غير محدد'}</td>
                                     <td>${getLeaveTypeName(leave.type)}</td>
-                                    <td>${new Date(leave.startDate).toLocaleDateString('ar-SA')}</td>
-                                    <td>${new Date(leave.endDate).toLocaleDateString('ar-SA')}</td>
-                                    <td>${leave.days || '-'}</td>
+                                    <td>${start.toLocaleDateString('ar-SA')}</td>
+                                    <td>${end.toLocaleDateString('ar-SA')}</td>
+                                    <td>${days}</td>
                                     <td>
                                         <button class="action-btn approve-btn" onclick="approveLeave(${leave.id})">موافقة</button>
                                         <button class="action-btn reject-btn" onclick="rejectLeave(${leave.id})">رفض</button>
                                     </td>
                                 </tr>
-                            `).join('')}
+                                `;
+                            }).join('')}
                         </tbody>
                     </table>
                 `;
@@ -1276,9 +1283,13 @@
         function getLeaveTypeName(type) {
             const types = {
                 'ANNUAL': 'سنوية',
+                'annual': 'سنوية',
                 'SICK': 'مرضية',
+                'sick': 'مرضية',
                 'EMERGENCY': 'طارئة',
-                'UNPAID': 'بدون راتب'
+                'emergency': 'طارئة',
+                'UNPAID': 'بدون راتب',
+                'unpaid': 'بدون راتب'
             };
             return types[type] || type;
         }

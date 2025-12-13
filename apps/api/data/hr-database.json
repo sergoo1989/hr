@@ -63,7 +63,7 @@
       "endDate": "2024-12-25T00:00:00.000Z",
       "days": 5,
       "daysCount": 5,
-      "status": "PENDING",
+      "status": "REJECTED",
       "requestDate": "2024-12-10T00:00:00.000Z",
       "reason": "عطلة نهاية العام"
     },
@@ -89,7 +89,7 @@
       "endDate": "2024-12-25T00:00:00.000Z",
       "days": 5,
       "daysCount": 5,
-      "status": "PENDING",
+      "status": "REJECTED",
       "requestDate": "2024-12-10T00:00:00.000Z",
       "reason": "عطلة نهاية العام"
     },
@@ -105,6 +105,15 @@
       "status": "APPROVED",
       "requestDate": "2024-11-14T00:00:00.000Z",
       "reason": "مرض"
+    },
+    {
+      "id": 5,
+      "employeeId": 2,
+      "startDate": "2026-01-01",
+      "endDate": "2026-01-13",
+      "reason": "h[h.m sk,dm ",
+      "requestDate": "2025-12-13T19:12:38.453Z",
+      "status": "PENDING"
     }
   ],
   "advances": [
@@ -308,7 +317,7 @@
   },
   "userIdCounter": 5,
   "employeeIdCounter": 5,
-  "leaveIdCounter": 5,
+  "leaveIdCounter": 6,
   "advanceIdCounter": 5,
   "assetIdCounter": 3,
   "departmentIdCounter": 13,
