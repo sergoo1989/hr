@@ -452,7 +452,8 @@
 
         async function loadEmployees() {
             try {
-                const response = await fetch(`${API_URL}/employees`, {
+                const apiUrl = Config.getApiUrl();
+                const response = await fetch(`${apiUrl}/employees`, {
                     headers: { 'Authorization': `Bearer ${token}` }
                 });
                 allEmployees = await response.json();
@@ -473,11 +474,12 @@
 
         async function loadAssets() {
             try {
+                const apiUrl = Config.getApiUrl();
                 document.getElementById('loading').style.display = 'block';
                 document.getElementById('noData').style.display = 'none';
                 document.getElementById('assetsTableContainer').style.display = 'none';
 
-                const response = await fetch(`${API_URL}/admin/assets`, {
+                const response = await fetch(`${apiUrl}/admin/assets`, {
                     headers: { 'Authorization': `Bearer ${token}` }
                 });
 
@@ -634,7 +636,8 @@
             };
 
             try {
-                const response = await fetch(`${API_URL}/admin/assets/assign`, {
+                const apiUrl = Config.getApiUrl();
+                const response = await fetch(`${apiUrl}/admin/assets/assign`, {
                     method: 'POST',
                     headers: {
                         'Authorization': `Bearer ${token}`,
@@ -670,7 +673,8 @@
             }
 
             try {
-                const response = await fetch(`${API_URL}/admin/assets/${assetId}/return`, {
+                const apiUrl = Config.getApiUrl();
+                const response = await fetch(`${apiUrl}/admin/assets/${assetId}/return`, {
                     method: 'PATCH',
                     headers: { 'Authorization': `Bearer ${token}` }
                 });
@@ -692,7 +696,8 @@
             }
 
             try {
-                const response = await fetch(`${API_URL}/admin/assets/${assetId}`, {
+                const apiUrl = Config.getApiUrl();
+                const response = await fetch(`${apiUrl}/admin/assets/${assetId}`, {
                     method: 'DELETE',
                     headers: { 'Authorization': `Bearer ${token}` }
                 });

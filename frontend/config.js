@@ -1,11 +1,11 @@
 // ملف إعدادات API URL
-const API_CONFIG = {
+const Config = {
     // سيتم تحديد الـ API URL حسب البيئة
     getApiUrl: function() {
-        // استخدام Render API
-        return 'https://hr-api-aak6.onrender.com';
+        // استخدام API المحلي
+        return 'http://localhost:3000';
     }
 };
 
-// تصدير API_URL للاستخدام في جميع الصفحات
-const API_URL = API_CONFIG.getApiUrl();
+// تصدير API_URL للتوافق مع الكود القديم (سيتم حذفه لاحقاً)
+const API_URL = Config.getApiUrl();

@@ -312,7 +312,8 @@
 
         async function loadDashboard() {
             try {
-                const response = await fetch(`${API_URL}/dashboard/stats`, {
+                const apiUrl = Config.getApiUrl();
+                const response = await fetch(`${apiUrl}/dashboard/stats`, {
                     headers: { 'Authorization': `Bearer ${token}` }
                 });
                 

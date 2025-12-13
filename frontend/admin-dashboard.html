@@ -821,7 +821,8 @@
 
         async function loadDashboard() {
             try {
-                const response = await fetch(`${API_URL}/dashboard/stats`, {
+                const apiUrl = Config.getApiUrl();
+                const response = await fetch(`${apiUrl}/dashboard/stats`, {
                     headers: { 'Authorization': `Bearer ${token}` }
                 });
                 const stats = await response.json();
@@ -831,7 +832,7 @@
                 document.getElementById('pendingAdvancesCount').textContent = stats.pendingAdvances || 0;
                 
                 // Calculate expiring documents for non-Saudi employees
-                const employeesResponse = await fetch(`${API_URL}/employees`, {
+                const employeesResponse = await fetch(`${apiUrl}/employees`, {
                     headers: { 'Authorization': `Bearer ${token}` }
                 });
                 const employees = await employeesResponse.json();
@@ -891,7 +892,8 @@
             
             isLoadingEmployees = true;
             try {
-                const response = await fetch(`${API_URL}/employees`, {
+                const apiUrl = Config.getApiUrl();
+                const response = await fetch(`${apiUrl}/employees`, {
                     headers: { 'Authorization': `Bearer ${token}` }
                 });
                 const employees = await response.json();
@@ -1034,7 +1036,8 @@
 
         async function loadPendingLeaves() {
             try {
-                const response = await fetch(`${API_URL}/admin/leaves/pending`, {
+                const apiUrl = Config.getApiUrl();
+                const response = await fetch(`${apiUrl}/admin/leaves/pending`, {
                     headers: { 'Authorization': `Bearer ${token}` }
                 });
                 const leaves = await response.json();
@@ -1088,7 +1091,8 @@
 
         async function loadPendingAdvances() {
             try {
-                const response = await fetch(`${API_URL}/admin/advances/pending`, {
+                const apiUrl = Config.getApiUrl();
+                const response = await fetch(`${apiUrl}/admin/advances/pending`, {
                     headers: { 'Authorization': `Bearer ${token}` }
                 });
                 const advances = await response.json();
@@ -1186,8 +1190,9 @@
             if (terminationDate) employeeData.terminationDate = terminationDate;
 
             try {
+                const apiUrl = Config.getApiUrl();
                 const editId = form.dataset.editId;
-                const url = editId ? `${API_URL}/employees/${editId}` : `${API_URL}/employees`;
+                const url = editId ? `${apiUrl}/employees/${editId}` : `${apiUrl}/employees`;
                 const method = editId ? 'PUT' : 'POST';
                 
                 const response = await fetch(url, {
@@ -1228,7 +1233,8 @@
             if (!confirm('هل أنت متأكد من الموافقة على هذه الإجازة؟')) return;
             
             try {
-                await fetch(`${API_URL}/admin/leaves/${id}/approve`, {
+                const apiUrl = Config.getApiUrl();
+                await fetch(`${apiUrl}/admin/leaves/${id}/approve`, {
                     method: 'PATCH',
                     headers: { 'Authorization': `Bearer ${token}` }
                 });
@@ -1242,7 +1248,8 @@
             if (!confirm('هل أنت متأكد من رفض هذه الإجازة؟')) return;
             
             try {
-                await fetch(`${API_URL}/admin/leaves/${id}/reject`, {
+                const apiUrl = Config.getApiUrl();
+                await fetch(`${apiUrl}/admin/leaves/${id}/reject`, {
                     method: 'PATCH',
                     headers: { 'Authorization': `Bearer ${token}` }
                 });
@@ -1256,7 +1263,8 @@
             if (!confirm('هل أنت متأكد من الموافقة على هذه السلفة؟')) return;
             
             try {
-                await fetch(`${API_URL}/admin/advances/${id}/approve`, {
+                const apiUrl = Config.getApiUrl();
+                await fetch(`${apiUrl}/admin/advances/${id}/approve`, {
                     method: 'PATCH',
                     headers: { 'Authorization': `Bearer ${token}` }
                 });
@@ -1270,7 +1278,8 @@
             if (!confirm('هل أنت متأكد من رفض هذه السلفة؟')) return;
             
             try {
-                await fetch(`${API_URL}/admin/advances/${id}/reject`, {
+                const apiUrl = Config.getApiUrl();
+                await fetch(`${apiUrl}/admin/advances/${id}/reject`, {
                     method: 'PATCH',
                     headers: { 'Authorization': `Bearer ${token}` }
                 });
@@ -1302,7 +1311,8 @@
         // Edit Employee
         async function editEmployee(id) {
             try {
-                const response = await fetch(`${API_URL}/employees/${id}`, {
+                const apiUrl = Config.getApiUrl();
+                const response = await fetch(`${apiUrl}/employees/${id}`, {
                     headers: { 'Authorization': `Bearer ${token}` }
                 });
                 const employee = await response.json();
@@ -1383,7 +1393,8 @@
             }
             
             try {
-                const response = await fetch(`${API_URL}/employees/${id}`, {
+                const apiUrl = Config.getApiUrl();
+                const response = await fetch(`${apiUrl}/employees/${id}`, {
                     method: 'DELETE',
                     headers: { 
                         'Authorization': `Bearer ${token}`,
@@ -1417,7 +1428,8 @@
             button.disabled = true;
 
             try {
-                const response = await fetch(`${API_URL}/admin/employees/${employeeId}/resend-activation`, {
+                const apiUrl = Config.getApiUrl();
+                const response = await fetch(`${apiUrl}/admin/employees/${employeeId}/resend-activation`, {
                     method: 'POST',
                     headers: { 
                         'Authorization': `Bearer ${token}`,
@@ -1457,7 +1469,8 @@
 
         async function loadCompanySettings() {
             try {
-                const response = await fetch(`${API_URL}/settings/company`, {
+                const apiUrl = Config.getApiUrl();
+                const response = await fetch(`${apiUrl}/settings/company`, {
                     headers: { 'Authorization': `Bearer ${token}` }
                 });
                 const settings = await response.json();
@@ -1526,6 +1539,7 @@
 
         async function saveLogo(logoData) {
             try {
+                const apiUrl = Config.getApiUrl();
                 const settings = {
                     companyName: document.getElementById('companyName').value,
                     companyNameEn: document.getElementById('companyNameEn').value,
@@ -1536,7 +1550,7 @@
                     logo: logoData
                 };
 
-                const response = await fetch(`${API_URL}/settings/company`, {
+                const response = await fetch(`${apiUrl}/settings/company`, {
                     method: 'PUT',
                     headers: {
                         'Authorization': `Bearer ${token}`,
@@ -1565,7 +1579,8 @@
 
         async function loadDepartments() {
             try {
-                const response = await fetch(`${API_URL}/settings/departments`, {
+                const apiUrl = Config.getApiUrl();
+                const response = await fetch(`${apiUrl}/settings/departments`, {
                     headers: { 'Authorization': `Bearer ${token}` }
                 });
                 departments = await response.json();
@@ -1577,7 +1592,8 @@
 
         async function loadJobTitles() {
             try {
-                const response = await fetch(`${API_URL}/settings/job-titles`, {
+                const apiUrl = Config.getApiUrl();
+                const response = await fetch(`${apiUrl}/settings/job-titles`, {
                     headers: { 'Authorization': `Bearer ${token}` }
                 });
                 jobTitles = await response.json();
@@ -1627,8 +1643,9 @@
             }
 
             try {
+                const apiUrl = Config.getApiUrl();
                 console.log('Sending department:', { name });
-                const response = await fetch(`${API_URL}/settings/departments`, {
+                const response = await fetch(`${apiUrl}/settings/departments`, {
                     method: 'POST',
                     headers: {
                         'Authorization': `Bearer ${token}`,
@@ -1659,7 +1676,8 @@
             if (!confirm('هل أنت متأكد من حذف هذا القسم؟')) return;
 
             try {
-                const response = await fetch(`${API_URL}/settings/departments/${id}`, {
+                const apiUrl = Config.getApiUrl();
+                const response = await fetch(`${apiUrl}/settings/departments/${id}`, {
                     method: 'DELETE',
                     headers: { 'Authorization': `Bearer ${token}` }
                 });
@@ -1687,8 +1705,9 @@
             }
 
             try {
+                const apiUrl = Config.getApiUrl();
                 console.log('Sending job title:', { title });
-                const response = await fetch(`${API_URL}/settings/job-titles`, {
+                const response = await fetch(`${apiUrl}/settings/job-titles`, {
                     method: 'POST',
                     headers: {
                         'Authorization': `Bearer ${token}`,
@@ -1719,7 +1738,8 @@
             if (!confirm('هل أنت متأكد من حذف هذا المسمى الوظيفي؟')) return;
 
             try {
-                const response = await fetch(`${API_URL}/settings/job-titles/${id}`, {
+                const apiUrl = Config.getApiUrl();
+                const response = await fetch(`${apiUrl}/settings/job-titles/${id}`, {
                     method: 'DELETE',
                     headers: { 'Authorization': `Bearer ${token}` }
                 });
@@ -1738,11 +1758,12 @@
         }
 
         async function loadDepartmentsAndJobTitlesForForm() {
+            const apiUrl = Config.getApiUrl();
             const deptSelect = document.getElementById('department');
             const jobSelect = document.getElementById('jobTitle');
 
             // Load departments
-            const deptsResponse = await fetch(`${API_URL}/settings/departments`, {
+            const deptsResponse = await fetch(`${apiUrl}/settings/departments`, {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
             const depts = await deptsResponse.json();
@@ -1751,7 +1772,7 @@
                 depts.map(d => `<option value="${d.name}">${d.name}</option>`).join('');
 
             // Load job titles
-            const jobsResponse = await fetch(`${API_URL}/settings/job-titles`, {
+            const jobsResponse = await fetch(`${apiUrl}/settings/job-titles`, {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
             const jobs = await jobsResponse.json();
@@ -1774,7 +1795,8 @@
             };
 
             try {
-                const response = await fetch(`${API_URL}/settings/company`, {
+                const apiUrl = Config.getApiUrl();
+                const response = await fetch(`${apiUrl}/settings/company`, {
                     method: 'PUT',
                     headers: {
                         'Authorization': `Bearer ${token}`,

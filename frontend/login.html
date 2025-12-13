@@ -190,7 +190,8 @@
             alert.style.display = 'none';
 
             try {
-                const response = await fetch(`${API_URL}/auth/login`, {
+                const apiUrl = Config.getApiUrl();
+                const response = await fetch(`${apiUrl}/auth/login`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',

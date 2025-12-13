@@ -505,12 +505,13 @@
             document.getElementById('reportContent').style.display = 'none';
 
             try {
+                const apiUrl = Config.getApiUrl();
                 // Load company settings and employees
                 const [settingsRes, employeesRes] = await Promise.all([
-                    fetch(`${API_URL}/settings/company`, {
+                    fetch(`${apiUrl}/settings/company`, {
                         headers: { 'Authorization': `Bearer ${token}` }
                     }),
-                    fetch(`${API_URL}/employees`, {
+                    fetch(`${apiUrl}/employees`, {
                         headers: { 'Authorization': `Bearer ${token}` }
                     })
                 ]);

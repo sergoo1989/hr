@@ -350,13 +350,14 @@
 
         async function fetchDashboardData() {
             try {
+                const apiUrl = Config.getApiUrl();
                 const headers = {
                     'Authorization': `Bearer ${token}`,
                     'Content-Type': 'application/json'
                 };
 
                 // Fetch dashboard data
-                const dashboardResponse = await fetch(`${API_URL}/employees/me/dashboard`, { headers });
+                const dashboardResponse = await fetch(`${apiUrl}/employees/me/dashboard`, { headers });
                 const dashboardData = await dashboardResponse.json();
 
                 if (!dashboardResponse.ok) {
@@ -368,28 +369,28 @@
                 document.getElementById('leaveBalance').textContent = leaveBalance.remainingDays || 0;
                 document.getElementById('usedLeaves').textContent = leaveBalance.usedDays || 0;
                 
-                const advances = await (await fetch(`${API_URL}/employees/me/advances`, { headers })).json();
+                const advances = await (await fetch(`${apiUrl}/employees/me/advances`, { headers })).json();
                 const pendingAdvancesCount = advances.filter(a => a.status === 'PENDING').length;
                 document.getElementById('pendingAdvances').textContent = pendingAdvancesCount;
                 
-                const assets = await (await fetch(`${API_URL}/employees/me/assets`, { headers })).json();
+                const assets = await (await fetch(`${apiUrl}/employees/me/assets`, { headers })).json();
                 document.getElementById('assets').textContent = assets.length;
 
                 // Display employee info
                 displayEmployeeInfo(dashboardData.employee);
 
                 // Fetch and display leaves
-                const leavesResponse = await fetch(`${API_URL}/employees/me/leaves`, { headers });
+                const leavesResponse = await fetch(`${apiUrl}/employees/me/leaves`, { headers });
                 const leaves = await leavesResponse.json();
                 displayLeaves(leaves);
 
                 // Fetch and display advances
-                const advancesResponse = await fetch(`${API_URL}/employees/me/advances`, { headers });
+                const advancesResponse = await fetch(`${apiUrl}/employees/me/advances`, { headers });
                 const advancesData = await advancesResponse.json();
                 displayAdvances(advancesData);
 
                 // Fetch and display assets
-                const assetsResponse = await fetch(`${API_URL}/employees/me/assets`, { headers });
+                const assetsResponse = await fetch(`${apiUrl}/employees/me/assets`, { headers });
                 const assetsData = await assetsResponse.json();
                 displayAssets(assetsData);
 
@@ -740,8 +741,9 @@
             }
 
             try {
+                const apiUrl = Config.getApiUrl();
                 const token = localStorage.getItem('token');
-                const response = await fetch(`${API_URL}/employees/me/assets/${assetId}/confirm`, {
+                const response = await fetch(`${apiUrl}/employees/me/assets/${assetId}/confirm`, {
                     method: 'POST',
                     headers: {
                         'Authorization': `Bearer ${token}`,
@@ -759,7 +761,7 @@
                 alert('✓ ' + result.message);
 
                 // Reload assets to refresh the display
-                const assetsResponse = await fetch(`${API_URL}/employees/me/assets`, {
+                const assetsResponse = await fetch(`${apiUrl}/employees/me/assets`, {
                     headers: { 'Authorization': `Bearer ${token}` }
                 });
                 const assetsData = await assetsResponse.json();
@@ -834,8 +836,9 @@
             }
 
             try {
+                const apiUrl = Config.getApiUrl();
                 const token = localStorage.getItem('token');
-                const response = await fetch(`${API_URL}/employees/me/leaves`, {
+                const response = await fetch(`${apiUrl}/employees/me/leaves`, {
                     method: 'POST',
                     headers: {
                         'Authorization': `Bearer ${token}`,
@@ -887,8 +890,9 @@
             }
 
             try {
+                const apiUrl = Config.getApiUrl();
                 const token = localStorage.getItem('token');
-                const response = await fetch(`${API_URL}/employees/me/advances`, {
+                const response = await fetch(`${apiUrl}/employees/me/advances`, {
                     method: 'POST',
                     headers: {
                         'Authorization': `Bearer ${token}`,
