@@ -2,8 +2,8 @@
 const API_CONFIG = {
     // سيتم تحديد الـ API URL حسب البيئة
     getApiUrl: function() {
-        // استخدام API المحلي
-        return 'http://localhost:3000';
+        // استخدام Render API
+        return 'https://hr-api-aak6.onrender.com';
     }
 };
 
