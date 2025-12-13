@@ -132,6 +132,27 @@ export class InMemoryDatabase {
     this.storage = DataStorage.getInstance();
     this.loadFromStorage();
     this.seedInitialData();
+    
+    // حفظ تلقائي كل 30 ثانية كنسخة احتياطية
+    setInterval(() => {
+      this.saveToStorage();
+      console.log('🔄 حفظ تلقائي للبيانات - ' + new Date().toLocaleTimeString('ar-SA'));
+    }, 30000); // كل 30 ثانية
+    
+    // حفظ البيانات عند إغلاق التطبيق
+    process.on('SIGINT', () => {
+      console.log('\n⚠️ جاري إيقاف السيرفر...');
+      this.saveToStorage();
+      console.log('✅ تم حفظ البيانات بنجاح قبل الإغلاق');
+      process.exit(0);
+    });
+    
+    process.on('SIGTERM', () => {
+      console.log('\n⚠️ جاري إيقاف السيرفر...');
+      this.saveToStorage();
+      console.log('✅ تم حفظ البيانات بنجاح قبل الإغلاق');
+      process.exit(0);
+    });
   }
 
   public static getInstance(): InMemoryDatabase {

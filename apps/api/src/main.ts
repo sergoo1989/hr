@@ -9,7 +9,22 @@ async function bootstrap() {
   console.log('✅ قاعدة البيانات تم تهيئتها بنجاح');
   console.log('👤 المستخدمون المتاحون:');
   console.log('   - مدير: admin / admin123');
-  console.log('   - موظف: employee1 / emp123');
+
+  // حفظ البيانات عند أي خطأ غير متوقع
+  process.on('uncaughtException', (error) => {
+    console.error('❌ خطأ غير متوقع:', error);
+    console.log('💾 جاري حفظ البيانات قبل الإغلاق...');
+    db.saveToStorage();
+    console.log('✅ تم حفظ البيانات بنجاح');
+    process.exit(1);
+  });
+
+  process.on('unhandledRejection', (reason, promise) => {
+    console.error('❌ Promise غير معالج:', reason);
+    console.log('💾 جاري حفظ البيانات...');
+    db.saveToStorage();
+    console.log('✅ تم حفظ البيانات بنجاح');
+  });
 
   const app = await NestFactory.create(AppModule);
   
@@ -26,5 +41,6 @@ async function bootstrap() {
   console.log(`🚀 HR API يعمل على المنفذ: ${port}`);
   console.log(`🌍 البيئة: ${process.env.NODE_ENV || 'development'}`);
   console.log('📡 الخادم جاهز لاستقبال الطلبات');
+  console.log('💾 نظام الحفظ التلقائي مفعّل (كل 30 ثانية)');
 }
 bootstrap();
