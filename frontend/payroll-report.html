@@ -1,0 +1,613 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>مسير الرواتب الشهري</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f5f7fa;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .no-print {
+            margin-bottom: 20px;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 8px;
+            color: white;
+        }
+
+        .controls {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            flex-wrap: wrap;
+            margin-top: 15px;
+        }
+
+        .controls select,
+        .controls input {
+            padding: 10px;
+            border: 1px solid rgba(255,255,255,0.3);
+            border-radius: 6px;
+            background: rgba(255,255,255,0.2);
+            color: white;
+            font-size: 14px;
+        }
+
+        .controls select option {
+            color: #333;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+
+        .btn-primary {
+            background: white;
+            color: #667eea;
+        }
+
+        .btn-primary:hover {
+            background: #f0f0f0;
+        }
+
+        .btn-success {
+            background: #4caf50;
+            color: white;
+        }
+
+        .btn-success:hover {
+            background: #45a049;
+        }
+
+        .btn-secondary {
+            background: rgba(255,255,255,0.3);
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background: rgba(255,255,255,0.4);
+        }
+
+        /* Print Styles */
+        @media print {
+            body {
+                background: white;
+                padding: 0;
+            }
+
+            .no-print {
+                display: none !important;
+            }
+
+            .container {
+                box-shadow: none;
+                padding: 0;
+                max-width: 100%;
+            }
+
+            .report-header {
+                page-break-after: avoid;
+            }
+
+            table {
+                page-break-inside: avoid;
+            }
+
+            .signature-section {
+                page-break-before: avoid;
+            }
+        }
+
+        /* Report Header */
+        .report-header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 3px solid #667eea;
+        }
+
+        .company-logo {
+            width: 120px;
+            height: 120px;
+            margin: 0 auto 15px;
+            border-radius: 12px;
+            overflow: hidden;
+            background: #f8f9fa;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .company-logo img {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
+        }
+
+        .report-header h1 {
+            color: #667eea;
+            font-size: 28px;
+            margin-bottom: 10px;
+        }
+
+        .report-header h2 {
+            color: #666;
+            font-size: 20px;
+            margin-bottom: 15px;
+        }
+
+        .report-info {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 30px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 8px;
+        }
+
+        .info-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px;
+            background: white;
+            border-radius: 6px;
+        }
+
+        .info-label {
+            font-weight: 600;
+            color: #666;
+        }
+
+        .info-value {
+            color: #333;
+            font-weight: 700;
+        }
+
+        /* Table Styles */
+        .payroll-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 30px;
+        }
+
+        .payroll-table thead {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .payroll-table th {
+            padding: 12px 8px;
+            text-align: center;
+            font-size: 13px;
+            font-weight: 600;
+            border: 1px solid rgba(255,255,255,0.3);
+        }
+
+        .payroll-table td {
+            padding: 10px 8px;
+            text-align: center;
+            border: 1px solid #dee2e6;
+            color: #333;
+            font-size: 12px;
+        }
+
+        .payroll-table tbody tr:nth-child(even) {
+            background: #f8f9fa;
+        }
+
+        .payroll-table tbody tr:hover {
+            background: #e3f2fd;
+        }
+
+        .total-row {
+            background: #fff3cd !important;
+            font-weight: 700;
+            font-size: 14px;
+        }
+
+        .total-row td {
+            color: #856404 !important;
+            border-top: 3px solid #ffc107;
+        }
+
+        /* Summary Section */
+        .summary-section {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+
+        .summary-card {
+            padding: 20px;
+            border-radius: 8px;
+            text-align: center;
+        }
+
+        .summary-card.total {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .summary-card.employees {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            color: white;
+        }
+
+        .summary-card.average {
+            background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+            color: white;
+        }
+
+        .summary-value {
+            font-size: 32px;
+            font-weight: 700;
+            margin-bottom: 5px;
+        }
+
+        .summary-label {
+            font-size: 14px;
+            opacity: 0.9;
+        }
+
+        /* Signature Section */
+        .signature-section {
+            margin-top: 50px;
+            padding-top: 30px;
+            border-top: 2px solid #dee2e6;
+        }
+
+        .signature-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 40px;
+            margin-top: 30px;
+        }
+
+        .signature-box {
+            text-align: center;
+        }
+
+        .signature-line {
+            width: 100%;
+            height: 80px;
+            border: 2px dashed #dee2e6;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #999;
+            font-size: 14px;
+        }
+
+        .signature-label {
+            font-weight: 600;
+            color: #666;
+            margin-bottom: 5px;
+        }
+
+        .signature-date {
+            color: #999;
+            font-size: 12px;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 50px;
+            color: #667eea;
+            font-size: 18px;
+        }
+
+        .error {
+            text-align: center;
+            padding: 50px;
+            color: #f44336;
+            font-size: 18px;
+        }
+
+        .no-data {
+            text-align: center;
+            padding: 50px;
+            color: #999;
+            font-size: 16px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Controls (No Print) -->
+        <div class="no-print">
+            <h2 style="margin-bottom: 15px;">📊 مسير الرواتب الشهري</h2>
+            <div class="controls">
+                <label style="font-weight: 600;">الشهر:</label>
+                <select id="monthSelect">
+                    <option value="1">يناير</option>
+                    <option value="2">فبراير</option>
+                    <option value="3">مارس</option>
+                    <option value="4">أبريل</option>
+                    <option value="5">مايو</option>
+                    <option value="6">يونيو</option>
+                    <option value="7">يوليو</option>
+                    <option value="8">أغسطس</option>
+                    <option value="9">سبتمبر</option>
+                    <option value="10">أكتوبر</option>
+                    <option value="11">نوفمبر</option>
+                    <option value="12">ديسمبر</option>
+                </select>
+
+                <label style="font-weight: 600;">السنة:</label>
+                <input type="number" id="yearInput" value="2025" min="2020" max="2030" style="width: 100px;">
+
+                <button class="btn btn-primary" onclick="loadPayroll()">🔄 تحميل</button>
+                <button class="btn btn-success" onclick="printReport()">🖨️ طباعة</button>
+                <button class="btn btn-secondary" onclick="goBack()">← رجوع</button>
+            </div>
+        </div>
+
+        <div id="loading" class="loading" style="display: none;">جاري تحميل البيانات...</div>
+        <div id="error" class="error" style="display: none;"></div>
+        
+        <!-- Report Content -->
+        <div id="reportContent" style="display: none;">
+            <!-- Report Header -->
+            <div class="report-header">
+                <div class="company-logo" id="companyLogo">
+                    <span style="color: #999; font-size: 14px;">شعار الشركة</span>
+                </div>
+                <h1 id="companyName">شركة صفوة الجوف الزراعية</h1>
+                <h2>مسير الرواتب الشهري</h2>
+            </div>
+
+            <!-- Report Info -->
+            <div class="report-info">
+                <div class="info-item">
+                    <span class="info-label">الشهر:</span>
+                    <span class="info-value" id="reportMonth">-</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">السنة:</span>
+                    <span class="info-value" id="reportYear">-</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">تاريخ الإصدار:</span>
+                    <span class="info-value" id="reportDate">-</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">عدد الموظفين:</span>
+                    <span class="info-value" id="employeeCount">-</span>
+                </div>
+            </div>
+
+            <!-- Summary Cards -->
+            <div class="summary-section">
+                <div class="summary-card total">
+                    <div class="summary-value" id="totalPayroll">0</div>
+                    <div class="summary-label">إجمالي المسير (ريال)</div>
+                </div>
+                <div class="summary-card employees">
+                    <div class="summary-value" id="totalEmployees">0</div>
+                    <div class="summary-label">عدد الموظفين</div>
+                </div>
+                <div class="summary-card average">
+                    <div class="summary-value" id="averageSalary">0</div>
+                    <div class="summary-label">متوسط الراتب (ريال)</div>
+                </div>
+            </div>
+
+            <!-- Payroll Table -->
+            <table class="payroll-table">
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>رقم الموظف</th>
+                        <th>اسم الموظف</th>
+                        <th>القسم</th>
+                        <th>المسمى الوظيفي</th>
+                        <th>الراتب الأساسي</th>
+                        <th>بدل السكن</th>
+                        <th>بدل النقل</th>
+                        <th>الخصومات</th>
+                        <th>الصافي</th>
+                        <th>التوقيع</th>
+                    </tr>
+                </thead>
+                <tbody id="payrollTableBody">
+                    <!-- Data will be inserted here -->
+                </tbody>
+                <tfoot>
+                    <tr class="total-row">
+                        <td colspan="5" style="text-align: right; font-weight: 700;">الإجمالي:</td>
+                        <td id="totalBasic">0</td>
+                        <td id="totalHousing">0</td>
+                        <td id="totalTransport">0</td>
+                        <td id="totalDeductions">0</td>
+                        <td id="totalNet">0</td>
+                        <td>-</td>
+                    </tr>
+                </tfoot>
+            </table>
+
+            <!-- Signature Section -->
+            <div class="signature-section">
+                <h3 style="color: #667eea; margin-bottom: 20px;">التوقيعات والاعتمادات</h3>
+                <div class="signature-row">
+                    <div class="signature-box">
+                        <div class="signature-label">مدير الموارد البشرية</div>
+                        <div class="signature-line">التوقيع</div>
+                        <div class="signature-date">التاريخ: ____/____/________</div>
+                    </div>
+                    <div class="signature-box">
+                        <div class="signature-label">المدير المالي</div>
+                        <div class="signature-line">التوقيع</div>
+                        <div class="signature-date">التاريخ: ____/____/________</div>
+                    </div>
+                    <div class="signature-box">
+                        <div class="signature-label">المدير العام</div>
+                        <div class="signature-line">التوقيع</div>
+                        <div class="signature-date">التاريخ: ____/____/________</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API_URL = 'http://localhost:3000';
+        const token = localStorage.getItem('token');
+
+        if (!token) {
+            window.location.href = 'login.html';
+        }
+
+        // Set current month and year
+        const today = new Date();
+        document.getElementById('monthSelect').value = today.getMonth() + 1;
+        document.getElementById('yearInput').value = today.getFullYear();
+
+        // Month names in Arabic
+        const monthNames = ['يناير', 'فبراير', 'مارس', 'أبريل', 'مايو', 'يونيو', 
+                            'يوليو', 'أغسطس', 'سبتمبر', 'أكتوبر', 'نوفمبر', 'ديسمبر'];
+
+        async function loadPayroll() {
+            const month = document.getElementById('monthSelect').value;
+            const year = document.getElementById('yearInput').value;
+
+            // Show loading
+            document.getElementById('loading').style.display = 'block';
+            document.getElementById('error').style.display = 'none';
+            document.getElementById('reportContent').style.display = 'none';
+
+            try {
+                // Load company settings and employees
+                const [settingsRes, employeesRes] = await Promise.all([
+                    fetch(`${API_URL}/settings/company`, {
+                        headers: { 'Authorization': `Bearer ${token}` }
+                    }),
+                    fetch(`${API_URL}/employees`, {
+                        headers: { 'Authorization': `Bearer ${token}` }
+                    })
+                ]);
+
+                const settings = await settingsRes.json();
+                const employees = await employeesRes.json();
+
+                // Update company info
+                if (settings.companyName) {
+                    document.getElementById('companyName').textContent = settings.companyName;
+                }
+
+                if (settings.logo) {
+                    document.getElementById('companyLogo').innerHTML = `<img src="${settings.logo}" alt="Logo">`;
+                }
+
+                // Update report info
+                document.getElementById('reportMonth').textContent = monthNames[month - 1];
+                document.getElementById('reportYear').textContent = year;
+                document.getElementById('reportDate').textContent = new Date().toLocaleDateString('ar-SA');
+                document.getElementById('employeeCount').textContent = employees.length;
+
+                // Calculate payroll
+                let totalBasic = 0;
+                let totalHousing = 0;
+                let totalTransport = 0;
+                let totalDeductions = 0;
+                let totalNet = 0;
+
+                const tableBody = document.getElementById('payrollTableBody');
+                tableBody.innerHTML = '';
+
+                employees.forEach((emp, index) => {
+                    const basic = parseFloat(emp.basicSalary) || parseFloat(emp.salary) || 0;
+                    const housing = parseFloat(emp.housingAllowance) || 0;
+                    const transport = parseFloat(emp.transportAllowance) || 0;
+                    const deductions = 0; // Can be calculated based on advances, etc.
+                    const net = basic + housing + transport - deductions;
+
+                    totalBasic += basic;
+                    totalHousing += housing;
+                    totalTransport += transport;
+                    totalDeductions += deductions;
+                    totalNet += net;
+
+                    const row = `
+                        <tr>
+                            <td>${index + 1}</td>
+                            <td>${emp.employeeNumber || '-'}</td>
+                            <td style="text-align: right; font-weight: 600;">${emp.fullName}</td>
+                            <td>${emp.department || '-'}</td>
+                            <td>${emp.jobTitle || '-'}</td>
+                            <td>${basic.toLocaleString()}</td>
+                            <td>${housing.toLocaleString()}</td>
+                            <td>${transport.toLocaleString()}</td>
+                            <td>${deductions.toLocaleString()}</td>
+                            <td style="font-weight: 700; color: #2e7d32;">${net.toLocaleString()}</td>
+                            <td style="background: #f8f9fa;"></td>
+                        </tr>
+                    `;
+                    tableBody.innerHTML += row;
+                });
+
+                // Update totals
+                document.getElementById('totalBasic').textContent = totalBasic.toLocaleString();
+                document.getElementById('totalHousing').textContent = totalHousing.toLocaleString();
+                document.getElementById('totalTransport').textContent = totalTransport.toLocaleString();
+                document.getElementById('totalDeductions').textContent = totalDeductions.toLocaleString();
+                document.getElementById('totalNet').textContent = totalNet.toLocaleString();
+
+                // Update summary cards
+                document.getElementById('totalPayroll').textContent = totalNet.toLocaleString();
+                document.getElementById('totalEmployees').textContent = employees.length;
+                document.getElementById('averageSalary').textContent = Math.round(totalNet / employees.length).toLocaleString();
+
+                // Show report
+                document.getElementById('loading').style.display = 'none';
+                document.getElementById('reportContent').style.display = 'block';
+
+            } catch (error) {
+                console.error('Error loading payroll:', error);
+                document.getElementById('loading').style.display = 'none';
+                document.getElementById('error').style.display = 'block';
+                document.getElementById('error').textContent = 'خطأ في تحميل البيانات: ' + error.message;
+            }
+        }
+
+        function printReport() {
+            window.print();
+        }
+
+        function goBack() {
+            window.location.href = 'admin-dashboard.html';
+        }
+
+        // Load on page load
+        loadPayroll();
+    </script>
+</body>
+</html>

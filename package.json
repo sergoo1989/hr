@@ -1,0 +1,10 @@
+{
+  "dependencies": {
+    "@nestjs/common": "^11.1.9",
+    "@nestjs/core": "^11.1.9",
+    "@nestjs/schedule": "^6.1.0",
+    "@prisma/client": "^5.22.0",
+    "prisma": "^5.22.0",
+    "reflect-metadata": "^0.2.2"
+  }
+}

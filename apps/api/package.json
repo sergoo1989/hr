@@ -1,0 +1,24 @@
+{
+  "scripts": {
+    "start": "nest start",
+    "start:dev": "nest start --watch",
+    "payroll:report": "ts-node src/reports/payroll.service.ts",
+    "payroll:excel": "ts-node scripts/generatePayroll.ts"
+  },
+  "dependencies": {
+    "@nestjs/common": "^11.1.9",
+    "@nestjs/core": "^11.1.9",
+    "@nestjs/jwt": "^11.0.2",
+    "@nestjs/passport": "^11.0.5",
+    "@nestjs/platform-express": "^11.1.9",
+    "@types/bcrypt": "^6.0.0",
+    "@types/node": "^25.0.1",
+    "@types/passport-jwt": "^4.0.1",
+    "bcrypt": "^6.0.0",
+    "passport": "^0.7.0",
+    "passport-jwt": "^4.0.1",
+    "reflect-metadata": "^0.2.2",
+    "rxjs": "^7.8.2",
+    "typescript": "^5.9.3"
+  }
+}

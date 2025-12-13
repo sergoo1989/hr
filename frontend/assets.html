@@ -1,0 +1,682 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>إدارة العهد العينية</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .header {
+            background: white;
+            padding: 25px 30px;
+            border-radius: 15px;
+            margin-bottom: 25px;
+            box-shadow: 0 8px 16px rgba(0,0,0,0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .header h1 {
+            color: #667eea;
+            font-size: 28px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 15px;
+            font-weight: 600;
+            transition: transform 0.2s;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(102, 126, 234, 0.3);
+        }
+
+        .btn-secondary {
+            background: #6c757d;
+        }
+
+        .btn-danger {
+            background: #dc3545;
+        }
+
+        .btn-success {
+            background: #28a745;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 25px;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 36px;
+            font-weight: bold;
+            margin-bottom: 8px;
+        }
+
+        .stat-label {
+            color: #666;
+            font-size: 14px;
+        }
+
+        .content-card {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 8px 16px rgba(0,0,0,0.1);
+            margin-bottom: 25px;
+        }
+
+        .section-title {
+            font-size: 22px;
+            color: #667eea;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #f0f0f0;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .form-group label {
+            margin-bottom: 8px;
+            color: #333;
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: border-color 0.3s;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .form-group textarea {
+            resize: vertical;
+            min-height: 80px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        table thead {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+        }
+
+        table th,
+        table td {
+            padding: 14px;
+            text-align: right;
+            border-bottom: 1px solid #f0f0f0;
+        }
+
+        table tbody tr:hover {
+            background: #f8f9fa;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .badge-active {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .badge-returned {
+            background: #d1ecf1;
+            color: #0c5460;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 8px;
+            justify-content: center;
+        }
+
+        .action-btn {
+            padding: 6px 14px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 13px;
+            transition: all 0.2s;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            backdrop-filter: blur(5px);
+        }
+
+        .modal-content {
+            background: white;
+            margin: 5% auto;
+            padding: 30px;
+            border-radius: 15px;
+            max-width: 600px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #f0f0f0;
+        }
+
+        .modal-header h2 {
+            color: #667eea;
+            font-size: 22px;
+        }
+
+        .close-btn {
+            background: none;
+            border: none;
+            font-size: 28px;
+            cursor: pointer;
+            color: #999;
+            transition: color 0.2s;
+        }
+
+        .close-btn:hover {
+            color: #333;
+        }
+
+        .alert {
+            padding: 12px 18px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            display: none;
+        }
+
+        .alert-success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .alert-error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #667eea;
+            font-size: 18px;
+        }
+
+        .no-data {
+            text-align: center;
+            padding: 40px;
+            color: #999;
+            font-size: 16px;
+        }
+
+        .filter-section {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        .filter-section select {
+            padding: 10px 15px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 14px;
+            min-width: 180px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <h1>📦 إدارة العهد العينية</h1>
+            <div style="display: flex; gap: 10px;">
+                <button onclick="window.location.href='admin-dashboard.html'" class="btn btn-secondary">
+                    ← العودة للوحة التحكم
+                </button>
+                <button onclick="openAssignModal()" class="btn">
+                    + تسليم عهدة جديدة
+                </button>
+            </div>
+        </div>
+
+        <!-- Statistics -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-value" style="color: #667eea;" id="totalAssets">0</div>
+                <div class="stat-label">إجمالي العهد</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" style="color: #28a745;" id="activeAssets">0</div>
+                <div class="stat-label">عهد نشطة</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" style="color: #17a2b8;" id="returnedAssets">0</div>
+                <div class="stat-label">عهد مستردة</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" style="color: #ffc107;" id="employeesWithAssets">0</div>
+                <div class="stat-label">موظفون لديهم عهد</div>
+            </div>
+        </div>
+
+        <!-- Assets Table -->
+        <div class="content-card">
+            <h2 class="section-title">📋 جميع العهد العينية</h2>
+            
+            <div class="filter-section">
+                <select id="filterEmployee" onchange="filterAssets()">
+                    <option value="">جميع الموظفين</option>
+                </select>
+                <select id="filterStatus" onchange="filterAssets()">
+                    <option value="">جميع الحالات</option>
+                    <option value="active">نشطة</option>
+                    <option value="returned">مستردة</option>
+                </select>
+                <select id="filterType" onchange="filterAssets()">
+                    <option value="">جميع الأنواع</option>
+                    <option value="LAPTOP">لاب توب</option>
+                    <option value="PHONE">هاتف</option>
+                    <option value="TABLET">تابلت</option>
+                    <option value="CAR">سيارة</option>
+                    <option value="TOOLS">أدوات</option>
+                    <option value="OTHER">أخرى</option>
+                </select>
+            </div>
+
+            <div id="loading" class="loading">جاري التحميل...</div>
+            <div id="noData" class="no-data" style="display: none;">لا توجد عهد عينية</div>
+            <div id="assetsTableContainer" style="display: none;">
+                <table id="assetsTable">
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>الموظف</th>
+                            <th>نوع العهدة</th>
+                            <th>الوصف</th>
+                            <th>تاريخ التسليم</th>
+                            <th>تاريخ الاسترداد</th>
+                            <th>الحالة</th>
+                            <th>الإجراءات</th>
+                        </tr>
+                    </thead>
+                    <tbody id="assetsTableBody"></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Assign Asset Modal -->
+    <div id="assignModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>📦 تسليم عهدة جديدة</h2>
+                <button class="close-btn" onclick="closeAssignModal()">&times;</button>
+            </div>
+            
+            <div id="assignAlert" class="alert"></div>
+            
+            <form id="assignAssetForm">
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label for="employeeSelect">الموظف *</label>
+                        <select id="employeeSelect" required></select>
+                    </div>
+                    <div class="form-group">
+                        <label for="assetType">نوع العهدة *</label>
+                        <select id="assetType" required>
+                            <option value="">اختر نوع العهدة</option>
+                            <option value="LAPTOP">لاب توب</option>
+                            <option value="PHONE">هاتف</option>
+                            <option value="TABLET">تابلت</option>
+                            <option value="CAR">سيارة</option>
+                            <option value="TOOLS">أدوات</option>
+                            <option value="OTHER">أخرى</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="assetDescription">الوصف التفصيلي *</label>
+                    <textarea id="assetDescription" required placeholder="مثال: لاب توب HP EliteBook - رقم تسلسلي: ABC123"></textarea>
+                </div>
+                
+                <div style="display: flex; gap: 10px; justify-content: flex-end; margin-top: 25px;">
+                    <button type="button" onclick="closeAssignModal()" class="btn btn-secondary">إلغاء</button>
+                    <button type="submit" class="btn">تسليم العهدة</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        const API_URL = 'http://localhost:3000';
+        const token = localStorage.getItem('token');
+
+        if (!token) {
+            window.location.href = 'login.html';
+        }
+
+        let allAssets = [];
+        let allEmployees = [];
+
+        // Load data on page load
+        window.addEventListener('DOMContentLoaded', async () => {
+            await loadEmployees();
+            await loadAssets();
+        });
+
+        async function loadEmployees() {
+            try {
+                const response = await fetch(`${API_URL}/employees`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                allEmployees = await response.json();
+                
+                // Populate employee dropdowns
+                const employeeSelect = document.getElementById('employeeSelect');
+                const filterEmployee = document.getElementById('filterEmployee');
+                
+                allEmployees.forEach(emp => {
+                    const option = new Option(emp.fullName, emp.id);
+                    employeeSelect.add(option.cloneNode(true));
+                    filterEmployee.add(option);
+                });
+            } catch (error) {
+                console.error('Error loading employees:', error);
+            }
+        }
+
+        async function loadAssets() {
+            try {
+                document.getElementById('loading').style.display = 'block';
+                document.getElementById('noData').style.display = 'none';
+                document.getElementById('assetsTableContainer').style.display = 'none';
+
+                const response = await fetch(`${API_URL}/admin/assets`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+
+                if (!response.ok) {
+                    throw new Error('Failed to load assets');
+                }
+
+                allAssets = await response.json();
+
+                document.getElementById('loading').style.display = 'none';
+
+                if (allAssets.length === 0) {
+                    document.getElementById('noData').style.display = 'block';
+                    updateStatistics();
+                    return;
+                }
+
+                document.getElementById('assetsTableContainer').style.display = 'block';
+                displayAssets(allAssets);
+                updateStatistics();
+            } catch (error) {
+                console.error('Error loading assets:', error);
+                document.getElementById('loading').style.display = 'none';
+                document.getElementById('noData').style.display = 'block';
+            }
+        }
+
+        function displayAssets(assets) {
+            const tbody = document.getElementById('assetsTableBody');
+            tbody.innerHTML = '';
+
+            assets.forEach((asset, index) => {
+                const employee = allEmployees.find(e => e.id === asset.employeeId);
+                const row = document.createElement('tr');
+                
+                const assetTypeNames = {
+                    'LAPTOP': 'لاب توب',
+                    'PHONE': 'هاتف',
+                    'TABLET': 'تابلت',
+                    'CAR': 'سيارة',
+                    'TOOLS': 'أدوات',
+                    'OTHER': 'أخرى'
+                };
+
+                row.innerHTML = `
+                    <td>${index + 1}</td>
+                    <td><strong>${employee?.fullName || 'غير معروف'}</strong></td>
+                    <td>${assetTypeNames[asset.assetType] || asset.assetType}</td>
+                    <td>${asset.description}</td>
+                    <td>${new Date(asset.assignedDate).toLocaleDateString('ar-SA')}</td>
+                    <td>${asset.returnDate ? new Date(asset.returnDate).toLocaleDateString('ar-SA') : '-'}</td>
+                    <td>
+                        <span class="badge ${asset.returned ? 'badge-returned' : 'badge-active'}">
+                            ${asset.returned ? 'مستردة' : 'نشطة'}
+                        </span>
+                    </td>
+                    <td>
+                        <div class="action-buttons">
+                            ${!asset.returned ? `
+                                <button class="action-btn btn-success" onclick="returnAsset(${asset.id})">
+                                    استرداد
+                                </button>
+                            ` : ''}
+                            <button class="action-btn btn-danger" onclick="deleteAsset(${asset.id})">
+                                حذف
+                            </button>
+                        </div>
+                    </td>
+                `;
+                tbody.appendChild(row);
+            });
+        }
+
+        function updateStatistics() {
+            const total = allAssets.length;
+            const active = allAssets.filter(a => !a.returned).length;
+            const returned = allAssets.filter(a => a.returned).length;
+            const employeesWithAssets = new Set(allAssets.map(a => a.employeeId)).size;
+
+            document.getElementById('totalAssets').textContent = total;
+            document.getElementById('activeAssets').textContent = active;
+            document.getElementById('returnedAssets').textContent = returned;
+            document.getElementById('employeesWithAssets').textContent = employeesWithAssets;
+        }
+
+        function filterAssets() {
+            const employeeFilter = document.getElementById('filterEmployee').value;
+            const statusFilter = document.getElementById('filterStatus').value;
+            const typeFilter = document.getElementById('filterType').value;
+
+            let filtered = [...allAssets];
+
+            if (employeeFilter) {
+                filtered = filtered.filter(a => a.employeeId == employeeFilter);
+            }
+
+            if (statusFilter === 'active') {
+                filtered = filtered.filter(a => !a.returned);
+            } else if (statusFilter === 'returned') {
+                filtered = filtered.filter(a => a.returned);
+            }
+
+            if (typeFilter) {
+                filtered = filtered.filter(a => a.assetType === typeFilter);
+            }
+
+            displayAssets(filtered);
+        }
+
+        function openAssignModal() {
+            document.getElementById('assignModal').style.display = 'block';
+            document.getElementById('assignAssetForm').reset();
+            document.getElementById('assignAlert').style.display = 'none';
+        }
+
+        function closeAssignModal() {
+            document.getElementById('assignModal').style.display = 'none';
+        }
+
+        document.getElementById('assignAssetForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const assetData = {
+                employeeId: parseInt(document.getElementById('employeeSelect').value),
+                assetType: document.getElementById('assetType').value,
+                description: document.getElementById('assetDescription').value
+            };
+
+            try {
+                const response = await fetch(`${API_URL}/admin/assets/assign`, {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(assetData)
+                });
+
+                if (response.ok) {
+                    const alert = document.getElementById('assignAlert');
+                    alert.className = 'alert alert-success';
+                    alert.textContent = '✓ تم تسليم العهدة بنجاح';
+                    alert.style.display = 'block';
+
+                    setTimeout(() => {
+                        closeAssignModal();
+                        loadAssets();
+                    }, 1500);
+                } else {
+                    throw new Error('Failed to assign asset');
+                }
+            } catch (error) {
+                const alert = document.getElementById('assignAlert');
+                alert.className = 'alert alert-error';
+                alert.textContent = '✗ حدث خطأ أثناء تسليم العهدة';
+                alert.style.display = 'block';
+            }
+        });
+
+        async function returnAsset(assetId) {
+            if (!confirm('هل أنت متأكد من استرداد هذه العهدة؟')) {
+                return;
+            }
+
+            try {
+                const response = await fetch(`${API_URL}/admin/assets/${assetId}/return`, {
+                    method: 'PATCH',
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+
+                if (response.ok) {
+                    await loadAssets();
+                } else {
+                    alert('حدث خطأ أثناء استرداد العهدة');
+                }
+            } catch (error) {
+                console.error('Error returning asset:', error);
+                alert('حدث خطأ أثناء استرداد العهدة');
+            }
+        }
+
+        async function deleteAsset(assetId) {
+            if (!confirm('هل أنت متأكد من حذف هذه العهدة؟ هذا الإجراء لا يمكن التراجع عنه.')) {
+                return;
+            }
+
+            try {
+                const response = await fetch(`${API_URL}/admin/assets/${assetId}`, {
+                    method: 'DELETE',
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+
+                if (response.ok) {
+                    await loadAssets();
+                } else {
+                    alert('حدث خطأ أثناء حذف العهدة');
+                }
+            } catch (error) {
+                console.error('Error deleting asset:', error);
+                alert('حدث خطأ أثناء حذف العهدة');
+            }
+        }
+    </script>
+</body>
+</html>

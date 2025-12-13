@@ -1,0 +1,654 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>لوحة التحليلات المتقدمة</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+
+        .header {
+            background: rgba(255, 255, 255, 0.95);
+            padding: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .header-content {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .header h1 {
+            color: #667eea;
+            font-size: 28px;
+        }
+
+        .back-btn {
+            background: #667eea;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 30px auto;
+            padding: 0 20px;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 36px;
+            font-weight: bold;
+            color: #667eea;
+            margin-bottom: 10px;
+        }
+
+        .stat-label {
+            color: #666;
+            font-size: 14px;
+        }
+
+        .charts-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .chart-card {
+            background: white;
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+
+        .chart-card h3 {
+            color: #333;
+            margin-bottom: 20px;
+            font-size: 18px;
+            border-bottom: 2px solid #667eea;
+            padding-bottom: 10px;
+        }
+
+        .section {
+            background: white;
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+
+        .section h2 {
+            color: #333;
+            margin-bottom: 20px;
+            font-size: 20px;
+            border-bottom: 2px solid #667eea;
+            padding-bottom: 10px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+        }
+
+        thead {
+            background: #f8f9fa;
+        }
+
+        th {
+            padding: 12px;
+            text-align: right;
+            color: #555;
+            font-weight: 600;
+            border-bottom: 2px solid #dee2e6;
+        }
+
+        td {
+            padding: 12px;
+            border-bottom: 1px solid #dee2e6;
+            color: #333;
+        }
+
+        tr:hover {
+            background: #f8f9fa;
+        }
+
+        .badge {
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .badge-danger {
+            background: #ff5252;
+            color: white;
+        }
+
+        .badge-warning {
+            background: #ff9800;
+            color: white;
+        }
+
+        .badge-success {
+            background: #4caf50;
+            color: white;
+        }
+
+        .badge-info {
+            background: #2196f3;
+            color: white;
+        }
+
+        .tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+        }
+
+        .tab {
+            background: white;
+            color: #667eea;
+            padding: 12px 25px;
+            border: 2px solid #667eea;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 15px;
+            transition: all 0.3s;
+        }
+
+        .tab.active {
+            background: #667eea;
+            color: white;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 50px;
+            color: white;
+            font-size: 20px;
+        }
+
+        .no-data {
+            text-align: center;
+            padding: 30px;
+            color: #999;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="header-content">
+            <h1>📊 لوحة التحليلات المتقدمة</h1>
+            <a href="admin-dashboard.html" class="back-btn">← العودة للوحة الرئيسية</a>
+        </div>
+    </div>
+
+    <div class="container">
+        <div id="loading" class="loading">جاري تحميل البيانات...</div>
+        
+        <div id="content" style="display: none;">
+            <!-- Statistics Cards -->
+            <div class="stats-grid" id="statsGrid"></div>
+
+            <!-- Navigation Tabs -->
+            <div class="tabs">
+                <button class="tab active" onclick="switchSection('overview')">نظرة عامة</button>
+                <button class="tab" onclick="switchSection('leaves')">تحليلات الإجازات</button>
+                <button class="tab" onclick="switchSection('endofservice')">نهاية الخدمة</button>
+                <button class="tab" onclick="switchSection('tickets')">التذاكر</button>
+                <button class="tab" onclick="switchSection('alerts')">التنبيهات</button>
+            </div>
+
+            <!-- Overview Section -->
+            <div id="overview" class="tab-content active">
+                <div class="charts-grid">
+                    <div class="chart-card">
+                        <h3>توزيع الموظفين حسب القسم</h3>
+                        <canvas id="departmentChart"></canvas>
+                    </div>
+                    <div class="chart-card">
+                        <h3>توزيع الموظفين حسب الجنسية</h3>
+                        <canvas id="nationalityChart"></canvas>
+                    </div>
+                    <div class="chart-card">
+                        <h3>توزيع الإجازات حسب النوع</h3>
+                        <canvas id="leaveTypeChart"></canvas>
+                    </div>
+                    <div class="chart-card">
+                        <h3>توزيع الرواتب</h3>
+                        <canvas id="salaryChart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Leave Balances Section -->
+            <div id="leaves" class="tab-content">
+                <div class="section">
+                    <h2>رصيد الإجازات للموظفين</h2>
+                    <div id="leaveBalancesTable"></div>
+                </div>
+            </div>
+
+            <!-- End of Service Section -->
+            <div id="endofservice" class="tab-content">
+                <div class="section">
+                    <h2>الموظفين المستحقين لمكافأة نهاية الخدمة</h2>
+                    <div id="endOfServiceTable"></div>
+                </div>
+            </div>
+
+            <!-- Tickets Section -->
+            <div id="tickets" class="tab-content">
+                <div class="section">
+                    <h2>الموظفين المستحقين للتذاكر</h2>
+                    <div id="ticketsTable"></div>
+                </div>
+            </div>
+
+            <!-- Alerts Section -->
+            <div id="alerts" class="tab-content">
+                <div class="section">
+                    <h2>تنبيهات الوثائق القريبة من الانتهاء</h2>
+                    <div id="alertsTable"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API_URL = 'http://localhost:3000';
+        const token = localStorage.getItem('token');
+
+        if (!token) {
+            window.location.href = 'login.html';
+        }
+
+        let charts = {};
+        let dashboardData = null;
+
+        async function loadDashboard() {
+            try {
+                const response = await fetch(`${API_URL}/dashboard/stats`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                
+                dashboardData = await response.json();
+                
+                renderStats(dashboardData);
+                renderCharts(dashboardData);
+                renderLeaveBalances(dashboardData.analytics?.leaveBalances || []);
+                renderEndOfService(dashboardData.analytics?.endOfServiceEligible || []);
+                renderTickets(dashboardData.analytics?.ticketEligible || []);
+                renderAlerts(dashboardData.tables?.expiringDocuments || []);
+                
+                document.getElementById('loading').style.display = 'none';
+                document.getElementById('content').style.display = 'block';
+            } catch (error) {
+                console.error('Error loading dashboard:', error);
+                document.getElementById('loading').innerHTML = '<p style="color: #ff5252;">حدث خطأ في تحميل البيانات</p>';
+            }
+        }
+
+        function renderStats(data) {
+            const stats = data.stats || {};
+            const statsHtml = `
+                <div class="stat-card">
+                    <div class="stat-value">${stats.totalEmployees || 0}</div>
+                    <div class="stat-label">إجمالي الموظفين</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value">${stats.saudiCount || 0}</div>
+                    <div class="stat-label">موظفين سعوديين</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value">${stats.nonSaudiCount || 0}</div>
+                    <div class="stat-label">موظفين غير سعوديين</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value">${stats.remoteCount || 0}</div>
+                    <div class="stat-label">موظفين عن بعد</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value">${stats.partTimeCount || 0}</div>
+                    <div class="stat-label">موظفين Part-Time</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value">${stats.personalSponsorCount || 0}</div>
+                    <div class="stat-label">كفالة شخصية</div>
+                </div>
+                <div class="stat-card" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+                    <div class="stat-value" style="color: white;">${(stats.monthlyPayroll || 0).toLocaleString()}</div>
+                    <div class="stat-label" style="color: rgba(255,255,255,0.9);">كشف الرواتب الشهري (ريال)</div>
+                </div>
+                <div class="stat-card" style="background: linear-gradient(135deg, #ff6b6b 0%, #ee5a6f 100%);">
+                    <div class="stat-value" style="color: white;">${stats.expiringDocuments || 0}</div>
+                    <div class="stat-label" style="color: rgba(255,255,255,0.9);">وثائق قريبة الانتهاء</div>
+                </div>
+            `;
+            document.getElementById('statsGrid').innerHTML = statsHtml;
+        }
+
+        function renderCharts(data) {
+            const charts = data.charts || {};
+            
+            // Department Chart
+            if (charts.departmentDistribution && charts.departmentDistribution.length > 0) {
+                createPieChart('departmentChart', charts.departmentDistribution);
+            }
+            
+            // Nationality Chart
+            if (charts.nationalityDistribution && charts.nationalityDistribution.length > 0) {
+                createDoughnutChart('nationalityChart', charts.nationalityDistribution);
+            }
+            
+            // Leave Type Chart
+            if (charts.leaveDistribution && charts.leaveDistribution.length > 0) {
+                createBarChart('leaveTypeChart', charts.leaveDistribution);
+            }
+            
+            // Salary Chart
+            if (charts.salaryDistribution && charts.salaryDistribution.length > 0) {
+                createBarChart('salaryChart', charts.salaryDistribution);
+            }
+        }
+
+        function createPieChart(canvasId, data) {
+            const ctx = document.getElementById(canvasId);
+            if (charts[canvasId]) charts[canvasId].destroy();
+            
+            charts[canvasId] = new Chart(ctx, {
+                type: 'pie',
+                data: {
+                    labels: data.map(d => d.name),
+                    datasets: [{
+                        data: data.map(d => d.value),
+                        backgroundColor: [
+                            '#667eea', '#764ba2', '#f093fb', '#4facfe',
+                            '#43e97b', '#fa709a', '#fee140', '#30cfd0'
+                        ]
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: true,
+                    plugins: {
+                        legend: {
+                            position: 'bottom'
+                        }
+                    }
+                }
+            });
+        }
+
+        function createDoughnutChart(canvasId, data) {
+            const ctx = document.getElementById(canvasId);
+            if (charts[canvasId]) charts[canvasId].destroy();
+            
+            charts[canvasId] = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: data.map(d => d.name),
+                    datasets: [{
+                        data: data.map(d => d.value),
+                        backgroundColor: ['#667eea', '#f093fb']
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: true,
+                    plugins: {
+                        legend: {
+                            position: 'bottom'
+                        }
+                    }
+                }
+            });
+        }
+
+        function createBarChart(canvasId, data) {
+            const ctx = document.getElementById(canvasId);
+            if (charts[canvasId]) charts[canvasId].destroy();
+            
+            charts[canvasId] = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: data.map(d => d.name),
+                    datasets: [{
+                        label: 'العدد',
+                        data: data.map(d => d.value),
+                        backgroundColor: '#667eea'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: true,
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
+                    }
+                }
+            });
+        }
+
+        function renderLeaveBalances(data) {
+            if (!data || data.length === 0) {
+                document.getElementById('leaveBalancesTable').innerHTML = '<p class="no-data">لا توجد بيانات</p>';
+                return;
+            }
+
+            const html = `
+                <table>
+                    <thead>
+                        <tr>
+                            <th>رقم الموظف</th>
+                            <th>الاسم</th>
+                            <th>الأيام المستحقة</th>
+                            <th>الأيام المستخدمة</th>
+                            <th>الأيام المتبقية</th>
+                            <th>الأجر اليومي</th>
+                            <th>رصيد الإجازات (ريال)</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${data.map(item => `
+                            <tr>
+                                <td>${item.employeeNumber}</td>
+                                <td>${item.fullName}</td>
+                                <td><span class="badge badge-info">${item.annualLeaveDays} يوم</span></td>
+                                <td><span class="badge badge-warning">${item.usedDays} يوم</span></td>
+                                <td><span class="badge badge-success">${item.remainingDays} يوم</span></td>
+                                <td>${item.dailyRate.toLocaleString()} ريال</td>
+                                <td><strong>${item.leaveBalanceAmount.toLocaleString()} ريال</strong></td>
+                            </tr>
+                        `).join('')}
+                    </tbody>
+                </table>
+            `;
+            document.getElementById('leaveBalancesTable').innerHTML = html;
+        }
+
+        function renderEndOfService(data) {
+            if (!data || data.length === 0) {
+                document.getElementById('endOfServiceTable').innerHTML = '<p class="no-data">لا توجد بيانات</p>';
+                return;
+            }
+
+            const totalAmount = data.reduce((sum, item) => sum + item.endOfServiceAmount, 0);
+
+            const html = `
+                <div style="background: #e3f2fd; padding: 15px; border-radius: 8px; margin-bottom: 20px;">
+                    <h3 style="color: #1976d2;">إجمالي مكافآت نهاية الخدمة المستحقة: ${totalAmount.toLocaleString()} ريال</h3>
+                </div>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>رقم الموظف</th>
+                            <th>الاسم</th>
+                            <th>تاريخ التعيين</th>
+                            <th>سنوات الخدمة</th>
+                            <th>الراتب الشهري</th>
+                            <th>مكافأة نهاية الخدمة</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${data.map(item => `
+                            <tr>
+                                <td>${item.employeeNumber}</td>
+                                <td>${item.fullName}</td>
+                                <td>${new Date(item.hireDate).toLocaleDateString('ar-SA')}</td>
+                                <td><span class="badge badge-info">${item.yearsWorked} سنة (${item.monthsWorked} شهر)</span></td>
+                                <td>${item.monthlySalary.toLocaleString()} ريال</td>
+                                <td><strong style="color: #4caf50;">${item.endOfServiceAmount.toLocaleString()} ريال</strong></td>
+                            </tr>
+                        `).join('')}
+                    </tbody>
+                </table>
+            `;
+            document.getElementById('endOfServiceTable').innerHTML = html;
+        }
+
+        function renderTickets(data) {
+            if (!data || data.length === 0) {
+                document.getElementById('ticketsTable').innerHTML = '<p class="no-data">لا توجد بيانات</p>';
+                return;
+            }
+
+            const totalCost = data.reduce((sum, item) => sum + item.estimatedCost, 0);
+
+            const html = `
+                <div style="background: #fff3e0; padding: 15px; border-radius: 8px; margin-bottom: 20px;">
+                    <h3 style="color: #ef6c00;">إجمالي تكلفة التذاكر المقدرة: ${totalCost.toLocaleString()} ريال</h3>
+                </div>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>رقم الموظف</th>
+                            <th>الاسم</th>
+                            <th>درجة التذكرة</th>
+                            <th>التكلفة المقدرة</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${data.map(item => `
+                            <tr>
+                                <td>${item.employeeNumber}</td>
+                                <td>${item.fullName}</td>
+                                <td><span class="badge ${item.ticketClass === 'BUSINESS' ? 'badge-warning' : 'badge-info'}">${item.ticketClass === 'BUSINESS' ? 'درجة أعمال' : 'اقتصادية'}</span></td>
+                                <td><strong>${item.estimatedCost.toLocaleString()} ريال</strong></td>
+                            </tr>
+                        `).join('')}
+                    </tbody>
+                </table>
+            `;
+            document.getElementById('ticketsTable').innerHTML = html;
+        }
+
+        function renderAlerts(data) {
+            if (!data || data.length === 0) {
+                document.getElementById('alertsTable').innerHTML = '<p class="no-data">لا توجد تنبيهات</p>';
+                return;
+            }
+
+            const html = `
+                <table>
+                    <thead>
+                        <tr>
+                            <th>رقم الموظف</th>
+                            <th>الاسم</th>
+                            <th>نوع الوثيقة</th>
+                            <th>تاريخ الانتهاء</th>
+                            <th>الأيام المتبقية</th>
+                            <th>الحالة</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${data.map(item => {
+                            let badge = 'badge-success';
+                            let status = 'جيد';
+                            if (item.daysRemaining <= 30) {
+                                badge = 'badge-danger';
+                                status = 'عاجل جداً!';
+                            } else if (item.daysRemaining <= 60) {
+                                badge = 'badge-warning';
+                                status = 'عاجل';
+                            }
+                            
+                            return `
+                            <tr>
+                                <td>${item.employeeNumber}</td>
+                                <td>${item.employeeName}</td>
+                                <td><strong>${item.documentType}</strong></td>
+                                <td>${new Date(item.expiryDate).toLocaleDateString('ar-SA')}</td>
+                                <td><span class="badge ${badge}">${item.daysRemaining} يوم</span></td>
+                                <td><span class="badge ${badge}">${status}</span></td>
+                            </tr>
+                        `}).join('')}
+                    </tbody>
+                </table>
+            `;
+            document.getElementById('alertsTable').innerHTML = html;
+        }
+
+        function switchSection(section) {
+            document.querySelectorAll('.tab').forEach(tab => tab.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+            
+            event.target.classList.add('active');
+            document.getElementById(section).classList.add('active');
+        }
+
+        // Load dashboard on page load
+        loadDashboard();
+    </script>
+</body>
+</html>
