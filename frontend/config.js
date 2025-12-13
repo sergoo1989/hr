@@ -11,8 +11,8 @@ const API_CONFIG = {
         if (window.location.hostname !== 'localhost' && 
             window.location.hostname !== '127.0.0.1' &&
             !window.location.hostname.startsWith('192.168.')) {
-            // ضع هنا رابط Railway API الخاص بك بعد رفعه
-            return window.PRODUCTION_API_URL || 'https://your-app-name.up.railway.app';
+            // رابط Railway API
+            return window.PRODUCTION_API_URL || 'https://hr-production-3cbb.up.railway.app';
         }
         
         // في بيئة التطوير المحلية
