@@ -478,26 +478,20 @@
                             </select>
                         </div>
                         <div class="form-group">
-                            <label for="sponsorshipType">نوع الكفالة</label>
-                            <select id="sponsorshipType">
-                                <option value="COMPANY">كفالة الشركة</option>
-                                <option value="PERSONAL">كفالة شخصية</option>
-                                <option value="EXTERNAL">عمالة خارجية</option>
-                            </select>
+                            <label for="contractDuration">مدة العقد (بالأشهر)</label>
+                            <input type="number" id="contractDuration" min="1">
                         </div>
                         <div class="form-group">
-                            <label for="ticketEntitlement">استحقاق التذكرة</label>
-                            <select id="ticketEntitlement">
-                                <option value="false">لا</option>
-                                <option value="true">نعم</option>
-                            </select>
+                            <label for="contractLeaveDays">عدد أيام الإجازة بالعقد</label>
+                            <input type="number" id="contractLeaveDays" min="0">
                         </div>
                         <div class="form-group">
-                            <label for="ticketClass">درجة التذكرة</label>
-                            <select id="ticketClass">
-                                <option value="ECONOMY">اقتصادية</option>
-                                <option value="BUSINESS">درجة أعمال</option>
-                            </select>
+                            <label for="contractEndDate">تاريخ انتهاء العقد</label>
+                            <input type="date" id="contractEndDate">
+                        </div>
+                        <div class="form-group">
+                            <label for="medicalInsuranceExpiryDate">تاريخ انتهاء التأمين الطبي</label>
+                            <input type="date" id="medicalInsuranceExpiryDate">
                         </div>
                     </div>
                     
@@ -506,12 +500,26 @@
                         <h3 style="color: #007bff; margin-bottom: 15px;">معلومات الموظف غير السعودي</h3>
                         <div class="form-grid">
                             <div class="form-group">
-                                <label for="contractDuration">مدة العقد (بالأشهر)</label>
-                                <input type="number" id="contractDuration" min="1">
+                                <label for="sponsorshipType">نوع الكفالة *</label>
+                                <select id="sponsorshipType">
+                                    <option value="COMPANY">كفالة الشركة</option>
+                                    <option value="PERSONAL">كفالة شخصية</option>
+                                    <option value="EXTERNAL">عمالة خارجية</option>
+                                </select>
                             </div>
                             <div class="form-group">
-                                <label for="contractLeaveDays">عدد أيام الإجازة بالعقد</label>
-                                <input type="number" id="contractLeaveDays" min="0">
+                                <label for="ticketEntitlement">استحقاق التذكرة *</label>
+                                <select id="ticketEntitlement">
+                                    <option value="false">لا</option>
+                                    <option value="true">نعم</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="ticketClass">درجة التذكرة *</label>
+                                <select id="ticketClass">
+                                    <option value="ECONOMY">اقتصادية</option>
+                                    <option value="BUSINESS">درجة أعمال</option>
+                                </select>
                             </div>
                             <div class="form-group">
                                 <label for="passportNumber">رقم الجواز</label>
@@ -528,14 +536,6 @@
                             <div class="form-group">
                                 <label for="passportFeesExpiryDate">تاريخ انتهاء رسوم الجوازات</label>
                                 <input type="date" id="passportFeesExpiryDate">
-                            </div>
-                            <div class="form-group">
-                                <label for="medicalInsuranceExpiryDate">تاريخ انتهاء التأمين الطبي</label>
-                                <input type="date" id="medicalInsuranceExpiryDate">
-                            </div>
-                            <div class="form-group">
-                                <label for="contractEndDate">تاريخ انتهاء العقد</label>
-                                <input type="date" id="contractEndDate">
                             </div>
                         </div>
                     </div>
@@ -1013,9 +1013,10 @@
                                         <td>${emp.terminationDate ? new Date(emp.terminationDate).toLocaleDateString('ar-SA') : '-'}</td>
                                         <td>${statusBadge}</td>
                                         <td>
-                                            <div style="display: flex; gap: 5px; justify-content: center;">
+                                            <div style="display: flex; gap: 5px; justify-content: center; flex-wrap: wrap;">
                                                 <button onclick="editEmployee(${emp.id})" style="background: #4CAF50; color: white; border: none; padding: 5px 12px; border-radius: 4px; cursor: pointer; font-size: 11px;">تعديل</button>
                                                 <button onclick="deleteEmployee(${emp.id}, '${emp.fullName}')" style="background: #f44336; color: white; border: none; padding: 5px 12px; border-radius: 4px; cursor: pointer; font-size: 11px;">حذف</button>
+                                                ${emp.email ? `<button onclick="resendActivationEmail(${emp.id}, '${emp.fullName}')" style="background: #2196F3; color: white; border: none; padding: 5px 12px; border-radius: 4px; cursor: pointer; font-size: 11px;" title="إعادة إرسال بريد التفعيل">📧 إرسال</button>` : ''}
                                             </div>
                                         </td>
                                     </tr>
@@ -1389,6 +1390,44 @@
             } catch (error) {
                 alert('خطأ في حذف الموظف');
                 console.error('Error deleting employee:', error);
+            }
+        }
+
+        // Resend Activation Email
+        async function resendActivationEmail(employeeId, employeeName) {
+            if (!confirm(`هل تريد إعادة إرسال بريد التفعيل للموظف: ${employeeName}؟\n\nسيتم إنشاء كلمة مرور جديدة وإرسالها عبر البريد الإلكتروني.`)) {
+                return;
+            }
+
+            // Show loading state
+            const button = event.target;
+            const originalText = button.innerHTML;
+            button.innerHTML = '⏳ جاري الإرسال...';
+            button.disabled = true;
+
+            try {
+                const response = await fetch(`${API_URL}/admin/employees/${employeeId}/resend-activation`, {
+                    method: 'POST',
+                    headers: { 
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
+                
+                if (response.ok) {
+                    const result = await response.json();
+                    alert(`✅ تم إرسال بريد التفعيل بنجاح إلى:\n${result.email}\n\nاسم المستخدم: ${result.username}`);
+                } else {
+                    const error = await response.json();
+                    alert(`❌ ${error.message || 'خطأ في إرسال البريد الإلكتروني'}`);
+                }
+            } catch (error) {
+                alert('❌ خطأ في إرسال البريد الإلكتروني');
+                console.error('Error resending activation email:', error);
+            } finally {
+                // Restore button state
+                button.innerHTML = originalText;
+                button.disabled = false;
             }
         }
 

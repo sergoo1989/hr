@@ -1,5 +1,8 @@
+import { EmailService } from '../email/email.service';
 export declare class AdminService {
+    private emailService;
     private db;
+    constructor(emailService: EmailService);
     getPendingLeaves(): Promise<{
         employee: import("../database/in-memory-db").Employee;
         id: number;
@@ -75,5 +78,11 @@ export declare class AdminService {
         yearsWorked: string;
         monthsWorked: number;
     }>;
+    resendActivationEmail(employeeId: number): Promise<{
+        message: string;
+        email: string;
+        username: string;
+    }>;
+    private generateTemporaryPassword;
     private getMonthsDifference;
 }

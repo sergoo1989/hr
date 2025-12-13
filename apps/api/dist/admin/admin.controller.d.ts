@@ -43,6 +43,11 @@ export declare class AdminController {
     }[]>;
     approveAdvance(id: string): Promise<import("../database/in-memory-db").Advance>;
     rejectAdvance(id: string): Promise<import("../database/in-memory-db").Advance>;
+    resendActivationEmail(id: string): Promise<{
+        message: string;
+        email: string;
+        username: string;
+    }>;
     createContract(contractData: any): Promise<{
         success: boolean;
         message: string;

@@ -43,6 +43,9 @@ let AdminController = class AdminController {
     async rejectAdvance(id) {
         return this.adminService.updateAdvanceStatus(parseInt(id), 'REJECTED');
     }
+    async resendActivationEmail(id) {
+        return this.adminService.resendActivationEmail(parseInt(id));
+    }
     async createContract(contractData) {
         return this.adminService.createContract(contractData);
     }
@@ -125,6 +128,13 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], AdminController.prototype, "rejectAdvance", null);
 __decorate([
+    (0, common_1.Post)('employees/:id/resend-activation'),
+    __param(0, (0, common_1.Param)('id')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String]),
+    __metadata("design:returntype", Promise)
+], AdminController.prototype, "resendActivationEmail", null);
+__decorate([
     (0, common_1.Post)('contracts'),
     __param(0, (0, common_1.Body)()),
     __metadata("design:type", Function),
@@ -167,7 +177,7 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], AdminController.prototype, "returnAsset", null);
 __decorate([
-    Delete('assets/:id'),
+    (0, common_1.Delete)('assets/:id'),
     __param(0, (0, common_1.Param)('id')),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [String]),

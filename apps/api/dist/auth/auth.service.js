@@ -28,6 +28,9 @@ let AuthService = class AuthService {
         if (!user || !(await bcrypt.compare(password, user.password))) {
             throw new common_1.UnauthorizedException('اسم المستخدم أو كلمة المرور غير صحيحة');
         }
+        if (!user.isActive) {
+            throw new common_1.UnauthorizedException('الحساب غير مفعل. يرجى التحقق من بريدك الإلكتروني');
+        }
         const employee = user.employeeId ? this.db.findEmployeeById(user.employeeId) : null;
         const payload = {
             sub: user.id,
@@ -38,6 +41,7 @@ let AuthService = class AuthService {
         return {
             access_token: this.jwtService.sign(payload),
             role: user.role,
+            mustChangePassword: user.mustChangePassword,
             user: {
                 id: user.id,
                 username: user.username,
@@ -45,6 +49,26 @@ let AuthService = class AuthService {
                 employee: employee,
             },
         };
+    }
+    async changePassword(userId, oldPassword, newPassword) {
+        const user = this.db.findUserById(userId);
+        if (!user) {
+            throw new common_1.UnauthorizedException('المستخدم غير موجود');
+        }
+        if (!(await bcrypt.compare(oldPassword, user.password))) {
+            throw new common_1.UnauthorizedException('كلمة المرور القديمة غير صحيحة');
+        }
+        const hashedPassword = await bcrypt.hash(newPassword, 10);
+        this.db.updateUserPassword(userId, hashedPassword);
+        return { success: true, message: 'تم تغيير كلمة المرور بنجاح' };
+    }
+    async activateAccount(activationToken) {
+        const user = this.db.findUserByActivationToken(activationToken);
+        if (!user) {
+            throw new common_1.UnauthorizedException('رمز التفعيل غير صحيح');
+        }
+        this.db.activateUser(user.id);
+        return { success: true, message: 'تم تفعيل الحساب بنجاح' };
     }
     async validateUser(userId) {
         const user = this.db.findUserById(userId);

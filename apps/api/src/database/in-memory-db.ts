@@ -8,6 +8,10 @@ export interface User {
   password: string;
   role: 'ADMIN' | 'EMPLOYEE';
   employeeId?: number;
+  isActive: boolean; // حساب مفعل أم لا
+  mustChangePassword: boolean; // يجب تغيير كلمة المرور
+  activationToken?: string; // رمز التفعيل
+  email?: string; // البريد الإلكتروني للإشعارات
 }
 
 export interface Employee {
@@ -238,6 +242,9 @@ export class InMemoryDatabase {
       password: adminPasswordHash,
       role: 'ADMIN',
       employeeId: adminEmployee.id,
+      isActive: true,
+      mustChangePassword: false,
+      email: 'admin@hr-system.com',
     };
     this.users.push(adminUser);
 
@@ -248,6 +255,9 @@ export class InMemoryDatabase {
       password: empPasswordHash,
       role: 'EMPLOYEE',
       employeeId: employee.id,
+      isActive: true,
+      mustChangePassword: false,
+      email: 'employee1@hr-system.com',
     };
     this.users.push(empUser);
 
@@ -311,6 +321,8 @@ export class InMemoryDatabase {
       description: 'Dell Latitude 5520',
       assignedDate: new Date('2021-06-15').toISOString(),
       returned: false,
+      confirmed: true,
+      confirmedDate: new Date('2021-06-15').toISOString(),
     };
     this.assets.push(asset1);
 
@@ -371,14 +383,28 @@ export class InMemoryDatabase {
   }
 
   // User Methods
-  async createUser(username: string, password: string, role: 'ADMIN' | 'EMPLOYEE', employeeId?: number): Promise<User> {
+  async createUser(
+    username: string, 
+    password: string, 
+    role: 'ADMIN' | 'EMPLOYEE', 
+    employeeId?: number,
+    email?: string,
+    isActive: boolean = true,
+    mustChangePassword: boolean = false
+  ): Promise<User> {
     const hashedPassword = await bcrypt.hash(password, 10);
+    const activationToken = this.generateActivationToken();
+    
     const user: User = {
       id: this.userIdCounter++,
       username,
       password: hashedPassword,
       role,
       employeeId,
+      email,
+      isActive,
+      mustChangePassword,
+      activationToken,
     };
     this.users.push(user);
     this.saveToStorage(); // حفظ البيانات
@@ -391,6 +417,36 @@ export class InMemoryDatabase {
 
   findUserById(id: number): User | undefined {
     return this.users.find(u => u.id === id);
+  }
+
+  findUserByEmployeeId(employeeId: number): User | undefined {
+    return this.users.find(u => u.employeeId === employeeId);
+  }
+
+  findUserByActivationToken(token: string): User | undefined {
+    return this.users.find(u => u.activationToken === token);
+  }
+
+  updateUserPassword(userId: number, newHashedPassword: string): void {
+    const user = this.users.find(u => u.id === userId);
+    if (user) {
+      user.password = newHashedPassword;
+      user.mustChangePassword = false;
+      this.saveToStorage();
+    }
+  }
+
+  activateUser(userId: number): void {
+    const user = this.users.find(u => u.id === userId);
+    if (user) {
+      user.isActive = true;
+      user.activationToken = undefined;
+      this.saveToStorage();
+    }
+  }
+
+  private generateActivationToken(): string {
+    return Math.random().toString(36).substring(2) + Date.now().toString(36);
   }
 
   // Employee Methods

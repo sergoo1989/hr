@@ -5,12 +5,17 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
     else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
     return c > 3 && r && Object.defineProperty(target, key, r), r;
 };
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.EmployeeService = void 0;
 const common_1 = require("@nestjs/common");
 const in_memory_db_1 = require("../database/in-memory-db");
+const email_service_1 = require("../email/email.service");
 let EmployeeService = class EmployeeService {
-    constructor() {
+    constructor(emailService) {
+        this.emailService = emailService;
         this.db = in_memory_db_1.InMemoryDatabase.getInstance();
     }
     async getEmployeeProfile(userId) {
@@ -143,7 +148,34 @@ let EmployeeService = class EmployeeService {
             if (employeeData.contractEndDate)
                 employeeRecord.contractEndDate = employeeData.contractEndDate;
         }
-        return this.db.createEmployee(employeeRecord);
+        const employee = this.db.createEmployee(employeeRecord);
+        if (employeeData.email) {
+            try {
+                const username = employeeData.fullName
+                    .toLowerCase()
+                    .replace(/\s+/g, '.')
+                    .replace(/[^a-z0-9.]/g, '');
+                const temporaryPassword = this.generateTemporaryPassword();
+                const user = await this.db.createUser(username, temporaryPassword, 'EMPLOYEE', employee.id, employeeData.email, true, true);
+                const activationLink = `http://localhost:3000/frontend/change-password.html`;
+                await this.emailService.sendEmployeeActivationEmail(employeeData.email, employeeData.fullName, username, temporaryPassword, activationLink);
+                console.log(`✅ تم إرسال بريد التفعيل إلى: ${employeeData.email}`);
+                console.log(`👤 اسم المستخدم: ${username}`);
+                console.log(`🔑 كلمة المرور المؤقتة: ${temporaryPassword}`);
+            }
+            catch (error) {
+                console.error('❌ خطأ في إنشاء حساب أو إرسال بريد:', error);
+            }
+        }
+        return employee;
+    }
+    generateTemporaryPassword() {
+        const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZabcdefghjkmnpqrstuvwxyz23456789';
+        let password = '';
+        for (let i = 0; i < 10; i++) {
+            password += chars.charAt(Math.floor(Math.random() * chars.length));
+        }
+        return password;
     }
     async updateEmployee(employeeId, employeeData) {
         const updateData = {
@@ -200,6 +232,7 @@ let EmployeeService = class EmployeeService {
 };
 exports.EmployeeService = EmployeeService;
 exports.EmployeeService = EmployeeService = __decorate([
-    (0, common_1.Injectable)()
+    (0, common_1.Injectable)(),
+    __metadata("design:paramtypes", [email_service_1.EmailService])
 ], EmployeeService);
 //# sourceMappingURL=employee.service.js.map

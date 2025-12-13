@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Put, Patch, Body, Param, UseGuards } from '@nestjs/common';
+import { Controller, Get, Post, Put, Patch, Delete, Body, Param, UseGuards } from '@nestjs/common';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { RolesGuard } from '../auth/roles.guard';
 import { Roles } from '../auth/roles.decorator';
@@ -43,6 +43,11 @@ export class AdminController {
   @Patch('advances/:id/reject')
   async rejectAdvance(@Param('id') id: string) {
     return this.adminService.updateAdvanceStatus(parseInt(id), 'REJECTED');
+  }
+
+  @Post('employees/:id/resend-activation')
+  async resendActivationEmail(@Param('id') id: string) {
+    return this.adminService.resendActivationEmail(parseInt(id));
   }
 
   @Post('contracts')

@@ -18,6 +18,7 @@ const audit_module_1 = require("./audit/audit.module");
 const termination_module_1 = require("./termination/termination.module");
 const scheduler_module_1 = require("./scheduler/scheduler.module");
 const settings_module_1 = require("./settings/settings.module");
+const email_module_1 = require("./email/email.module");
 const app_controller_1 = require("./app.controller");
 let AppModule = class AppModule {
 };
@@ -27,6 +28,7 @@ exports.AppModule = AppModule = __decorate([
         imports: [
             audit_module_1.AuditModule,
             auth_module_1.AuthModule,
+            email_module_1.EmailModule,
             employee_module_1.EmployeeModule,
             admin_module_1.AdminModule,
             dashboard_module_1.DashboardModule,

@@ -1,9 +1,12 @@
 import { Injectable } from '@nestjs/common';
 import { InMemoryDatabase } from '../database/in-memory-db';
+import { EmailService } from '../email/email.service';
 
 @Injectable()
 export class EmployeeService {
   public db = InMemoryDatabase.getInstance();
+
+  constructor(private emailService: EmailService) {}
 
   async getEmployeeProfile(userId: number) {
     const user = this.db.findUserById(userId);
@@ -146,7 +149,66 @@ export class EmployeeService {
       if (employeeData.contractEndDate) employeeRecord.contractEndDate = employeeData.contractEndDate;
     }
     
-    return this.db.createEmployee(employeeRecord);
+    const employee = this.db.createEmployee(employeeRecord);
+    
+    // إنشاء حساب مستخدم للموظف
+    if (employeeData.email) {
+      try {
+        // إنشاء اسم مستخدم من الاسم الكامل (بدون مسافات وأحرف صغيرة)
+        const username = employeeData.fullName
+          .toLowerCase()
+          .replace(/\s+/g, '.')
+          .replace(/[^a-z0-9.]/g, '');
+        
+        // كلمة مرور مؤقتة
+        const temporaryPassword = this.generateTemporaryPassword();
+        
+        // إنشاء المستخدم
+        const user = await this.db.createUser(
+          username,
+          temporaryPassword,
+          'EMPLOYEE',
+          employee.id,
+          employeeData.email,
+          true, // isActive = true
+          true  // mustChangePassword = true
+        );
+        
+        // رابط التفعيل
+        const activationLink = `http://localhost:3000/frontend/change-password.html`;
+        
+        // إرسال البريد الإلكتروني
+        await this.emailService.sendEmployeeActivationEmail(
+          employeeData.email,
+          employeeData.fullName,
+          username,
+          temporaryPassword,
+          activationLink
+        );
+        
+        console.log(`✅ تم إرسال بريد التفعيل إلى: ${employeeData.email}`);
+        console.log(`👤 اسم المستخدم: ${username}`);
+        console.log(`🔑 كلمة المرور المؤقتة: ${temporaryPassword}`);
+        
+      } catch (error) {
+        console.error('❌ خطأ في إنشاء حساب أو إرسال بريد:', error);
+        // نكمل إنشاء الموظف حتى لو فشل إرسال البريد
+      }
+    }
+    
+    return employee;
+  }
+
+  /**
+   * توليد كلمة مرور مؤقتة عشوائية
+   */
+  private generateTemporaryPassword(): string {
+    const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZabcdefghjkmnpqrstuvwxyz23456789';
+    let password = '';
+    for (let i = 0; i < 10; i++) {
+      password += chars.charAt(Math.floor(Math.random() * chars.length));
+    }
+    return password;
   }
 
   async updateEmployee(employeeId: number, employeeData: any) {

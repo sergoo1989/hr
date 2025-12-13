@@ -5,12 +5,17 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
     else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
     return c > 3 && r && Object.defineProperty(target, key, r), r;
 };
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.AdminService = void 0;
 const common_1 = require("@nestjs/common");
 const in_memory_db_1 = require("../database/in-memory-db");
+const email_service_1 = require("../email/email.service");
 let AdminService = class AdminService {
-    constructor() {
+    constructor(emailService) {
+        this.emailService = emailService;
         this.db = in_memory_db_1.InMemoryDatabase.getInstance();
     }
     async getPendingLeaves() {
@@ -109,6 +114,50 @@ let AdminService = class AdminService {
             monthsWorked,
         };
     }
+    async resendActivationEmail(employeeId) {
+        const employee = this.db.findEmployeeById(employeeId);
+        if (!employee) {
+            throw new common_1.NotFoundException('الموظف غير موجود');
+        }
+        if (!employee.email) {
+            throw new common_1.BadRequestException('الموظف ليس لديه بريد إلكتروني');
+        }
+        const user = this.db.findUserByEmployeeId(employeeId);
+        if (!user) {
+            throw new common_1.NotFoundException('حساب المستخدم غير موجود');
+        }
+        if (user.isActive && !user.mustChangePassword) {
+            throw new common_1.BadRequestException('الحساب مفعّل بالفعل');
+        }
+        const newTempPassword = this.generateTemporaryPassword();
+        const bcrypt = require('bcrypt');
+        const hashedPassword = await bcrypt.hash(newTempPassword, 10);
+        await this.db.updateUserPassword(user.id, hashedPassword);
+        const activationLink = `http://localhost:5500/frontend/login.html`;
+        try {
+            await this.emailService.sendEmployeeActivationEmail(employee.email, employee.fullName, user.username, newTempPassword, activationLink);
+            console.log(`✅ تم إعادة إرسال بريد التفعيل إلى: ${employee.email}`);
+            console.log(`👤 اسم المستخدم: ${user.username}`);
+            console.log(`🔑 كلمة المرور المؤقتة الجديدة: ${newTempPassword}`);
+            return {
+                message: 'تم إعادة إرسال بريد التفعيل بنجاح',
+                email: employee.email,
+                username: user.username,
+            };
+        }
+        catch (error) {
+            console.error('❌ خطأ في إعادة إرسال البريد الإلكتروني:', error);
+            throw new common_1.BadRequestException('فشل في إرسال البريد الإلكتروني');
+        }
+    }
+    generateTemporaryPassword() {
+        const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+        let password = '';
+        for (let i = 0; i < 10; i++) {
+            password += chars.charAt(Math.floor(Math.random() * chars.length));
+        }
+        return password;
+    }
     getMonthsDifference(startDate, endDate) {
         const months = (endDate.getFullYear() - startDate.getFullYear()) * 12;
         return months + endDate.getMonth() - startDate.getMonth();
@@ -116,6 +165,7 @@ let AdminService = class AdminService {
 };
 exports.AdminService = AdminService;
 exports.AdminService = AdminService = __decorate([
-    (0, common_1.Injectable)()
+    (0, common_1.Injectable)(),
+    __metadata("design:paramtypes", [email_service_1.EmailService])
 ], AdminService);
 //# sourceMappingURL=admin.service.js.map

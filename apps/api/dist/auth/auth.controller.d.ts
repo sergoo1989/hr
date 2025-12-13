@@ -18,11 +18,23 @@ export declare class AuthController {
     }): Promise<{
         access_token: string;
         role: "ADMIN" | "EMPLOYEE";
+        mustChangePassword: boolean;
         user: {
             id: number;
             username: string;
             role: "ADMIN" | "EMPLOYEE";
             employee: import("../database/in-memory-db").Employee;
         };
+    }>;
+    changePassword(req: any, body: {
+        oldPassword: string;
+        newPassword: string;
+    }): Promise<{
+        success: boolean;
+        message: string;
+    }>;
+    activateAccount(token: string): Promise<{
+        success: boolean;
+        message: string;
     }>;
 }

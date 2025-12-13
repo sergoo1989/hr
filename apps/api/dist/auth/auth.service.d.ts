@@ -11,12 +11,21 @@ export declare class AuthService {
     login(username: string, password: string): Promise<{
         access_token: string;
         role: "ADMIN" | "EMPLOYEE";
+        mustChangePassword: boolean;
         user: {
             id: number;
             username: string;
             role: "ADMIN" | "EMPLOYEE";
             employee: import("../database/in-memory-db").Employee;
         };
+    }>;
+    changePassword(userId: number, oldPassword: string, newPassword: string): Promise<{
+        success: boolean;
+        message: string;
+    }>;
+    activateAccount(activationToken: string): Promise<{
+        success: boolean;
+        message: string;
     }>;
     validateUser(userId: number): Promise<{
         employee: import("../database/in-memory-db").Employee;
@@ -25,5 +34,9 @@ export declare class AuthService {
         password: string;
         role: "ADMIN" | "EMPLOYEE";
         employeeId?: number;
+        isActive: boolean;
+        mustChangePassword: boolean;
+        activationToken?: string;
+        email?: string;
     }>;
 }

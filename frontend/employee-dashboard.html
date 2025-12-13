@@ -542,6 +542,154 @@
             return statuses[status] || status;
         }
 
+        function displayAssets(assets) {
+            const container = document.getElementById('assetsTable');
+            if (!assets || assets.length === 0) {
+                container.innerHTML = '<p style="color: #999; text-align: center; padding: 20px;">لا توجد عهد عينية</p>';
+                return;
+            }
+
+            const pendingAssets = assets.filter(a => !a.confirmed && !a.returned);
+            const confirmedAssets = assets.filter(a => a.confirmed && !a.returned);
+            const returnedAssets = assets.filter(a => a.returned);
+
+            let html = '';
+
+            // Show pending confirmations first (important)
+            if (pendingAssets.length > 0) {
+                html += `
+                    <div style="background: #fff3cd; border: 2px solid #ffc107; border-radius: 8px; padding: 15px; margin-bottom: 20px;">
+                        <h3 style="color: #856404; margin: 0 0 10px 0;">⚠️ عهد تحتاج إلى تأكيد الاستلام (${pendingAssets.length})</h3>
+                        <p style="margin: 0 0 15px 0; color: #856404;">يرجى تأكيد استلام العهد التالية:</p>
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>نوع العهدة</th>
+                                    <th>الوصف</th>
+                                    <th>تاريخ التسليم</th>
+                                    <th>الإجراء</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${pendingAssets.map(asset => `
+                                    <tr style="background: #fff3cd;">
+                                        <td><strong>${asset.assetType}</strong></td>
+                                        <td>${asset.description || '-'}</td>
+                                        <td>${new Date(asset.assignedDate).toLocaleDateString('ar-SA')}</td>
+                                        <td>
+                                            <button onclick="confirmAssetReceipt(${asset.id})" 
+                                                    style="background: #28a745; color: white; border: none; padding: 8px 16px; border-radius: 4px; cursor: pointer; font-weight: bold;">
+                                                ✓ تأكيد الاستلام
+                                            </button>
+                                        </td>
+                                    </tr>
+                                `).join('')}
+                            </tbody>
+                        </table>
+                    </div>
+                `;
+            }
+
+            // Show confirmed assets
+            if (confirmedAssets.length > 0) {
+                html += `
+                    <div style="margin-bottom: 20px;">
+                        <h3 style="color: #28a745; margin: 0 0 10px 0;">✓ عهد مؤكدة (${confirmedAssets.length})</h3>
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>نوع العهدة</th>
+                                    <th>الوصف</th>
+                                    <th>تاريخ التسليم</th>
+                                    <th>تاريخ التأكيد</th>
+                                    <th>الحالة</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${confirmedAssets.map(asset => `
+                                    <tr>
+                                        <td>${asset.assetType}</td>
+                                        <td>${asset.description || '-'}</td>
+                                        <td>${new Date(asset.assignedDate).toLocaleDateString('ar-SA')}</td>
+                                        <td>${new Date(asset.confirmedDate).toLocaleDateString('ar-SA')}</td>
+                                        <td><span style="background: #28a745; color: white; padding: 4px 12px; border-radius: 12px; font-size: 12px;">✓ مؤكدة</span></td>
+                                    </tr>
+                                `).join('')}
+                            </tbody>
+                        </table>
+                    </div>
+                `;
+            }
+
+            // Show returned assets
+            if (returnedAssets.length > 0) {
+                html += `
+                    <div>
+                        <h3 style="color: #6c757d; margin: 0 0 10px 0;">↩️ عهد مرتجعة (${returnedAssets.length})</h3>
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>نوع العهدة</th>
+                                    <th>الوصف</th>
+                                    <th>تاريخ التسليم</th>
+                                    <th>تاريخ الإرجاع</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${returnedAssets.map(asset => `
+                                    <tr style="opacity: 0.6;">
+                                        <td>${asset.assetType}</td>
+                                        <td>${asset.description || '-'}</td>
+                                        <td>${new Date(asset.assignedDate).toLocaleDateString('ar-SA')}</td>
+                                        <td>${new Date(asset.returnDate).toLocaleDateString('ar-SA')}</td>
+                                    </tr>
+                                `).join('')}
+                            </tbody>
+                        </table>
+                    </div>
+                `;
+            }
+
+            container.innerHTML = html;
+        }
+
+        async function confirmAssetReceipt(assetId) {
+            if (!confirm('هل أنت متأكد من تأكيد استلام هذه العهدة؟\n\nبتأكيدك أنت تقر باستلام العهدة المذكورة وتتحمل مسؤوليتها.')) {
+                return;
+            }
+
+            try {
+                const token = localStorage.getItem('token');
+                const response = await fetch(`${API_URL}/employees/me/assets/${assetId}/confirm`, {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                if (!response.ok) {
+                    throw new Error('فشل تأكيد استلام العهدة');
+                }
+
+                const result = await response.json();
+                
+                // Show success message
+                alert('✓ ' + result.message);
+
+                // Reload assets to refresh the display
+                const assetsResponse = await fetch(`${API_URL}/employees/me/assets`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                const assetsData = await assetsResponse.json();
+                displayAssets(assetsData);
+
+            } catch (error) {
+                console.error('Error confirming asset:', error);
+                alert('حدث خطأ أثناء تأكيد استلام العهدة: ' + error.message);
+            }
+        }
+
         function logout() {
             localStorage.clear();
             window.location.href = 'login.html';

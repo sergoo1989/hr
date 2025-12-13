@@ -2,8 +2,10 @@ import { Module } from '@nestjs/common';
 import { EmployeeController } from './employee.controller';
 import { EmployeeService } from './employee.service';
 import { EmployeeDashboardService } from './employee-dashboard.service';
+import { EmailModule } from '../email/email.module';
 
 @Module({
+  imports: [EmailModule],
   controllers: [EmployeeController],
   providers: [EmployeeService, EmployeeDashboardService],
   exports: [EmployeeService, EmployeeDashboardService],

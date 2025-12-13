@@ -353,6 +353,8 @@
                     <option value="">جميع الحالات</option>
                     <option value="active">نشطة</option>
                     <option value="returned">مستردة</option>
+                    <option value="pending">تنتظر التأكيد</option>
+                    <option value="confirmed">مؤكدة</option>
                 </select>
                 <select id="filterType" onchange="filterAssets()">
                     <option value="">جميع الأنواع</option>
@@ -376,6 +378,7 @@
                             <th>نوع العهدة</th>
                             <th>الوصف</th>
                             <th>تاريخ التسليم</th>
+                            <th>حالة التأكيد</th>
                             <th>تاريخ الاسترداد</th>
                             <th>الحالة</th>
                             <th>الإجراءات</th>
@@ -525,6 +528,13 @@
                     <td>${assetTypeNames[asset.assetType] || asset.assetType}</td>
                     <td>${asset.description}</td>
                     <td>${new Date(asset.assignedDate).toLocaleDateString('ar-SA')}</td>
+                    <td>
+                        ${asset.confirmed 
+                            ? `<span style="color: #28a745;">✓ مؤكدة</span><br><small>${new Date(asset.confirmedDate).toLocaleDateString('ar-SA')}</small>` 
+                            : asset.returned 
+                            ? '-' 
+                            : '<span style="color: #ffc107; font-weight: bold;">⚠️ تنتظر التأكيد</span>'}
+                    </td>
                     <td>${asset.returnDate ? new Date(asset.returnDate).toLocaleDateString('ar-SA') : '-'}</td>
                     <td>
                         <span class="badge ${asset.returned ? 'badge-returned' : 'badge-active'}">
@@ -553,11 +563,27 @@
             const active = allAssets.filter(a => !a.returned).length;
             const returned = allAssets.filter(a => a.returned).length;
             const employeesWithAssets = new Set(allAssets.map(a => a.employeeId)).size;
+            const pendingConfirmation = allAssets.filter(a => !a.confirmed && !a.returned).length;
 
             document.getElementById('totalAssets').textContent = total;
             document.getElementById('activeAssets').textContent = active;
             document.getElementById('returnedAssets').textContent = returned;
             document.getElementById('employeesWithAssets').textContent = employeesWithAssets;
+
+            // Show alert if there are pending confirmations
+            if (pendingConfirmation > 0) {
+                const alertDiv = document.createElement('div');
+                alertDiv.className = 'alert alert-error';
+                alertDiv.style.display = 'block';
+                alertDiv.innerHTML = `⚠️ هناك <strong>${pendingConfirmation}</strong> عهدة تنتظر تأكيد الاستلام من الموظفين`;
+                
+                // Insert after the stats grid
+                const statsGrid = document.querySelector('.stats-grid');
+                if (statsGrid && !document.querySelector('.pending-alert')) {
+                    alertDiv.classList.add('pending-alert');
+                    statsGrid.after(alertDiv);
+                }
+            }
         }
 
         function filterAssets() {
@@ -575,6 +601,10 @@
                 filtered = filtered.filter(a => !a.returned);
             } else if (statusFilter === 'returned') {
                 filtered = filtered.filter(a => a.returned);
+            } else if (statusFilter === 'pending') {
+                filtered = filtered.filter(a => !a.confirmed && !a.returned);
+            } else if (statusFilter === 'confirmed') {
+                filtered = filtered.filter(a => a.confirmed && !a.returned);
             }
 
             if (typeFilter) {

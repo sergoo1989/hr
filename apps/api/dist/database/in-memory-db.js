@@ -116,6 +116,9 @@ class InMemoryDatabase {
             password: adminPasswordHash,
             role: 'ADMIN',
             employeeId: adminEmployee.id,
+            isActive: true,
+            mustChangePassword: false,
+            email: 'admin@hr-system.com',
         };
         this.users.push(adminUser);
         const empPasswordHash = await bcrypt.hash('emp123', 10);
@@ -125,6 +128,9 @@ class InMemoryDatabase {
             password: empPasswordHash,
             role: 'EMPLOYEE',
             employeeId: employee.id,
+            isActive: true,
+            mustChangePassword: false,
+            email: 'employee1@hr-system.com',
         };
         this.users.push(empUser);
         const leave1 = {
@@ -180,6 +186,8 @@ class InMemoryDatabase {
             description: 'Dell Latitude 5520',
             assignedDate: new Date('2021-06-15').toISOString(),
             returned: false,
+            confirmed: true,
+            confirmedDate: new Date('2021-06-15').toISOString(),
         };
         this.assets.push(asset1);
         this.companySettings = {
@@ -229,14 +237,19 @@ class InMemoryDatabase {
         console.log('🏢 تم إضافة: ' + this.departments.length + ' أقسام، ' + this.jobTitles.length + ' مسميات وظيفية');
         this.saveToStorage();
     }
-    async createUser(username, password, role, employeeId) {
+    async createUser(username, password, role, employeeId, email, isActive = true, mustChangePassword = false) {
         const hashedPassword = await bcrypt.hash(password, 10);
+        const activationToken = this.generateActivationToken();
         const user = {
             id: this.userIdCounter++,
             username,
             password: hashedPassword,
             role,
             employeeId,
+            email,
+            isActive,
+            mustChangePassword,
+            activationToken,
         };
         this.users.push(user);
         this.saveToStorage();
@@ -247,6 +260,31 @@ class InMemoryDatabase {
     }
     findUserById(id) {
         return this.users.find(u => u.id === id);
+    }
+    findUserByEmployeeId(employeeId) {
+        return this.users.find(u => u.employeeId === employeeId);
+    }
+    findUserByActivationToken(token) {
+        return this.users.find(u => u.activationToken === token);
+    }
+    updateUserPassword(userId, newHashedPassword) {
+        const user = this.users.find(u => u.id === userId);
+        if (user) {
+            user.password = newHashedPassword;
+            user.mustChangePassword = false;
+            this.saveToStorage();
+        }
+    }
+    activateUser(userId) {
+        const user = this.users.find(u => u.id === userId);
+        if (user) {
+            user.isActive = true;
+            user.activationToken = undefined;
+            this.saveToStorage();
+        }
+    }
+    generateActivationToken() {
+        return Math.random().toString(36).substring(2) + Date.now().toString(36);
     }
     createEmployee(data) {
         const employeeNumber = data.employeeNumber || `EMP${String(this.employeeIdCounter).padStart(3, '0')}`;

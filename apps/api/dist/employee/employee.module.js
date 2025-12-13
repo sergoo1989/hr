@@ -11,11 +11,13 @@ const common_1 = require("@nestjs/common");
 const employee_controller_1 = require("./employee.controller");
 const employee_service_1 = require("./employee.service");
 const employee_dashboard_service_1 = require("./employee-dashboard.service");
+const email_module_1 = require("../email/email.module");
 let EmployeeModule = class EmployeeModule {
 };
 exports.EmployeeModule = EmployeeModule;
 exports.EmployeeModule = EmployeeModule = __decorate([
     (0, common_1.Module)({
+        imports: [email_module_1.EmailModule],
         controllers: [employee_controller_1.EmployeeController],
         providers: [employee_service_1.EmployeeService, employee_dashboard_service_1.EmployeeDashboardService],
         exports: [employee_service_1.EmployeeService, employee_dashboard_service_1.EmployeeDashboardService],

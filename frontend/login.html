@@ -206,6 +206,16 @@
                     localStorage.setItem('token', data.access_token);
                     localStorage.setItem('userRole', data.role);
                     localStorage.setItem('username', username);
+                    localStorage.setItem('user', JSON.stringify(data.user));
+
+                    // التحقق من ضرورة تغيير كلمة المرور
+                    if (data.mustChangePassword) {
+                        showAlert('يجب تغيير كلمة المرور المؤقتة...', 'success');
+                        setTimeout(() => {
+                            window.location.href = 'change-password.html';
+                        }, 1500);
+                        return;
+                    }
 
                     // Show success message
                     showAlert('تم تسجيل الدخول بنجاح!', 'success');

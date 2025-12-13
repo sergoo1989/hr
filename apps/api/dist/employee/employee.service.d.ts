@@ -1,6 +1,9 @@
 import { InMemoryDatabase } from '../database/in-memory-db';
+import { EmailService } from '../email/email.service';
 export declare class EmployeeService {
+    private emailService;
     db: InMemoryDatabase;
+    constructor(emailService: EmailService);
     getEmployeeProfile(userId: number): Promise<import("../database/in-memory-db").Employee>;
     getEmployeeLeaves(employeeId: number): Promise<import("../database/in-memory-db").Leave[]>;
     getEmployeeLeaveBalance(employeeId: number): Promise<{
@@ -22,6 +25,7 @@ export declare class EmployeeService {
     requestAdvance(employeeId: number, advanceData: any): Promise<import("../database/in-memory-db").Advance>;
     getAllEmployees(): Promise<import("../database/in-memory-db").Employee[]>;
     createEmployee(employeeData: any): Promise<import("../database/in-memory-db").Employee>;
+    private generateTemporaryPassword;
     updateEmployee(employeeId: number, employeeData: any): Promise<import("../database/in-memory-db").Employee>;
     deleteEmployee(employeeId: number): Promise<{
         message: string;

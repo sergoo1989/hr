@@ -21,6 +21,11 @@ export class AuthService {
       throw new UnauthorizedException('اسم المستخدم أو كلمة المرور غير صحيحة');
     }
 
+    // التحقق من أن الحساب مفعل
+    if (!user.isActive) {
+      throw new UnauthorizedException('الحساب غير مفعل. يرجى التحقق من بريدك الإلكتروني');
+    }
+
     const employee = user.employeeId ? this.db.findEmployeeById(user.employeeId) : null;
 
     const payload = { 
@@ -33,6 +38,7 @@ export class AuthService {
     return {
       access_token: this.jwtService.sign(payload),
       role: user.role,
+      mustChangePassword: user.mustChangePassword, // إضافة حالة تغيير كلمة المرور
       user: {
         id: user.id,
         username: user.username,
@@ -40,6 +46,43 @@ export class AuthService {
         employee: employee,
       },
     };
+  }
+
+  /**
+   * تغيير كلمة المرور (إلزامي للموظفين الجدد)
+   */
+  async changePassword(userId: number, oldPassword: string, newPassword: string) {
+    const user = this.db.findUserById(userId);
+    
+    if (!user) {
+      throw new UnauthorizedException('المستخدم غير موجود');
+    }
+
+    // التحقق من كلمة المرور القديمة
+    if (!(await bcrypt.compare(oldPassword, user.password))) {
+      throw new UnauthorizedException('كلمة المرور القديمة غير صحيحة');
+    }
+
+    // تحديث كلمة المرور
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
+    this.db.updateUserPassword(userId, hashedPassword);
+
+    return { success: true, message: 'تم تغيير كلمة المرور بنجاح' };
+  }
+
+  /**
+   * تفعيل حساب موظف جديد
+   */
+  async activateAccount(activationToken: string) {
+    const user = this.db.findUserByActivationToken(activationToken);
+    
+    if (!user) {
+      throw new UnauthorizedException('رمز التفعيل غير صحيح');
+    }
+
+    this.db.activateUser(user.id);
+
+    return { success: true, message: 'تم تفعيل الحساب بنجاح' };
   }
 
   async validateUser(userId: number) {

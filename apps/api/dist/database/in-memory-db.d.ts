@@ -4,6 +4,10 @@ export interface User {
     password: string;
     role: 'ADMIN' | 'EMPLOYEE';
     employeeId?: number;
+    isActive: boolean;
+    mustChangePassword: boolean;
+    activationToken?: string;
+    email?: string;
 }
 export interface Employee {
     id: number;
@@ -111,9 +115,14 @@ export declare class InMemoryDatabase {
     private loadFromStorage;
     saveToStorage(): void;
     seedInitialData(): Promise<void>;
-    createUser(username: string, password: string, role: 'ADMIN' | 'EMPLOYEE', employeeId?: number): Promise<User>;
+    createUser(username: string, password: string, role: 'ADMIN' | 'EMPLOYEE', employeeId?: number, email?: string, isActive?: boolean, mustChangePassword?: boolean): Promise<User>;
     findUserByUsername(username: string): User | undefined;
     findUserById(id: number): User | undefined;
+    findUserByEmployeeId(employeeId: number): User | undefined;
+    findUserByActivationToken(token: string): User | undefined;
+    updateUserPassword(userId: number, newHashedPassword: string): void;
+    activateUser(userId: number): void;
+    private generateActivationToken;
     createEmployee(data: Omit<Employee, 'id'>): Employee;
     findEmployeeById(id: number): Employee | undefined;
     findAllEmployees(): Employee[];

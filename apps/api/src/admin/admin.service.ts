@@ -1,9 +1,12 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
 import { InMemoryDatabase } from '../database/in-memory-db';
+import { EmailService } from '../email/email.service';
 
 @Injectable()
 export class AdminService {
   private db = InMemoryDatabase.getInstance();
+
+  constructor(private emailService: EmailService) {}
 
   async getPendingLeaves() {
     return this.db.findPendingLeaves().map(leave => ({
@@ -130,6 +133,71 @@ export class AdminService {
       yearsWorked: yearsWorked.toFixed(2),
       monthsWorked,
     };
+  }
+
+  async resendActivationEmail(employeeId: number) {
+    const employee = this.db.findEmployeeById(employeeId);
+    if (!employee) {
+      throw new NotFoundException('الموظف غير موجود');
+    }
+
+    if (!employee.email) {
+      throw new BadRequestException('الموظف ليس لديه بريد إلكتروني');
+    }
+
+    // Find user by employeeId
+    const user = this.db.findUserByEmployeeId(employeeId);
+    if (!user) {
+      throw new NotFoundException('حساب المستخدم غير موجود');
+    }
+
+    if (user.isActive && !user.mustChangePassword) {
+      throw new BadRequestException('الحساب مفعّل بالفعل');
+    }
+
+    // Generate new temporary password
+    const newTempPassword = this.generateTemporaryPassword();
+    const bcrypt = require('bcrypt');
+    const hashedPassword = await bcrypt.hash(newTempPassword, 10);
+    
+    // Update password
+    await this.db.updateUserPassword(user.id, hashedPassword);
+
+    // Generate activation link
+    const activationLink = `http://localhost:5500/frontend/login.html`;
+
+    // Send email
+    try {
+      await this.emailService.sendEmployeeActivationEmail(
+        employee.email,
+        employee.fullName,
+        user.username,
+        newTempPassword,
+        activationLink,
+      );
+
+      console.log(`✅ تم إعادة إرسال بريد التفعيل إلى: ${employee.email}`);
+      console.log(`👤 اسم المستخدم: ${user.username}`);
+      console.log(`🔑 كلمة المرور المؤقتة الجديدة: ${newTempPassword}`);
+
+      return {
+        message: 'تم إعادة إرسال بريد التفعيل بنجاح',
+        email: employee.email,
+        username: user.username,
+      };
+    } catch (error) {
+      console.error('❌ خطأ في إعادة إرسال البريد الإلكتروني:', error);
+      throw new BadRequestException('فشل في إرسال البريد الإلكتروني');
+    }
+  }
+
+  private generateTemporaryPassword(): string {
+    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+    let password = '';
+    for (let i = 0; i < 10; i++) {
+      password += chars.charAt(Math.floor(Math.random() * chars.length));
+    }
+    return password;
   }
 
   private getMonthsDifference(startDate: Date, endDate: Date): number {
