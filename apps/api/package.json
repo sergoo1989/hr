@@ -6,7 +6,7 @@
     "build": "npx nest build",
     "start": "npx nest start",
     "start:dev": "npx nest start --watch",
-    "start:prod": "node dist/main",
+    "start:prod": "node dist/main.js",
     "payroll:report": "ts-node src/reports/payroll.service.ts",
     "payroll:excel": "ts-node scripts/generatePayroll.ts"
   },
