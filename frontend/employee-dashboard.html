@@ -234,15 +234,24 @@
 
             <div class="dashboard-grid">
                 <div class="card">
-                    <h3>رصيد الإجازات</h3>
+                    <h3>رصيد الإجازات (أيام)</h3>
                     <div class="card-value" id="leaveBalance">-</div>
                     <div class="card-label" id="leaveBalanceLabel">يوم متبقي</div>
-                    <div style="margin-top: 10px; font-size: 16px; color: #28a745; font-weight: bold;" id="leaveBalanceAmount">-</div>
+                </div>
+                <div class="card" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white;">
+                    <h3 style="color: white;">💰 رصيد الإجازات (فلوس)</h3>
+                    <div class="card-value" style="color: white;" id="leaveBalanceAmount">-</div>
+                    <div class="card-label" style="color: rgba(255,255,255,0.8);">ريال</div>
                 </div>
                 <div class="card">
                     <h3>الإجازات المستخدمة</h3>
                     <div class="card-value" id="usedLeaves">-</div>
                     <div class="card-label">يوم</div>
+                </div>
+                <div class="card" style="background: linear-gradient(135deg, #28a745 0%, #20c997 100%); color: white;">
+                    <h3 style="color: white;">💵 المبلغ المستلم من الإجازات</h3>
+                    <div class="card-value" style="color: white;" id="usedLeavesAmount">-</div>
+                    <div class="card-label" style="color: rgba(255,255,255,0.8);">ريال</div>
                 </div>
                 <div class="card">
                     <h3>السلف المعلقة</h3>
@@ -369,15 +378,22 @@
                 const leaveBalance = dashboardData.leaveBalance || {};
                 const remainingDays = leaveBalance.remainingDays || 0;
                 const totalDays = leaveBalance.totalDays || 21;
+                const usedDays = leaveBalance.usedDays || 0;
                 
                 document.getElementById('leaveBalance').textContent = remainingDays;
                 document.getElementById('leaveBalanceLabel').textContent = `من ${totalDays} يوم سنوياً`;
                 
-                // عرض المبلغ المالي لرصيد الإجازات
+                // عرض المبلغ المالي لرصيد الإجازات المتبقية
                 const leaveBalanceAmount = leaveBalance.leaveBalance || 0;
-                document.getElementById('leaveBalanceAmount').textContent = `${Math.round(leaveBalanceAmount).toLocaleString('ar-SA')} ريال`;
+                document.getElementById('leaveBalanceAmount').textContent = Math.round(leaveBalanceAmount).toLocaleString('ar-SA');
                 
-                document.getElementById('usedLeaves').textContent = leaveBalance.usedDays || 0;
+                document.getElementById('usedLeaves').textContent = usedDays;
+                
+                // حساب المبلغ المستلم من الإجازات المستخدمة
+                const employee = dashboardData.employee || {};
+                const dailyWage = ((employee.basicSalary || employee.salary || 0) / 30);
+                const usedLeavesAmount = usedDays * dailyWage;
+                document.getElementById('usedLeavesAmount').textContent = Math.round(usedLeavesAmount).toLocaleString('ar-SA');
                 
                 const advances = await (await fetch(`${apiUrl}/employees/me/advances`, { headers })).json();
                 const pendingAdvancesCount = advances.filter(a => a.status === 'PENDING').length;
