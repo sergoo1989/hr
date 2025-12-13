@@ -262,11 +262,71 @@
 
             <div class="section">
                 <h2>آخر الإجازات</h2>
+                <button style="background: #667eea; color: white; padding: 12px 24px; border: none; border-radius: 8px; cursor: pointer; margin-bottom: 15px; font-size: 16px;" onclick="showLeaveForm()">
+                    ➕ تقديم طلب إجازة جديد
+                </button>
+                <div id="leaveFormSection" style="display: none; background: #f8f9fa; padding: 20px; border-radius: 8px; margin-bottom: 20px;">
+                    <h3 style="margin-bottom: 15px;">طلب إجازة جديد</h3>
+                    <div style="display: grid; gap: 15px;">
+                        <div>
+                            <label style="display: block; margin-bottom: 5px; font-weight: bold;">نوع الإجازة:</label>
+                            <select id="leaveType" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px;">
+                                <option value="annual">سنوية</option>
+                                <option value="sick">مرضية</option>
+                                <option value="emergency">طارئة</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label style="display: block; margin-bottom: 5px; font-weight: bold;">من تاريخ:</label>
+                            <input type="date" id="leaveStartDate" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px;">
+                        </div>
+                        <div>
+                            <label style="display: block; margin-bottom: 5px; font-weight: bold;">إلى تاريخ:</label>
+                            <input type="date" id="leaveEndDate" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px;">
+                        </div>
+                        <div>
+                            <label style="display: block; margin-bottom: 5px; font-weight: bold;">السبب:</label>
+                            <textarea id="leaveReason" rows="3" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px;" placeholder="اكتب سبب الإجازة..."></textarea>
+                        </div>
+                        <div style="display: flex; gap: 10px;">
+                            <button onclick="submitLeaveRequest()" style="flex: 1; background: #28a745; color: white; padding: 12px; border: none; border-radius: 6px; cursor: pointer; font-size: 16px;">
+                                ✓ إرسال الطلب
+                            </button>
+                            <button onclick="hideLeaveForm()" style="flex: 1; background: #dc3545; color: white; padding: 12px; border: none; border-radius: 6px; cursor: pointer; font-size: 16px;">
+                                ✗ إلغاء
+                            </button>
+                        </div>
+                    </div>
+                </div>
                 <div id="leavesTable"></div>
             </div>
 
             <div class="section">
                 <h2>السلف</h2>
+                <button style="background: #f5576c; color: white; padding: 12px 24px; border: none; border-radius: 8px; cursor: pointer; margin-bottom: 15px; font-size: 16px;" onclick="showAdvanceForm()">
+                    ➕ تقديم طلب سلفة جديدة
+                </button>
+                <div id="advanceFormSection" style="display: none; background: #f8f9fa; padding: 20px; border-radius: 8px; margin-bottom: 20px;">
+                    <h3 style="margin-bottom: 15px;">طلب سلفة جديدة</h3>
+                    <div style="display: grid; gap: 15px;">
+                        <div>
+                            <label style="display: block; margin-bottom: 5px; font-weight: bold;">المبلغ المطلوب (ريال):</label>
+                            <input type="number" id="advanceAmount" min="100" max="10000" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px;" placeholder="أدخل المبلغ">
+                        </div>
+                        <div>
+                            <label style="display: block; margin-bottom: 5px; font-weight: bold;">السبب:</label>
+                            <textarea id="advanceReason" rows="3" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px;" placeholder="اكتب سبب السلفة..."></textarea>
+                        </div>
+                        <div style="display: flex; gap: 10px;">
+                            <button onclick="submitAdvanceRequest()" style="flex: 1; background: #28a745; color: white; padding: 12px; border: none; border-radius: 6px; cursor: pointer; font-size: 16px;">
+                                ✓ إرسال الطلب
+                            </button>
+                            <button onclick="hideAdvanceForm()" style="flex: 1; background: #dc3545; color: white; padding: 12px; border: none; border-radius: 6px; cursor: pointer; font-size: 16px;">
+                                ✗ إلغاء
+                            </button>
+                        </div>
+                    </div>
+                </div>
                 <div id="advancesTable"></div>
             </div>
 
@@ -718,23 +778,127 @@
 
         // Scroll functions for quick actions
         function scrollToLeaves() {
-            document.querySelector('#leavesTable').scrollIntoView({ behavior: 'smooth' });
-            setTimeout(() => alert('يمكنك رؤية طلبات الإجازة هنا. قريباً سنضيف نموذج لتقديم طلب جديد!'), 500);
+            document.querySelector('#leavesTable').parentElement.scrollIntoView({ behavior: 'smooth' });
+            setTimeout(() => showLeaveForm(), 500);
         }
 
         function scrollToAdvances() {
-            document.querySelector('#advancesTable').scrollIntoView({ behavior: 'smooth' });
-            setTimeout(() => alert('يمكنك رؤية طلبات السلف هنا. قريباً سنضيف نموذج لتقديم طلب جديد!'), 500);
+            document.querySelector('#advancesTable').parentElement.scrollIntoView({ behavior: 'smooth' });
+            setTimeout(() => showAdvanceForm(), 500);
         }
 
         function scrollToAssets() {
             document.querySelector('#assetsTable').scrollIntoView({ behavior: 'smooth' });
-            setTimeout(() => alert('يمكنك التأكيد على استلام العهدة من الجدول أدناه بالضغط على زر "تأكيد الاستلام"'), 500);
         }
 
         function scrollToPayroll() {
             document.querySelector('#employeeInfo').scrollIntoView({ behavior: 'smooth' });
-            setTimeout(() => alert('المستحقات المالية تظهر في معلومات الموظف. قريباً سنضيف قسم خاص بكشف الراتب الشهري!'), 500);
+        }
+
+        // Form functions
+        function showLeaveForm() {
+            document.getElementById('leaveFormSection').style.display = 'block';
+        }
+
+        function hideLeaveForm() {
+            document.getElementById('leaveFormSection').style.display = 'none';
+        }
+
+        function showAdvanceForm() {
+            document.getElementById('advanceFormSection').style.display = 'block';
+        }
+
+        function hideAdvanceForm() {
+            document.getElementById('advanceFormSection').style.display = 'none';
+        }
+
+        async function submitLeaveRequest() {
+            const type = document.getElementById('leaveType').value;
+            const startDate = document.getElementById('leaveStartDate').value;
+            const endDate = document.getElementById('leaveEndDate').value;
+            const reason = document.getElementById('leaveReason').value;
+
+            if (!startDate || !endDate || !reason) {
+                alert('❌ الرجاء ملء جميع الحقول');
+                return;
+            }
+
+            try {
+                const token = localStorage.getItem('token');
+                const response = await fetch(`${API_URL}/employees/me/leaves`, {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ type, startDate, endDate, reason })
+                });
+
+                if (!response.ok) {
+                    throw new Error('فشل تقديم الطلب');
+                }
+
+                const result = await response.json();
+                alert('✓ تم تقديم طلب الإجازة بنجاح!');
+                hideLeaveForm();
+                
+                // Clear form
+                document.getElementById('leaveType').value = 'annual';
+                document.getElementById('leaveStartDate').value = '';
+                document.getElementById('leaveEndDate').value = '';
+                document.getElementById('leaveReason').value = '';
+                
+                // Refresh data
+                fetchDashboardData();
+            } catch (error) {
+                console.error('Error:', error);
+                alert('❌ حدث خطأ أثناء تقديم الطلب: ' + error.message);
+            }
+        }
+
+        async function submitAdvanceRequest() {
+            const amount = document.getElementById('advanceAmount').value;
+            const reason = document.getElementById('advanceReason').value;
+
+            if (!amount || !reason) {
+                alert('❌ الرجاء ملء جميع الحقول');
+                return;
+            }
+
+            if (amount < 100) {
+                alert('❌ الحد الأدنى للسلفة 100 ريال');
+                return;
+            }
+
+            try {
+                const token = localStorage.getItem('token');
+                const response = await fetch(`${API_URL}/employees/me/advances`, {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ amount: parseFloat(amount), reason })
+                });
+
+                if (!response.ok) {
+                    throw new Error('فشل تقديم الطلب');
+                }
+
+                const result = await response.json();
+                alert('✓ تم تقديم طلب السلفة بنجاح!');
+                hideAdvanceForm();
+                
+                // Clear form
+                document.getElementById('advanceAmount').value = '';
+                document.getElementById('advanceReason').value = '';
+                
+                // Refresh data
+                fetchDashboardData();
+            } catch (error) {
+                console.error('Error:', error);
+                alert('❌ حدث خطأ أثناء تقديم الطلب: ' + error.message);
+            }
         }
 
         // Load data on page load
