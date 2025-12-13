@@ -211,6 +211,27 @@
         <div id="loading" class="loading">جاري تحميل البيانات...</div>
         <div id="error" class="error" style="display: none;"></div>
         <div id="content" style="display: none;">
+            
+            <!-- أزرار سريعة للإجراءات -->
+            <div class="dashboard-grid" style="margin-bottom: 20px;">
+                <div class="card" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; cursor: pointer;" onclick="scrollToLeaves()">
+                    <h3 style="color: white;">📝 طلب إجازة جديدة</h3>
+                    <div style="font-size: 14px; margin-top: 10px;">اضغط لتقديم طلب إجازة</div>
+                </div>
+                <div class="card" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); color: white; cursor: pointer;" onclick="scrollToAdvances()">
+                    <h3 style="color: white;">💰 طلب سلفة جديدة</h3>
+                    <div style="font-size: 14px; margin-top: 10px;">اضغط لتقديم طلب سلفة</div>
+                </div>
+                <div class="card" style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); color: white; cursor: pointer;" onclick="scrollToAssets()">
+                    <h3 style="color: white;">📦 العهدة العينية</h3>
+                    <div style="font-size: 14px; margin-top: 10px;">التأكيد على استلام العهدة</div>
+                </div>
+                <div class="card" style="background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%); color: white; cursor: pointer;" onclick="scrollToPayroll()">
+                    <h3 style="color: white;">💵 المستحقات المالية</h3>
+                    <div style="font-size: 14px; margin-top: 10px;">شاهد راتبك ومستحقاتك</div>
+                </div>
+            </div>
+
             <div class="dashboard-grid">
                 <div class="card">
                     <h3>رصيد الإجازات</h3>
@@ -693,6 +714,27 @@
         function logout() {
             localStorage.clear();
             window.location.href = 'login.html';
+        }
+
+        // Scroll functions for quick actions
+        function scrollToLeaves() {
+            document.querySelector('#leavesTable').scrollIntoView({ behavior: 'smooth' });
+            setTimeout(() => alert('يمكنك رؤية طلبات الإجازة هنا. قريباً سنضيف نموذج لتقديم طلب جديد!'), 500);
+        }
+
+        function scrollToAdvances() {
+            document.querySelector('#advancesTable').scrollIntoView({ behavior: 'smooth' });
+            setTimeout(() => alert('يمكنك رؤية طلبات السلف هنا. قريباً سنضيف نموذج لتقديم طلب جديد!'), 500);
+        }
+
+        function scrollToAssets() {
+            document.querySelector('#assetsTable').scrollIntoView({ behavior: 'smooth' });
+            setTimeout(() => alert('يمكنك التأكيد على استلام العهدة من الجدول أدناه بالضغط على زر "تأكيد الاستلام"'), 500);
+        }
+
+        function scrollToPayroll() {
+            document.querySelector('#employeeInfo').scrollIntoView({ behavior: 'smooth' });
+            setTimeout(() => alert('المستحقات المالية تظهر في معلومات الموظف. قريباً سنضيف قسم خاص بكشف الراتب الشهري!'), 500);
         }
 
         // Load data on page load

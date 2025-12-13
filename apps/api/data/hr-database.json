@@ -1,16 +1,6 @@
 {
   "users": [
     {
-      "id": 1,
-      "username": "admin",
-      "password": "$2b$10$vBptGily4zA3/wfIRuDFDekrx/F1SA3VKHgZx9CWG0uELg2KWKxS2",
-      "role": "ADMIN",
-      "employeeId": 3,
-      "isActive": true,
-      "mustChangePassword": false,
-      "email": "admin@hr-system.com"
-    },
-    {
       "id": 2,
       "username": "admin",
       "password": "$2b$10$dy7/l21B3Kn3F3JZd3IbS.ykRT.20kHDVKZes6NTD6KX91NkktrVO",
@@ -60,21 +50,6 @@
       "basicSalary": 8000,
       "housingAllowance": 2500,
       "transportAllowance": 800,
-      "nationality": "SAUDI"
-    },
-    {
-      "id": 3,
-      "fullName": "مدير النظام",
-      "employeeNumber": "EMP001",
-      "nationalId": "1234567890",
-      "email": "admin@company.com",
-      "phone": "+966501234567",
-      "department": "الإدارة",
-      "jobTitle": "مدير الموارد البشرية",
-      "hireDate": "2020-01-01T00:00:00.000Z",
-      "basicSalary": 10000,
-      "housingAllowance": 3000,
-      "transportAllowance": 1000,
       "nationality": "SAUDI"
     }
   ],
