@@ -1999,6 +1999,18 @@
             const fileName = `قائمة_الموظفين_${new Date().toISOString().split('T')[0]}.pdf`;
             doc.save(fileName);
         }
+        
+        // Auto-refresh for pending requests every 30 seconds
+        setInterval(() => {
+            const currentTab = document.querySelector('.tab-btn.active')?.textContent;
+            if (currentTab === 'الإجازات') {
+                loadPendingLeaves();
+                console.log('🔄 تحديث طلبات الإجازات');
+            } else if (currentTab === 'السلف') {
+                loadPendingAdvances();
+                console.log('🔄 تحديث طلبات السلف');
+            }
+        }, 30000);
     </script>
 </body>
 </html>

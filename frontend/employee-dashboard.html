@@ -823,6 +823,16 @@
                 return;
             }
 
+            // حساب عدد الأيام
+            const start = new Date(startDate);
+            const end = new Date(endDate);
+            const days = Math.ceil((end - start) / (1000 * 60 * 60 * 24)) + 1;
+
+            if (days < 1) {
+                alert('❌ تاريخ النهاية يجب أن يكون بعد تاريخ البداية');
+                return;
+            }
+
             try {
                 const token = localStorage.getItem('token');
                 const response = await fetch(`${API_URL}/employees/me/leaves`, {
@@ -831,7 +841,13 @@
                         'Authorization': `Bearer ${token}`,
                         'Content-Type': 'application/json'
                     },
-                    body: JSON.stringify({ type, startDate, endDate, reason })
+                    body: JSON.stringify({ 
+                        leaveType: type.toUpperCase(), 
+                        startDate, 
+                        endDate, 
+                        reason,
+                        days
+                    })
                 });
 
                 if (!response.ok) {
@@ -903,6 +919,12 @@
 
         // Load data on page load
         fetchDashboardData();
+        
+        // Auto-refresh every 30 seconds
+        setInterval(() => {
+            fetchDashboardData();
+            console.log('🔄 تم تحديث البيانات تلقائياً');
+        }, 30000);
     </script>
 </body>
 </html>
