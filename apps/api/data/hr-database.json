@@ -1,325 +1,36 @@
 {
   "users": [
     {
-      "id": 2,
+      "id": 1,
       "username": "admin",
       "password": "$2b$10$dy7/l21B3Kn3F3JZd3IbS.ykRT.20kHDVKZes6NTD6KX91NkktrVO",
       "role": "ADMIN",
-      "employeeId": 1,
+      "employeeId": null,
       "isActive": true,
       "mustChangePassword": false,
       "email": "admin@hr-system.com"
-    },
-    {
-      "id": 3,
-      "username": "employee1",
-      "password": "$2b$10$ooiGYBjfkDgF/meMQ/AzteIt0ntPEOUoWIhIpc5Pl0s7YTExsUpJq",
-      "role": "EMPLOYEE",
-      "employeeId": 2,
-      "isActive": true,
-      "mustChangePassword": false,
-      "email": "employee1@hr-system.com"
     }
   ],
-  "employees": [
-    {
-      "id": 1,
-      "fullName": "مدير النظام",
-      "employeeNumber": "EMP001",
-      "nationalId": "1234567890",
-      "email": "admin@company.com",
-      "phone": "+966501234567",
-      "department": "الإدارة",
-      "jobTitle": "مدير الموارد البشرية",
-      "hireDate": "2020-01-01T00:00:00.000Z",
-      "basicSalary": 10000,
-      "housingAllowance": 3000,
-      "transportAllowance": 1000,
-      "nationality": "SAUDI"
-    },
-    {
-      "id": 2,
-      "fullName": "أحمد محمد السعيد",
-      "employeeNumber": "EMP002",
-      "nationalId": "1234567891",
-      "email": "ahmed@company.com",
-      "phone": "+966501234568",
-      "department": "تقنية المعلومات",
-      "jobTitle": "مطور برامج",
-      "hireDate": "2021-06-15T00:00:00.000Z",
-      "basicSalary": 8000,
-      "housingAllowance": 2500,
-      "transportAllowance": 800,
-      "nationality": "SAUDI"
-    }
-  ],
-  "leaves": [
-    {
-      "id": 1,
-      "employeeId": 2,
-      "type": "ANNUAL",
-      "leaveType": "إجازة سنوية",
-      "startDate": "2024-12-20T00:00:00.000Z",
-      "endDate": "2024-12-25T00:00:00.000Z",
-      "days": 5,
-      "daysCount": 5,
-      "status": "REJECTED",
-      "requestDate": "2024-12-10T00:00:00.000Z",
-      "reason": "عطلة نهاية العام"
-    },
-    {
-      "id": 2,
-      "employeeId": 2,
-      "type": "SICK",
-      "leaveType": "إجازة مرضية",
-      "startDate": "2024-11-15T00:00:00.000Z",
-      "endDate": "2024-11-17T00:00:00.000Z",
-      "days": 2,
-      "daysCount": 2,
-      "status": "APPROVED",
-      "requestDate": "2024-11-14T00:00:00.000Z",
-      "reason": "مرض"
-    },
-    {
-      "id": 3,
-      "employeeId": 4,
-      "type": "ANNUAL",
-      "leaveType": "إجازة سنوية",
-      "startDate": "2024-12-20T00:00:00.000Z",
-      "endDate": "2024-12-25T00:00:00.000Z",
-      "days": 5,
-      "daysCount": 5,
-      "status": "REJECTED",
-      "requestDate": "2024-12-10T00:00:00.000Z",
-      "reason": "عطلة نهاية العام"
-    },
-    {
-      "id": 4,
-      "employeeId": 4,
-      "type": "SICK",
-      "leaveType": "إجازة مرضية",
-      "startDate": "2024-11-15T00:00:00.000Z",
-      "endDate": "2024-11-17T00:00:00.000Z",
-      "days": 2,
-      "daysCount": 2,
-      "status": "APPROVED",
-      "requestDate": "2024-11-14T00:00:00.000Z",
-      "reason": "مرض"
-    },
-    {
-      "id": 5,
-      "employeeId": 2,
-      "startDate": "2026-01-01",
-      "endDate": "2026-01-13",
-      "reason": "h[h.m sk,dm ",
-      "requestDate": "2025-12-13T19:12:38.453Z",
-      "status": "APPROVED"
-    }
-  ],
-  "advances": [
-    {
-      "id": 1,
-      "employeeId": 2,
-      "amount": 5000,
-      "requestDate": "2024-12-01T00:00:00.000Z",
-      "status": "PENDING",
-      "reason": "احتياجات شخصية"
-    },
-    {
-      "id": 2,
-      "employeeId": 2,
-      "amount": 3000,
-      "requestDate": "2024-11-10T00:00:00.000Z",
-      "status": "APPROVED",
-      "reason": "ظروف طارئة"
-    },
-    {
-      "id": 3,
-      "employeeId": 4,
-      "amount": 5000,
-      "requestDate": "2024-12-01T00:00:00.000Z",
-      "status": "PENDING",
-      "reason": "احتياجات شخصية"
-    },
-    {
-      "id": 4,
-      "employeeId": 4,
-      "amount": 3000,
-      "requestDate": "2024-11-10T00:00:00.000Z",
-      "status": "APPROVED",
-      "reason": "ظروف طارئة"
-    }
-  ],
-  "assets": [
-    {
-      "id": 1,
-      "employeeId": 2,
-      "assetType": "LAPTOP",
-      "description": "Dell Latitude 5520",
-      "assignedDate": "2021-06-15T00:00:00.000Z",
-      "returned": false,
-      "confirmed": true,
-      "confirmedDate": "2021-06-15T00:00:00.000Z"
-    },
-    {
-      "id": 2,
-      "employeeId": 4,
-      "assetType": "LAPTOP",
-      "description": "Dell Latitude 5520",
-      "assignedDate": "2021-06-15T00:00:00.000Z",
-      "returned": false,
-      "confirmed": true,
-      "confirmedDate": "2021-06-15T00:00:00.000Z"
-    }
-  ],
-  "departments": [
-    {
-      "id": 1,
-      "name": "الإدارة",
-      "createdAt": "2025-12-13T17:17:12.287Z"
-    },
-    {
-      "id": 2,
-      "name": "تقنية المعلومات",
-      "createdAt": "2025-12-13T17:17:12.287Z"
-    },
-    {
-      "id": 3,
-      "name": "الموارد البشرية",
-      "createdAt": "2025-12-13T17:17:12.287Z"
-    },
-    {
-      "id": 4,
-      "name": "المالية",
-      "createdAt": "2025-12-13T17:17:12.287Z"
-    },
-    {
-      "id": 5,
-      "name": "التسويق",
-      "createdAt": "2025-12-13T17:17:12.287Z"
-    },
-    {
-      "id": 6,
-      "name": "المبيعات",
-      "createdAt": "2025-12-13T17:17:12.287Z"
-    },
-    {
-      "id": 7,
-      "name": "الإدارة",
-      "createdAt": "2025-12-13T17:17:12.289Z"
-    },
-    {
-      "id": 8,
-      "name": "تقنية المعلومات",
-      "createdAt": "2025-12-13T17:17:12.289Z"
-    },
-    {
-      "id": 9,
-      "name": "الموارد البشرية",
-      "createdAt": "2025-12-13T17:17:12.289Z"
-    },
-    {
-      "id": 10,
-      "name": "المالية",
-      "createdAt": "2025-12-13T17:17:12.289Z"
-    },
-    {
-      "id": 11,
-      "name": "التسويق",
-      "createdAt": "2025-12-13T17:17:12.289Z"
-    },
-    {
-      "id": 12,
-      "name": "المبيعات",
-      "createdAt": "2025-12-13T17:17:12.289Z"
-    }
-  ],
-  "jobTitles": [
-    {
-      "id": 1,
-      "title": "مدير الموارد البشرية",
-      "createdAt": "2025-12-13T17:17:12.288Z"
-    },
-    {
-      "id": 2,
-      "title": "مطور برامج",
-      "createdAt": "2025-12-13T17:17:12.288Z"
-    },
-    {
-      "id": 3,
-      "title": "مدير مالي",
-      "createdAt": "2025-12-13T17:17:12.288Z"
-    },
-    {
-      "id": 4,
-      "title": "محاسب",
-      "createdAt": "2025-12-13T17:17:12.288Z"
-    },
-    {
-      "id": 5,
-      "title": "مدير تسويق",
-      "createdAt": "2025-12-13T17:17:12.288Z"
-    },
-    {
-      "id": 6,
-      "title": "مندوب مبيعات",
-      "createdAt": "2025-12-13T17:17:12.288Z"
-    },
-    {
-      "id": 7,
-      "title": "موظف إداري",
-      "createdAt": "2025-12-13T17:17:12.288Z"
-    },
-    {
-      "id": 8,
-      "title": "مدير الموارد البشرية",
-      "createdAt": "2025-12-13T17:17:12.289Z"
-    },
-    {
-      "id": 9,
-      "title": "مطور برامج",
-      "createdAt": "2025-12-13T17:17:12.289Z"
-    },
-    {
-      "id": 10,
-      "title": "مدير مالي",
-      "createdAt": "2025-12-13T17:17:12.289Z"
-    },
-    {
-      "id": 11,
-      "title": "محاسب",
-      "createdAt": "2025-12-13T17:17:12.289Z"
-    },
-    {
-      "id": 12,
-      "title": "مدير تسويق",
-      "createdAt": "2025-12-13T17:17:12.289Z"
-    },
-    {
-      "id": 13,
-      "title": "مندوب مبيعات",
-      "createdAt": "2025-12-13T17:17:12.289Z"
-    },
-    {
-      "id": 14,
-      "title": "موظف إداري",
-      "createdAt": "2025-12-13T17:17:12.289Z"
-    }
-  ],
+  "employees": [],
+  "leaves": [],
+  "advances": [],
+  "assets": [],
+  "departments": [],
+  "jobTitles": [],
   "companySettings": {
     "id": 1,
-    "companyName": "شركة الموارد البشرية",
-    "companyNameEn": "HR Company",
-    "email": "info@hrcompany.com",
-    "phone": "+966501234567",
-    "address": "الرياض، المملكة العربية السعودية",
-    "taxNumber": "300000000000003"
+    "companyName": "اسم الشركة",
+    "companyNameEn": "Company Name",
+    "email": "info@company.com",
+    "phone": "+966500000000",
+    "address": "العنوان",
+    "taxNumber": ""
   },
-  "userIdCounter": 5,
-  "employeeIdCounter": 5,
-  "leaveIdCounter": 6,
-  "advanceIdCounter": 5,
-  "assetIdCounter": 3,
-  "departmentIdCounter": 13,
-  "jobTitleIdCounter": 15
+  "userIdCounter": 2,
+  "employeeIdCounter": 1,
+  "leaveIdCounter": 1,
+  "advanceIdCounter": 1,
+  "assetIdCounter": 1,
+  "departmentIdCounter": 1,
+  "jobTitleIdCounter": 1
 }
