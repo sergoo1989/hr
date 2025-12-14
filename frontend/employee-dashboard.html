@@ -383,6 +383,33 @@
                 <h2>📦 العهد العينية</h2>
                 <div id="assetsTable"></div>
             </div>
+
+            <!-- السجل التاريخي الشامل -->
+            <div class="section" style="background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);">
+                <h2>📋 السجل التاريخي الشامل</h2>
+                
+                <!-- أزرار التبويب -->
+                <div style="display: flex; gap: 10px; margin-bottom: 20px; flex-wrap: wrap;">
+                    <button onclick="switchHistoryTab('all')" id="historyTabAll" style="padding: 10px 20px; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white;">
+                        📊 الكل
+                    </button>
+                    <button onclick="switchHistoryTab('leaves')" id="historyTabLeaves" style="padding: 10px 20px; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; background: #f8f9fa; color: #666;">
+                        🏖️ الإجازات
+                    </button>
+                    <button onclick="switchHistoryTab('advances')" id="historyTabAdvances" style="padding: 10px 20px; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; background: #f8f9fa; color: #666;">
+                        💰 السلف
+                    </button>
+                    <button onclick="switchHistoryTab('assets')" id="historyTabAssets" style="padding: 10px 20px; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; background: #f8f9fa; color: #666;">
+                        📦 العهد
+                    </button>
+                </div>
+
+                <!-- إحصائيات سريعة -->
+                <div id="historyStats" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 15px; margin-bottom: 20px;"></div>
+
+                <!-- جدول السجل -->
+                <div id="historyTable" style="overflow-x: auto;"></div>
+            </div>
         </div>
     </div>
 
@@ -1238,12 +1265,244 @@
             }
         }
 
+        // ========== السجل التاريخي ==========
+        let historyData = { leaves: [], advances: [], assets: [] };
+        let currentHistoryTab = 'all';
+
+        async function loadHistoryData() {
+            try {
+                const apiUrl = Config.getApiUrl();
+                const headers = {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                };
+
+                // جلب كل البيانات
+                const [leavesRes, advancesRes, assetsRes] = await Promise.all([
+                    fetch(`${apiUrl}/employees/me/leaves`, { headers }),
+                    fetch(`${apiUrl}/employees/me/advances`, { headers }),
+                    fetch(`${apiUrl}/employees/me/assets`, { headers })
+                ]);
+
+                historyData.leaves = await leavesRes.json() || [];
+                historyData.advances = await advancesRes.json() || [];
+                historyData.assets = await assetsRes.json() || [];
+
+                displayHistoryStats();
+                displayHistoryTable(currentHistoryTab);
+            } catch (error) {
+                console.error('Error loading history:', error);
+            }
+        }
+
+        function displayHistoryStats() {
+            const stats = document.getElementById('historyStats');
+            
+            // حساب الإحصائيات
+            const totalLeaves = historyData.leaves.length;
+            const approvedLeaves = historyData.leaves.filter(l => l.status === 'APPROVED').length;
+            const pendingLeaves = historyData.leaves.filter(l => l.status === 'PENDING').length;
+            const totalLeaveDays = historyData.leaves.filter(l => l.status === 'APPROVED').reduce((sum, l) => sum + (l.days || l.daysCount || 0), 0);
+            
+            const totalAdvances = historyData.advances.length;
+            const approvedAdvances = historyData.advances.filter(a => a.status === 'APPROVED').length;
+            const pendingAdvances = historyData.advances.filter(a => a.status === 'PENDING').length;
+            const totalAdvanceAmount = historyData.advances.filter(a => a.status === 'APPROVED').reduce((sum, a) => sum + (a.amount || 0), 0);
+            
+            const totalAssets = historyData.assets.length;
+            const confirmedAssets = historyData.assets.filter(a => a.confirmed).length;
+            const returnedAssets = historyData.assets.filter(a => a.returned).length;
+
+            stats.innerHTML = `
+                <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 15px; border-radius: 8px; text-align: center; color: white;">
+                    <div style="font-size: 24px; font-weight: bold;">${totalLeaves}</div>
+                    <div style="font-size: 12px;">إجمالي الإجازات</div>
+                    <div style="font-size: 10px; margin-top: 5px;">${totalLeaveDays} يوم</div>
+                </div>
+                <div style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); padding: 15px; border-radius: 8px; text-align: center; color: white;">
+                    <div style="font-size: 24px; font-weight: bold;">${totalAdvances}</div>
+                    <div style="font-size: 12px;">إجمالي السلف</div>
+                    <div style="font-size: 10px; margin-top: 5px;">${totalAdvanceAmount.toLocaleString('ar-SA')} ريال</div>
+                </div>
+                <div style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); padding: 15px; border-radius: 8px; text-align: center; color: white;">
+                    <div style="font-size: 24px; font-weight: bold;">${totalAssets}</div>
+                    <div style="font-size: 12px;">إجمالي العهد</div>
+                    <div style="font-size: 10px; margin-top: 5px;">${confirmedAssets} مؤكدة</div>
+                </div>
+                <div style="background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%); padding: 15px; border-radius: 8px; text-align: center; color: white;">
+                    <div style="font-size: 24px; font-weight: bold;">${pendingLeaves + pendingAdvances}</div>
+                    <div style="font-size: 12px;">طلبات معلقة</div>
+                    <div style="font-size: 10px; margin-top: 5px;">تنتظر الموافقة</div>
+                </div>
+            `;
+        }
+
+        function switchHistoryTab(tab) {
+            currentHistoryTab = tab;
+            
+            // تحديث أزرار التبويب
+            const tabs = ['all', 'leaves', 'advances', 'assets'];
+            tabs.forEach(t => {
+                const btn = document.getElementById(`historyTab${t.charAt(0).toUpperCase() + t.slice(1)}`);
+                if (btn) {
+                    if (t === tab) {
+                        btn.style.background = 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)';
+                        btn.style.color = 'white';
+                    } else {
+                        btn.style.background = '#f8f9fa';
+                        btn.style.color = '#666';
+                    }
+                }
+            });
+            
+            displayHistoryTable(tab);
+        }
+
+        function displayHistoryTable(tab) {
+            const container = document.getElementById('historyTable');
+            let items = [];
+
+            if (tab === 'all' || tab === 'leaves') {
+                historyData.leaves.forEach(l => {
+                    items.push({
+                        type: 'leave',
+                        typeLabel: '🏖️ إجازة',
+                        date: l.requestDate || l.startDate,
+                        description: `${getLeaveTypeName(l.type || l.leaveType)} - ${l.days || l.daysCount || 0} أيام`,
+                        details: l.reason || '-',
+                        status: l.status,
+                        amount: '-'
+                    });
+                });
+            }
+
+            if (tab === 'all' || tab === 'advances') {
+                historyData.advances.forEach(a => {
+                    items.push({
+                        type: 'advance',
+                        typeLabel: '💰 سلفة',
+                        date: a.requestDate,
+                        description: `طلب سلفة`,
+                        details: a.reason || '-',
+                        status: a.status,
+                        amount: `${(a.amount || 0).toLocaleString('ar-SA')} ريال`
+                    });
+                });
+            }
+
+            if (tab === 'all' || tab === 'assets') {
+                historyData.assets.forEach(a => {
+                    let status = 'PENDING';
+                    if (a.returned) status = 'RETURNED';
+                    else if (a.confirmed) status = 'CONFIRMED';
+                    
+                    items.push({
+                        type: 'asset',
+                        typeLabel: '📦 عهدة',
+                        date: a.assignedDate,
+                        description: a.assetType,
+                        details: a.description || '-',
+                        status: status,
+                        amount: '-'
+                    });
+                });
+            }
+
+            // ترتيب حسب التاريخ (الأحدث أولاً)
+            items.sort((a, b) => new Date(b.date) - new Date(a.date));
+
+            if (items.length === 0) {
+                container.innerHTML = '<p style="text-align: center; color: #999; padding: 30px;">لا توجد سجلات</p>';
+                return;
+            }
+
+            const table = `
+                <table style="width: 100%; border-collapse: collapse;">
+                    <thead>
+                        <tr style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+                            <th style="padding: 12px; text-align: right; color: white; border-radius: 8px 0 0 0;">النوع</th>
+                            <th style="padding: 12px; text-align: right; color: white;">التاريخ</th>
+                            <th style="padding: 12px; text-align: right; color: white;">الوصف</th>
+                            <th style="padding: 12px; text-align: right; color: white;">التفاصيل</th>
+                            <th style="padding: 12px; text-align: right; color: white;">المبلغ</th>
+                            <th style="padding: 12px; text-align: right; color: white; border-radius: 0 8px 0 0;">الحالة</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${items.map((item, index) => `
+                            <tr style="background: ${index % 2 === 0 ? '#fff' : '#f8f9fa'}; transition: background 0.2s;" onmouseover="this.style.background='#e3f2fd'" onmouseout="this.style.background='${index % 2 === 0 ? '#fff' : '#f8f9fa'}'">
+                                <td style="padding: 12px; border-bottom: 1px solid #e0e0e0;">
+                                    <span style="background: ${getTypeColor(item.type)}; color: white; padding: 4px 10px; border-radius: 15px; font-size: 12px; font-weight: bold;">
+                                        ${item.typeLabel}
+                                    </span>
+                                </td>
+                                <td style="padding: 12px; border-bottom: 1px solid #e0e0e0;">${formatDate(item.date)}</td>
+                                <td style="padding: 12px; border-bottom: 1px solid #e0e0e0; font-weight: bold;">${item.description}</td>
+                                <td style="padding: 12px; border-bottom: 1px solid #e0e0e0; color: #666; font-size: 13px;">${item.details}</td>
+                                <td style="padding: 12px; border-bottom: 1px solid #e0e0e0; font-weight: bold; color: ${item.amount !== '-' ? '#28a745' : '#999'};">${item.amount}</td>
+                                <td style="padding: 12px; border-bottom: 1px solid #e0e0e0;">
+                                    <span class="status-badge" style="${getStatusStyle(item.status)}">
+                                        ${getHistoryStatusName(item.status)}
+                                    </span>
+                                </td>
+                            </tr>
+                        `).join('')}
+                    </tbody>
+                </table>
+            `;
+
+            container.innerHTML = table;
+        }
+
+        function getTypeColor(type) {
+            const colors = {
+                'leave': 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                'advance': 'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)',
+                'asset': 'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)'
+            };
+            return colors[type] || '#999';
+        }
+
+        function getStatusStyle(status) {
+            const styles = {
+                'PENDING': 'background: #fff3cd; color: #856404; padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: 600;',
+                'APPROVED': 'background: #d4edda; color: #155724; padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: 600;',
+                'REJECTED': 'background: #f8d7da; color: #721c24; padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: 600;',
+                'CONFIRMED': 'background: #d4edda; color: #155724; padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: 600;',
+                'RETURNED': 'background: #e2e3e5; color: #383d41; padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: 600;'
+            };
+            return styles[status] || styles['PENDING'];
+        }
+
+        function getHistoryStatusName(status) {
+            const names = {
+                'PENDING': '⏳ قيد الانتظار',
+                'APPROVED': '✓ موافق عليه',
+                'REJECTED': '✗ مرفوض',
+                'CONFIRMED': '✓ مؤكد',
+                'RETURNED': '↩️ مُرجع'
+            };
+            return names[status] || status;
+        }
+
+        function formatDate(dateStr) {
+            if (!dateStr) return '-';
+            const date = new Date(dateStr);
+            return date.toLocaleDateString('ar-SA', {
+                year: 'numeric',
+                month: 'short',
+                day: 'numeric'
+            });
+        }
+
         // Load data on page load
         fetchDashboardData();
+        loadHistoryData();
         
         // Auto-refresh every 30 seconds
         setInterval(() => {
             fetchDashboardData();
+            loadHistoryData();
             console.log('🔄 تم تحديث البيانات تلقائياً');
         }, 30000);
     </script>

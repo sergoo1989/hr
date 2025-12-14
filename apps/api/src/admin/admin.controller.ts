@@ -35,6 +35,11 @@ export class AdminController {
     return this.adminService.getPendingAdvances();
   }
 
+  @Get('advances')
+  async getAllAdvances() {
+    return this.adminService.getAllAdvances();
+  }
+
   @Patch('advances/:id/approve')
   async approveAdvance(@Param('id') id: string) {
     return this.adminService.updateAdvanceStatus(parseInt(id), 'APPROVED');

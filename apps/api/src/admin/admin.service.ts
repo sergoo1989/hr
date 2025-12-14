@@ -33,6 +33,13 @@ export class AdminService {
     }));
   }
 
+  async getAllAdvances() {
+    return this.db.findAllAdvances().map(advance => ({
+      ...advance,
+      employee: this.db.findEmployeeById(advance.employeeId),
+    }));
+  }
+
   async updateAdvanceStatus(advanceId: number, status: string) {
     return this.db.updateAdvanceStatus(advanceId, status as 'APPROVED' | 'REJECTED');
   }

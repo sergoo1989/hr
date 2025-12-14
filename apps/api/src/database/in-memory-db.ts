@@ -743,6 +743,10 @@ export class InMemoryDatabase {
     return this.advances.filter(a => a.status === 'PENDING');
   }
 
+  findAllAdvances(): Advance[] {
+    return this.advances;
+  }
+
   updateAdvanceStatus(id: number, status: 'APPROVED' | 'REJECTED'): Advance | undefined {
     const advance = this.advances.find(a => a.id === id);
     if (advance) {

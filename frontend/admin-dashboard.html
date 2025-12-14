@@ -374,6 +374,7 @@
     <div class="container">
         <div class="tabs">
             <button class="tab active" onclick="switchTab('dashboard', event)">لوحة المعلومات</button>
+            <button class="tab" onclick="switchTab('history', event)">📋 السجل التاريخي</button>
             <button class="tab" onclick="switchTab('analytics', event)">📊 التحليلات المتقدمة</button>
             <a href="payroll-report.html" class="tab" style="text-decoration: none; display: inline-flex; align-items: center; gap: 5px;">💰 مسير الرواتب</a>
             <a href="assets.html" class="tab" style="text-decoration: none; display: inline-flex; align-items: center; gap: 5px;">📦 العهد العينية</a>
@@ -406,6 +407,62 @@
                     <div class="stat-value" id="expiringDocuments" style="color: white;">-</div>
                     <div class="stat-label" style="color: rgba(255,255,255,0.9);">وثائق قريبة الانتهاء</div>
                 </div>
+            </div>
+        </div>
+
+        <!-- History Tab - السجل التاريخي -->
+        <div id="history" class="tab-content">
+            <div class="section">
+                <h2>📋 السجل التاريخي الشامل</h2>
+                
+                <!-- فلاتر البحث -->
+                <div style="background: #f8f9fa; padding: 20px; border-radius: 8px; margin-bottom: 20px;">
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; align-items: end;">
+                        <div>
+                            <label style="display: block; margin-bottom: 5px; font-weight: bold; color: #333;">الموظف:</label>
+                            <select id="historyEmployeeFilter" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px;" onchange="filterHistory()">
+                                <option value="">جميع الموظفين</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label style="display: block; margin-bottom: 5px; font-weight: bold; color: #333;">النوع:</label>
+                            <select id="historyTypeFilter" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px;" onchange="filterHistory()">
+                                <option value="">الكل</option>
+                                <option value="leave">🏖️ الإجازات</option>
+                                <option value="advance">💰 السلف</option>
+                                <option value="asset">📦 العهد</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label style="display: block; margin-bottom: 5px; font-weight: bold; color: #333;">الحالة:</label>
+                            <select id="historyStatusFilter" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px;" onchange="filterHistory()">
+                                <option value="">الكل</option>
+                                <option value="PENDING">⏳ قيد الانتظار</option>
+                                <option value="APPROVED">✓ موافق عليه</option>
+                                <option value="REJECTED">✗ مرفوض</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label style="display: block; margin-bottom: 5px; font-weight: bold; color: #333;">من تاريخ:</label>
+                            <input type="date" id="historyFromDate" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px;" onchange="filterHistory()">
+                        </div>
+                        <div>
+                            <label style="display: block; margin-bottom: 5px; font-weight: bold; color: #333;">إلى تاريخ:</label>
+                            <input type="date" id="historyToDate" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px;" onchange="filterHistory()">
+                        </div>
+                        <div>
+                            <button onclick="exportHistoryToExcel()" class="btn" style="background: #28a745; width: 100%;">
+                                📊 تصدير Excel
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- الإحصائيات -->
+                <div id="adminHistoryStats" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 15px; margin-bottom: 20px;"></div>
+
+                <!-- جدول السجل -->
+                <div id="adminHistoryTable" style="overflow-x: auto;"></div>
             </div>
         </div>
 
@@ -2811,6 +2868,319 @@
                 btn.textContent = '💾 حفظ الآن';
             }
         }
+
+        // ========== السجل التاريخي للأدمن ==========
+        let adminHistoryData = { employees: [], leaves: [], advances: [], assets: [] };
+        let filteredHistoryData = [];
+
+        async function loadAdminHistory() {
+            try {
+                const apiUrl = Config.getApiUrl();
+                const headers = {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                };
+
+                // جلب كل البيانات
+                const [employeesRes, leavesRes, advancesRes, assetsRes] = await Promise.all([
+                    fetch(`${apiUrl}/employees`, { headers }),
+                    fetch(`${apiUrl}/admin/leaves`, { headers }),
+                    fetch(`${apiUrl}/admin/advances`, { headers }),
+                    fetch(`${apiUrl}/admin/assets`, { headers })
+                ]);
+
+                adminHistoryData.employees = await employeesRes.json() || [];
+                adminHistoryData.leaves = await leavesRes.json() || [];
+                adminHistoryData.advances = await advancesRes.json() || [];
+                adminHistoryData.assets = await assetsRes.json() || [];
+
+                // ملء قائمة الموظفين
+                populateEmployeeFilter();
+                
+                // عرض البيانات
+                filterHistory();
+            } catch (error) {
+                console.error('Error loading admin history:', error);
+            }
+        }
+
+        function populateEmployeeFilter() {
+            const select = document.getElementById('historyEmployeeFilter');
+            if (!select) return;
+            
+            select.innerHTML = '<option value="">جميع الموظفين</option>';
+            adminHistoryData.employees.forEach(emp => {
+                select.innerHTML += `<option value="${emp.id}">${emp.fullName} (${emp.employeeNumber})</option>`;
+            });
+        }
+
+        function filterHistory() {
+            const employeeFilter = document.getElementById('historyEmployeeFilter')?.value || '';
+            const typeFilter = document.getElementById('historyTypeFilter')?.value || '';
+            const statusFilter = document.getElementById('historyStatusFilter')?.value || '';
+            const fromDate = document.getElementById('historyFromDate')?.value || '';
+            const toDate = document.getElementById('historyToDate')?.value || '';
+
+            let items = [];
+
+            // الإجازات
+            if (!typeFilter || typeFilter === 'leave') {
+                adminHistoryData.leaves.forEach(l => {
+                    const emp = adminHistoryData.employees.find(e => e.id === l.employeeId);
+                    items.push({
+                        type: 'leave',
+                        typeLabel: '🏖️ إجازة',
+                        employeeId: l.employeeId,
+                        employeeName: emp?.fullName || 'غير معروف',
+                        employeeNumber: emp?.employeeNumber || '-',
+                        date: l.requestDate || l.startDate,
+                        description: `${getAdminLeaveTypeName(l.type || l.leaveType)} - ${l.days || l.daysCount || 0} أيام`,
+                        details: l.reason || '-',
+                        status: l.status,
+                        amount: '-',
+                        startDate: l.startDate,
+                        endDate: l.endDate
+                    });
+                });
+            }
+
+            // السلف
+            if (!typeFilter || typeFilter === 'advance') {
+                adminHistoryData.advances.forEach(a => {
+                    const emp = adminHistoryData.employees.find(e => e.id === a.employeeId);
+                    items.push({
+                        type: 'advance',
+                        typeLabel: '💰 سلفة',
+                        employeeId: a.employeeId,
+                        employeeName: emp?.fullName || 'غير معروف',
+                        employeeNumber: emp?.employeeNumber || '-',
+                        date: a.requestDate,
+                        description: `طلب سلفة`,
+                        details: a.reason || '-',
+                        status: a.status,
+                        amount: `${(a.amount || 0).toLocaleString('ar-SA')} ريال`
+                    });
+                });
+            }
+
+            // العهد
+            if (!typeFilter || typeFilter === 'asset') {
+                adminHistoryData.assets.forEach(a => {
+                    const emp = adminHistoryData.employees.find(e => e.id === a.employeeId);
+                    let status = 'PENDING';
+                    if (a.returned) status = 'RETURNED';
+                    else if (a.confirmed) status = 'CONFIRMED';
+                    
+                    items.push({
+                        type: 'asset',
+                        typeLabel: '📦 عهدة',
+                        employeeId: a.employeeId,
+                        employeeName: emp?.fullName || 'غير معروف',
+                        employeeNumber: emp?.employeeNumber || '-',
+                        date: a.assignedDate,
+                        description: a.assetType,
+                        details: a.description || '-',
+                        status: status,
+                        amount: '-'
+                    });
+                });
+            }
+
+            // تطبيق الفلاتر
+            if (employeeFilter) {
+                items = items.filter(i => i.employeeId == employeeFilter);
+            }
+            if (statusFilter) {
+                items = items.filter(i => i.status === statusFilter || 
+                    (statusFilter === 'APPROVED' && i.status === 'CONFIRMED'));
+            }
+            if (fromDate) {
+                items = items.filter(i => new Date(i.date) >= new Date(fromDate));
+            }
+            if (toDate) {
+                items = items.filter(i => new Date(i.date) <= new Date(toDate));
+            }
+
+            // ترتيب حسب التاريخ (الأحدث أولاً)
+            items.sort((a, b) => new Date(b.date) - new Date(a.date));
+
+            filteredHistoryData = items;
+            displayAdminHistoryStats(items);
+            displayAdminHistoryTable(items);
+        }
+
+        function displayAdminHistoryStats(items) {
+            const stats = document.getElementById('adminHistoryStats');
+            if (!stats) return;
+            
+            const leaves = items.filter(i => i.type === 'leave');
+            const advances = items.filter(i => i.type === 'advance');
+            const assets = items.filter(i => i.type === 'asset');
+            
+            const approvedLeaves = leaves.filter(l => l.status === 'APPROVED').length;
+            const pendingLeaves = leaves.filter(l => l.status === 'PENDING').length;
+            const totalAdvanceAmount = advances.filter(a => a.status === 'APPROVED').reduce((sum, a) => {
+                const amount = parseFloat(a.amount.replace(/[^\d.]/g, '')) || 0;
+                return sum + amount;
+            }, 0);
+            const pendingAdvances = advances.filter(a => a.status === 'PENDING').length;
+            const confirmedAssets = assets.filter(a => a.status === 'CONFIRMED').length;
+
+            stats.innerHTML = `
+                <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 15px; border-radius: 8px; text-align: center; color: white;">
+                    <div style="font-size: 28px; font-weight: bold;">${leaves.length}</div>
+                    <div style="font-size: 12px;">إجمالي الإجازات</div>
+                    <div style="font-size: 10px; margin-top: 5px;">✓ ${approvedLeaves} موافق | ⏳ ${pendingLeaves} معلق</div>
+                </div>
+                <div style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); padding: 15px; border-radius: 8px; text-align: center; color: white;">
+                    <div style="font-size: 28px; font-weight: bold;">${advances.length}</div>
+                    <div style="font-size: 12px;">إجمالي السلف</div>
+                    <div style="font-size: 10px; margin-top: 5px;">${totalAdvanceAmount.toLocaleString('ar-SA')} ريال</div>
+                </div>
+                <div style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); padding: 15px; border-radius: 8px; text-align: center; color: white;">
+                    <div style="font-size: 28px; font-weight: bold;">${assets.length}</div>
+                    <div style="font-size: 12px;">إجمالي العهد</div>
+                    <div style="font-size: 10px; margin-top: 5px;">${confirmedAssets} مؤكدة</div>
+                </div>
+                <div style="background: linear-gradient(135deg, #ff9800 0%, #ff5722 100%); padding: 15px; border-radius: 8px; text-align: center; color: white;">
+                    <div style="font-size: 28px; font-weight: bold;">${pendingLeaves + pendingAdvances}</div>
+                    <div style="font-size: 12px;">طلبات معلقة</div>
+                    <div style="font-size: 10px; margin-top: 5px;">تنتظر الموافقة</div>
+                </div>
+                <div style="background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%); padding: 15px; border-radius: 8px; text-align: center; color: white;">
+                    <div style="font-size: 28px; font-weight: bold;">${items.length}</div>
+                    <div style="font-size: 12px;">إجمالي السجلات</div>
+                    <div style="font-size: 10px; margin-top: 5px;">حسب الفلاتر</div>
+                </div>
+            `;
+        }
+
+        function displayAdminHistoryTable(items) {
+            const container = document.getElementById('adminHistoryTable');
+            if (!container) return;
+
+            if (items.length === 0) {
+                container.innerHTML = '<p style="text-align: center; color: #999; padding: 30px;">لا توجد سجلات تطابق معايير البحث</p>';
+                return;
+            }
+
+            const table = `
+                <table style="width: 100%; border-collapse: collapse;">
+                    <thead>
+                        <tr style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+                            <th style="padding: 12px; text-align: right; color: white;">النوع</th>
+                            <th style="padding: 12px; text-align: right; color: white;">الموظف</th>
+                            <th style="padding: 12px; text-align: right; color: white;">رقم الموظف</th>
+                            <th style="padding: 12px; text-align: right; color: white;">التاريخ</th>
+                            <th style="padding: 12px; text-align: right; color: white;">الوصف</th>
+                            <th style="padding: 12px; text-align: right; color: white;">التفاصيل</th>
+                            <th style="padding: 12px; text-align: right; color: white;">المبلغ</th>
+                            <th style="padding: 12px; text-align: right; color: white;">الحالة</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${items.map((item, index) => `
+                            <tr style="background: ${index % 2 === 0 ? '#fff' : '#f8f9fa'}; transition: background 0.2s;" onmouseover="this.style.background='#e3f2fd'" onmouseout="this.style.background='${index % 2 === 0 ? '#fff' : '#f8f9fa'}'">
+                                <td style="padding: 12px; border-bottom: 1px solid #e0e0e0;">
+                                    <span style="background: ${getAdminTypeColor(item.type)}; color: white; padding: 4px 10px; border-radius: 15px; font-size: 12px; font-weight: bold;">
+                                        ${item.typeLabel}
+                                    </span>
+                                </td>
+                                <td style="padding: 12px; border-bottom: 1px solid #e0e0e0; font-weight: bold;">${item.employeeName}</td>
+                                <td style="padding: 12px; border-bottom: 1px solid #e0e0e0; color: #666;">${item.employeeNumber}</td>
+                                <td style="padding: 12px; border-bottom: 1px solid #e0e0e0;">${formatAdminDate(item.date)}</td>
+                                <td style="padding: 12px; border-bottom: 1px solid #e0e0e0;">${item.description}</td>
+                                <td style="padding: 12px; border-bottom: 1px solid #e0e0e0; color: #666; font-size: 13px; max-width: 200px; overflow: hidden; text-overflow: ellipsis;">${item.details}</td>
+                                <td style="padding: 12px; border-bottom: 1px solid #e0e0e0; font-weight: bold; color: ${item.amount !== '-' ? '#28a745' : '#999'};">${item.amount}</td>
+                                <td style="padding: 12px; border-bottom: 1px solid #e0e0e0;">
+                                    <span style="${getAdminStatusStyle(item.status)}">
+                                        ${getAdminHistoryStatusName(item.status)}
+                                    </span>
+                                </td>
+                            </tr>
+                        `).join('')}
+                    </tbody>
+                </table>
+            `;
+
+            container.innerHTML = table;
+        }
+
+        function getAdminTypeColor(type) {
+            const colors = {
+                'leave': 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                'advance': 'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)',
+                'asset': 'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)'
+            };
+            return colors[type] || '#999';
+        }
+
+        function getAdminStatusStyle(status) {
+            const styles = {
+                'PENDING': 'background: #fff3cd; color: #856404; padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: 600;',
+                'APPROVED': 'background: #d4edda; color: #155724; padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: 600;',
+                'REJECTED': 'background: #f8d7da; color: #721c24; padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: 600;',
+                'CONFIRMED': 'background: #d4edda; color: #155724; padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: 600;',
+                'RETURNED': 'background: #e2e3e5; color: #383d41; padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: 600;'
+            };
+            return styles[status] || styles['PENDING'];
+        }
+
+        function getAdminHistoryStatusName(status) {
+            const names = {
+                'PENDING': '⏳ قيد الانتظار',
+                'APPROVED': '✓ موافق عليه',
+                'REJECTED': '✗ مرفوض',
+                'CONFIRMED': '✓ مؤكد',
+                'RETURNED': '↩️ مُرجع'
+            };
+            return names[status] || status;
+        }
+
+        function getAdminLeaveTypeName(type) {
+            if (!type) return '-';
+            const typeUpper = type.toString().toUpperCase();
+            const types = {
+                'ANNUAL': 'سنوية',
+                'SICK': 'مرضية',
+                'EMERGENCY': 'طارئة',
+                'UNPAID': 'بدون راتب'
+            };
+            return types[typeUpper] || type;
+        }
+
+        function formatAdminDate(dateStr) {
+            if (!dateStr) return '-';
+            const date = new Date(dateStr);
+            return date.toLocaleDateString('ar-SA', {
+                year: 'numeric',
+                month: 'short',
+                day: 'numeric'
+            });
+        }
+
+        function exportHistoryToExcel() {
+            if (filteredHistoryData.length === 0) {
+                alert('لا توجد بيانات للتصدير');
+                return;
+            }
+
+            const data = filteredHistoryData.map(item => ({
+                'النوع': item.typeLabel,
+                'الموظف': item.employeeName,
+                'رقم الموظف': item.employeeNumber,
+                'التاريخ': formatAdminDate(item.date),
+                'الوصف': item.description,
+                'التفاصيل': item.details,
+                'المبلغ': item.amount,
+                'الحالة': getAdminHistoryStatusName(item.status)
+            }));
+
+            const wb = XLSX.utils.book_new();
+            const ws = XLSX.utils.json_to_sheet(data);
+            XLSX.utils.book_append_sheet(wb, ws, 'السجل التاريخي');
+            XLSX.writeFile(wb, `السجل_التاريخي_${new Date().toISOString().split('T')[0]}.xlsx`);
+        }
         
         // Load backup info when switching to backup tab
         const originalSwitchTab = switchTab;
@@ -2818,6 +3188,9 @@
             originalSwitchTab(tabName, event);
             if (tabName === 'backup') {
                 loadBackupInfo();
+            }
+            if (tabName === 'history') {
+                loadAdminHistory();
             }
         };
         
