@@ -319,4 +319,49 @@ export class AdminService {
       message: 'تم حذف اليوزر بنجاح'
     };
   }
+
+  async createDeduction(deductionData: any) {
+    const { employeeId, type, amount, month, year, description, advanceId } = deductionData;
+
+    // التحقق من وجود الموظف
+    const employee = this.db.findEmployeeById(employeeId);
+    if (!employee) {
+      throw new NotFoundException('الموظف غير موجود');
+    }
+
+    const deduction = this.db.createDeduction({
+      employeeId,
+      type,
+      amount: parseFloat(amount),
+      date: new Date(),
+      month: parseInt(month),
+      year: parseInt(year),
+      description,
+      advanceId: advanceId ? parseInt(advanceId) : undefined
+    });
+
+    console.log(`✅ تم إضافة خصم للموظف ${employee.fullName}: ${amount} ريال - ${type}`);
+
+    return deduction;
+  }
+
+  getAllDeductions() {
+    return this.db.findAllDeductions();
+  }
+
+  getDeductionsByMonth(month: number, year: number) {
+    return this.db.findDeductionsByMonth(month, year);
+  }
+
+  async deleteDeduction(id: number) {
+    const success = this.db.deleteDeduction(id);
+    if (!success) {
+      throw new NotFoundException('الخصم غير موجود');
+    }
+
+    return {
+      success: true,
+      message: 'تم حذف الخصم بنجاح'
+    };
+  }
 }

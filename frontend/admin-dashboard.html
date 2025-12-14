@@ -382,6 +382,7 @@
             <button class="tab" onclick="switchTab('users', event)">🔐 اليوزرات والباسوردات</button>
             <button class="tab" onclick="switchTab('leaves', event)">الإجازات</button>
             <button class="tab" onclick="switchTab('advances', event)">السلف</button>
+            <button class="tab" onclick="switchTab('deductions', event)">➖ الخصومات</button>
             <button class="tab" onclick="switchTab('settings', event)">الإعدادات</button>
         </div>
 
@@ -883,6 +884,81 @@
             </div>
         </div>
 
+        <!-- Deductions Tab -->
+        <div id="deductions" class="tab-content">
+            <div class="section">
+                <h2>➖ إدارة الخصومات</h2>
+                
+                <!-- نموذج إضافة خصم -->
+                <div style="background: #fff3cd; border: 2px solid #ffc107; padding: 20px; border-radius: 8px; margin-bottom: 30px;">
+                    <h3 style="color: #856404; margin-bottom: 15px;">➕ إضافة خصم جديد</h3>
+                    <div id="addDeductionAlert" class="alert"></div>
+                    <form id="addDeductionForm" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; align-items: end;">
+                        <div class="form-group">
+                            <label for="deductionEmployee">الموظف *</label>
+                            <select id="deductionEmployee" required style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px;">
+                                <option value="">-- اختر موظف --</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="deductionType">نوع الخصم *</label>
+                            <select id="deductionType" required style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px;" onchange="toggleAdvanceSelect()">
+                                <option value="">-- اختر النوع --</option>
+                                <option value="ABSENCE">غياب</option>
+                                <option value="ADVANCE">خصم سلفة</option>
+                                <option value="OTHER">أخرى</option>
+                            </select>
+                        </div>
+                        <div class="form-group" id="advanceSelectGroup" style="display: none;">
+                            <label for="deductionAdvance">السلفة</label>
+                            <select id="deductionAdvance" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px;">
+                                <option value="">-- اختر سلفة --</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="deductionAmount">المبلغ *</label>
+                            <input type="number" id="deductionAmount" required step="0.01" min="0" placeholder="0.00" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px;">
+                        </div>
+                        <div class="form-group">
+                            <label for="deductionMonth">الشهر *</label>
+                            <select id="deductionMonth" required style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px;">
+                                <option value="">-- اختر الشهر --</option>
+                                <option value="1">يناير</option>
+                                <option value="2">فبراير</option>
+                                <option value="3">مارس</option>
+                                <option value="4">أبريل</option>
+                                <option value="5">مايو</option>
+                                <option value="6">يونيو</option>
+                                <option value="7">يوليو</option>
+                                <option value="8">أغسطس</option>
+                                <option value="9">سبتمبر</option>
+                                <option value="10">أكتوبر</option>
+                                <option value="11">نوفمبر</option>
+                                <option value="12">ديسمبر</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="deductionYear">السنة *</label>
+                            <input type="number" id="deductionYear" required min="2020" max="2100" value="2025" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px;">
+                        </div>
+                        <div class="form-group" style="grid-column: 1 / -1;">
+                            <label for="deductionDescription">الوصف</label>
+                            <textarea id="deductionDescription" rows="2" placeholder="وصف الخصم (اختياري)" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px;"></textarea>
+                        </div>
+                        <div style="grid-column: 1 / -1;">
+                            <button type="submit" class="btn" style="background: #ffc107; color: #856404; width: 100%; padding: 12px;">✓ إضافة الخصم</button>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- قائمة الخصومات -->
+                <div style="background: white; padding: 20px; border-radius: 8px;">
+                    <h3 style="margin-bottom: 15px;">قائمة الخصومات</h3>
+                    <div id="deductionsList"></div>
+                </div>
+            </div>
+        </div>
+
         <!-- Settings Tab -->
         <div id="settings" class="tab-content">
             <div class="section">
@@ -1020,6 +1096,7 @@
             }
             if (tabName === 'leaves') loadPendingLeaves();
             if (tabName === 'advances') loadPendingAdvances();
+            if (tabName === 'deductions') loadDeductions();
             if (tabName === 'settings') loadSettings();
         }
 
@@ -3368,6 +3445,240 @@
                 loadAdminHistory();
             }
         };
+
+        // ========== Deductions Management ==========
+        async function loadDeductions() {
+            try {
+                const apiUrl = Config.getApiUrl();
+                const [deductionsRes, employeesRes] = await Promise.all([
+                    fetch(`${apiUrl}/admin/deductions`, {
+                        headers: { 'Authorization': `Bearer ${token}` }
+                    }),
+                    fetch(`${apiUrl}/employees`, {
+                        headers: { 'Authorization': `Bearer ${token}` }
+                    })
+                ]);
+
+                const deductions = await deductionsRes.json();
+                const employees = await employeesRes.json();
+
+                // Populate employee dropdown
+                const employeeSelect = document.getElementById('deductionEmployee');
+                employeeSelect.innerHTML = '<option value="">-- اختر موظف --</option>';
+                employees.forEach(emp => {
+                    employeeSelect.innerHTML += `<option value="${emp.id}">${emp.fullName} - ${emp.employeeNumber || 'بدون رقم'}</option>`;
+                });
+
+                displayDeductions(deductions, employees);
+            } catch (error) {
+                console.error('Error loading deductions:', error);
+                showAlert('addDeductionAlert', 'خطأ في تحميل الخصومات', 'error');
+            }
+        }
+
+        function displayDeductions(deductions, employees) {
+            const container = document.getElementById('deductionsList');
+            
+            if (deductions.length === 0) {
+                container.innerHTML = '<p style="text-align: center; color: #999; padding: 30px;">لا توجد خصومات مسجلة</p>';
+                return;
+            }
+
+            const employeeMap = {};
+            employees.forEach(emp => {
+                employeeMap[emp.id] = emp;
+            });
+
+            const months = ['', 'يناير', 'فبراير', 'مارس', 'أبريل', 'مايو', 'يونيو', 'يوليو', 'أغسطس', 'سبتمبر', 'أكتوبر', 'نوفمبر', 'ديسمبر'];
+            const typeLabels = {
+                'ABSENCE': 'غياب',
+                'ADVANCE': 'خصم سلفة',
+                'OTHER': 'أخرى'
+            };
+
+            let html = `
+                <table style="width: 100%; border-collapse: collapse;">
+                    <thead>
+                        <tr style="background: #f8f9fa;">
+                            <th style="padding: 12px; text-align: right; border-bottom: 2px solid #dee2e6;">#</th>
+                            <th style="padding: 12px; text-align: right; border-bottom: 2px solid #dee2e6;">الموظف</th>
+                            <th style="padding: 12px; text-align: right; border-bottom: 2px solid #dee2e6;">نوع الخصم</th>
+                            <th style="padding: 12px; text-align: right; border-bottom: 2px solid #dee2e6;">المبلغ</th>
+                            <th style="padding: 12px; text-align: right; border-bottom: 2px solid #dee2e6;">الشهر/السنة</th>
+                            <th style="padding: 12px; text-align: right; border-bottom: 2px solid #dee2e6;">الوصف</th>
+                            <th style="padding: 12px; text-align: right; border-bottom: 2px solid #dee2e6;">التاريخ</th>
+                            <th style="padding: 12px; text-align: center; border-bottom: 2px solid #dee2e6;">إجراءات</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+            `;
+
+            deductions.forEach((deduction, index) => {
+                const employee = employeeMap[deduction.employeeId];
+                const employeeName = employee ? employee.fullName : 'موظف محذوف';
+                
+                html += `
+                    <tr style="border-bottom: 1px solid #dee2e6;">
+                        <td style="padding: 12px;">${index + 1}</td>
+                        <td style="padding: 12px; font-weight: 600;">${employeeName}</td>
+                        <td style="padding: 12px;">
+                            <span style="padding: 4px 10px; border-radius: 4px; font-size: 12px; font-weight: 600; background: ${deduction.type === 'ABSENCE' ? '#ffebee' : deduction.type === 'ADVANCE' ? '#e3f2fd' : '#f3e5f5'}; color: ${deduction.type === 'ABSENCE' ? '#c62828' : deduction.type === 'ADVANCE' ? '#1565c0' : '#6a1b9a'};">
+                                ${typeLabels[deduction.type] || deduction.type}
+                            </span>
+                        </td>
+                        <td style="padding: 12px; font-weight: 700; color: #d32f2f;">${parseFloat(deduction.amount).toLocaleString()} ريال</td>
+                        <td style="padding: 12px;">${months[deduction.month]} ${deduction.year}</td>
+                        <td style="padding: 12px; color: #666;">${deduction.description || '-'}</td>
+                        <td style="padding: 12px; font-size: 12px; color: #666;">${new Date(deduction.date).toLocaleDateString('ar-SA')}</td>
+                        <td style="padding: 12px; text-align: center;">
+                            <button onclick="deleteDeduction(${deduction.id})" class="btn" style="background: #f44336; color: white; padding: 6px 12px; font-size: 12px;">
+                                🗑️ حذف
+                            </button>
+                        </td>
+                    </tr>
+                `;
+            });
+
+            html += `
+                    </tbody>
+                </table>
+            `;
+
+            container.innerHTML = html;
+        }
+
+        document.getElementById('addDeductionForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const employeeId = document.getElementById('deductionEmployee').value;
+            const type = document.getElementById('deductionType').value;
+            const amount = document.getElementById('deductionAmount').value;
+            const month = document.getElementById('deductionMonth').value;
+            const year = document.getElementById('deductionYear').value;
+            const description = document.getElementById('deductionDescription').value;
+            const advanceId = document.getElementById('deductionAdvance').value;
+
+            if (!employeeId || !type || !amount || !month || !year) {
+                showAlert('addDeductionAlert', 'الرجاء ملء جميع الحقول المطلوبة', 'error');
+                return;
+            }
+
+            try {
+                const apiUrl = Config.getApiUrl();
+                const response = await fetch(`${apiUrl}/admin/deductions`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify({
+                        employeeId: parseInt(employeeId),
+                        type,
+                        amount: parseFloat(amount),
+                        month: parseInt(month),
+                        year: parseInt(year),
+                        description,
+                        advanceId: advanceId ? parseInt(advanceId) : undefined
+                    })
+                });
+
+                if (response.ok) {
+                    showAlert('addDeductionAlert', 'تم إضافة الخصم بنجاح', 'success');
+                    e.target.reset();
+                    document.getElementById('deductionYear').value = '2025';
+                    document.getElementById('advanceSelectGroup').style.display = 'none';
+                    loadDeductions();
+                } else {
+                    const error = await response.json();
+                    showAlert('addDeductionAlert', error.message || 'حدث خطأ', 'error');
+                }
+            } catch (error) {
+                console.error('Error adding deduction:', error);
+                showAlert('addDeductionAlert', 'خطأ في الاتصال بالسيرفر', 'error');
+            }
+        });
+
+        async function deleteDeduction(id) {
+            if (!confirm('هل أنت متأكد من حذف هذا الخصم؟')) return;
+
+            try {
+                const apiUrl = Config.getApiUrl();
+                const response = await fetch(`${apiUrl}/admin/deductions/${id}`, {
+                    method: 'DELETE',
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+
+                if (response.ok) {
+                    loadDeductions();
+                } else {
+                    alert('حدث خطأ أثناء الحذف');
+                }
+            } catch (error) {
+                console.error('Error deleting deduction:', error);
+                alert('خطأ في الاتصال بالسيرفر');
+            }
+        }
+
+        function toggleAdvanceSelect() {
+            const type = document.getElementById('deductionType').value;
+            const advanceGroup = document.getElementById('advanceSelectGroup');
+            
+            if (type === 'ADVANCE') {
+                advanceGroup.style.display = 'block';
+                loadApprovedAdvances();
+            } else {
+                advanceGroup.style.display = 'none';
+            }
+        }
+
+        async function loadApprovedAdvances() {
+            try {
+                const apiUrl = Config.getApiUrl();
+                const employeeId = document.getElementById('deductionEmployee').value;
+                
+                if (!employeeId) return;
+
+                const [advancesRes, employeesRes] = await Promise.all([
+                    fetch(`${apiUrl}/admin/advances`, {
+                        headers: { 'Authorization': `Bearer ${token}` }
+                    }),
+                    fetch(`${apiUrl}/employees`, {
+                        headers: { 'Authorization': `Bearer ${token}` }
+                    })
+                ]);
+
+                const allAdvances = await advancesRes.json();
+                const employees = await employeesRes.json();
+
+                const employeeMap = {};
+                employees.forEach(emp => employeeMap[emp.id] = emp);
+
+                // Filter approved advances for selected employee
+                const approvedAdvances = allAdvances.filter(adv => 
+                    adv.status === 'APPROVED' && adv.employeeId === parseInt(employeeId)
+                );
+
+                const advanceSelect = document.getElementById('deductionAdvance');
+                advanceSelect.innerHTML = '<option value="">-- اختر سلفة --</option>';
+                
+                approvedAdvances.forEach(adv => {
+                    const employee = employeeMap[adv.employeeId];
+                    advanceSelect.innerHTML += `
+                        <option value="${adv.id}">
+                            ${parseFloat(adv.amount).toLocaleString()} ريال - ${new Date(adv.requestDate).toLocaleDateString('ar-SA')}
+                        </option>
+                    `;
+                });
+            } catch (error) {
+                console.error('Error loading advances:', error);
+            }
+        }
+
+        document.getElementById('deductionEmployee').addEventListener('change', () => {
+            if (document.getElementById('deductionType').value === 'ADVANCE') {
+                loadApprovedAdvances();
+            }
+        });
         
         // Auto-refresh for pending requests every 30 seconds
         setInterval(() => {

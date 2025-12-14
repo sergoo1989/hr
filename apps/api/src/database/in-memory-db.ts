@@ -72,6 +72,18 @@ export interface Advance {
   reason?: string;
 }
 
+export interface Deduction {
+  id: number;
+  employeeId: number;
+  type: 'ABSENCE' | 'ADVANCE' | 'OTHER'; // نوع الخصم: غياب، سلفة، أخرى
+  amount: number;
+  date: Date | string;
+  month: number; // الشهر
+  year: number; // السنة
+  description?: string; // وصف الخصم
+  advanceId?: number; // معرف السلفة إذا كان الخصم لسلفة
+}
+
 export interface Asset {
   id: number;
   employeeId: number;
@@ -173,6 +185,7 @@ export class InMemoryDatabase {
   public employees: Employee[] = [];
   public leaves: Leave[] = [];
   public advances: Advance[] = [];
+  public deductions: Deduction[] = [];
   public assets: Asset[] = [];
   public departments: Department[] = [];
   public jobTitles: JobTitle[] = [];
@@ -185,6 +198,7 @@ export class InMemoryDatabase {
   private employeeIdCounter = 1;
   private leaveIdCounter = 1;
   private advanceIdCounter = 1;
+  private deductionIdCounter = 1;
   private assetIdCounter = 1;
   private departmentIdCounter = 1;
   private jobTitleIdCounter = 1;
@@ -772,6 +786,43 @@ export class InMemoryDatabase {
     if (index > -1) {
       this.advances.splice(index, 1);
       this.saveToStorage(); // حفظ البيانات
+      return true;
+    }
+    return false;
+  }
+
+  // Deduction Methods
+  createDeduction(data: Omit<Deduction, 'id'>): Deduction {
+    const deduction: Deduction = {
+      id: this.deductionIdCounter++,
+      ...data,
+    };
+    this.deductions.push(deduction);
+    this.saveToStorage();
+    return deduction;
+  }
+
+  findDeductionsByEmployeeId(employeeId: number): Deduction[] {
+    return this.deductions.filter(d => d.employeeId === employeeId);
+  }
+
+  findDeductionsByMonth(month: number, year: number): Deduction[] {
+    return this.deductions.filter(d => d.month === month && d.year === year);
+  }
+
+  findDeductionsByEmployeeAndMonth(employeeId: number, month: number, year: number): Deduction[] {
+    return this.deductions.filter(d => d.employeeId === employeeId && d.month === month && d.year === year);
+  }
+
+  findAllDeductions(): Deduction[] {
+    return this.deductions;
+  }
+
+  deleteDeduction(id: number): boolean {
+    const index = this.deductions.findIndex(d => d.id === id);
+    if (index > -1) {
+      this.deductions.splice(index, 1);
+      this.saveToStorage();
       return true;
     }
     return false;

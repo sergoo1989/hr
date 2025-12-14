@@ -534,6 +534,12 @@
                 document.getElementById('reportDate').textContent = new Date().toLocaleDateString('ar-SA');
                 document.getElementById('employeeCount').textContent = employees.length;
 
+                // Get deductions for this month and year
+                const deductionsResponse = await fetch(`${apiUrl}/admin/deductions/month/${currentMonth}/year/${currentYear}`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                const allDeductions = await deductionsResponse.json();
+
                 // Calculate payroll
                 let totalBasic = 0;
                 let totalHousing = 0;
@@ -548,7 +554,11 @@
                     const basic = parseFloat(emp.basicSalary) || parseFloat(emp.salary) || 0;
                     const housing = parseFloat(emp.housingAllowance) || 0;
                     const transport = parseFloat(emp.transportAllowance) || 0;
-                    const deductions = 0; // Can be calculated based on advances, etc.
+                    
+                    // Calculate deductions for this employee
+                    const employeeDeductions = allDeductions.filter(d => d.employeeId === emp.id);
+                    const deductions = employeeDeductions.reduce((sum, d) => sum + parseFloat(d.amount), 0);
+                    
                     const net = basic + housing + transport - deductions;
 
                     totalBasic += basic;

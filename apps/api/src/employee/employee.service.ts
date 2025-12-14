@@ -75,6 +75,15 @@ export class EmployeeService {
       });
   }
 
+  async getEmployeeDeductions(employeeId: number) {
+    return this.db.findDeductionsByEmployeeId(employeeId)
+      .sort((a, b) => {
+        const aDate = typeof a.date === 'string' ? new Date(a.date) : a.date;
+        const bDate = typeof b.date === 'string' ? new Date(b.date) : b.date;
+        return bDate.getTime() - aDate.getTime();
+      });
+  }
+
   async confirmAssetReceipt(employeeId: number, assetId: number) {
     const asset = this.db.confirmAssetReceipt(assetId, employeeId);
     if (!asset) {

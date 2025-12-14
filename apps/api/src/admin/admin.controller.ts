@@ -129,4 +129,24 @@ export class AdminController {
   async deleteUser(@Param('id') id: string) {
     return this.adminService.deleteUser(parseInt(id));
   }
+
+  @Post('deductions')
+  async createDeduction(@Body() deductionData: any) {
+    return this.adminService.createDeduction(deductionData);
+  }
+
+  @Get('deductions')
+  async getAllDeductions() {
+    return this.adminService.getAllDeductions();
+  }
+
+  @Get('deductions/month/:month/year/:year')
+  async getDeductionsByMonth(@Param('month') month: string, @Param('year') year: string) {
+    return this.adminService.getDeductionsByMonth(parseInt(month), parseInt(year));
+  }
+
+  @Delete('deductions/:id')
+  async deleteDeduction(@Param('id') id: string) {
+    return this.adminService.deleteDeduction(parseInt(id));
+  }
 }

@@ -61,6 +61,11 @@ export class EmployeeController {
     return this.employeeService.getEmployeeAssets(req.user.employeeId);
   }
 
+  @Get('me/deductions')
+  async getMyDeductions(@Request() req) {
+    return this.employeeService.getEmployeeDeductions(req.user.employeeId);
+  }
+
   @Post('me/assets/:id/confirm')
   async confirmAssetReceipt(@Request() req, @Param('id') id: string) {
     return this.employeeService.confirmAssetReceipt(req.user.employeeId, parseInt(id));
