@@ -9,6 +9,28 @@
       "isActive": true,
       "mustChangePassword": false,
       "email": "admin@hr-system.com"
+    },
+    {
+      "id": 6,
+      "username": "serag",
+      "password": "$2b$10$ugpAJa9qVHqEr8AiKadn9u1OOmPa8gyBkUW22exzaxBGZE18pcIIC",
+      "role": "ADMIN",
+      "employeeId": 6,
+      "email": "ahmed@safwat-aljawf.com",
+      "isActive": true,
+      "mustChangePassword": false,
+      "activationToken": "2cix37q4pfcmj4y55ac"
+    },
+    {
+      "id": 7,
+      "username": "ahmed101",
+      "password": "$2b$10$HeA3K1G1M9ZVvrqNM8PUYeBWxZOWZbTDteVFEgHqI5uGvlsmQedlm",
+      "role": "EMPLOYEE",
+      "employeeId": 7,
+      "email": "",
+      "isActive": true,
+      "mustChangePassword": false,
+      "activationToken": "nswv97rmc3mj4y8205"
     }
   ],
   "employees": [
@@ -26,6 +48,56 @@
       "housingAllowance": 3000,
       "transportAllowance": 1000,
       "nationality": "SAUDI"
+    },
+    {
+      "id": 6,
+      "fullName": "احمد سراج",
+      "nationalId": "2425071848",
+      "phoneNumber": "0598486065",
+      "email": "ahmed@safwat-aljawf.com",
+      "hireDate": "2023-05-01",
+      "jobTitle": "مدير مالي",
+      "department": "المالية",
+      "salary": 9000,
+      "basicSalary": 9000,
+      "housingAllowance": 2000,
+      "transportAllowance": 1000,
+      "nationality": "NON_SAUDI",
+      "workType": "FULL_TIME",
+      "sponsorshipType": "COMPANY",
+      "ticketEntitlement": true,
+      "ticketClass": "ECONOMY",
+      "contractDuration": 12,
+      "contractLeaveDays": 30,
+      "passportNumber": "a0151515",
+      "passportExpiryDate": "2026-12-09",
+      "workPermitExpiryDate": "2026-08-13",
+      "passportFeesExpiryDate": "2026-12-16",
+      "medicalInsuranceExpiryDate": "2026-12-08",
+      "contractEndDate": "2027-11-08",
+      "employeeNumber": "EMP006"
+    },
+    {
+      "id": 7,
+      "fullName": "احمد مجاهد",
+      "nationalId": "2464624",
+      "phoneNumber": "",
+      "email": "",
+      "hireDate": "2023-07-01",
+      "jobTitle": "موظف إداري",
+      "department": "الإدارة",
+      "salary": 3000,
+      "basicSalary": 3000,
+      "housingAllowance": 1000,
+      "transportAllowance": 500,
+      "nationality": "NON_SAUDI",
+      "workType": "FULL_TIME",
+      "sponsorshipType": "COMPANY",
+      "ticketEntitlement": true,
+      "ticketClass": "ECONOMY",
+      "contractDuration": 12,
+      "contractLeaveDays": 21,
+      "employeeNumber": "EMP007"
     }
   ],
   "leaves": [
@@ -97,7 +169,7 @@
       "employeeId": 2,
       "amount": 5000,
       "requestDate": "2024-12-01T00:00:00.000Z",
-      "status": "PENDING",
+      "status": "REJECTED",
       "reason": "احتياجات شخصية"
     },
     {
@@ -113,7 +185,7 @@
       "employeeId": 4,
       "amount": 5000,
       "requestDate": "2024-12-01T00:00:00.000Z",
-      "status": "PENDING",
+      "status": "REJECTED",
       "reason": "احتياجات شخصية"
     },
     {
@@ -125,28 +197,7 @@
       "reason": "ظروف طارئة"
     }
   ],
-  "assets": [
-    {
-      "id": 1,
-      "employeeId": 2,
-      "assetType": "LAPTOP",
-      "description": "Dell Latitude 5520",
-      "assignedDate": "2021-06-15T00:00:00.000Z",
-      "returned": false,
-      "confirmed": true,
-      "confirmedDate": "2021-06-15T00:00:00.000Z"
-    },
-    {
-      "id": 2,
-      "employeeId": 4,
-      "assetType": "LAPTOP",
-      "description": "Dell Latitude 5520",
-      "assignedDate": "2021-06-15T00:00:00.000Z",
-      "returned": false,
-      "confirmed": true,
-      "confirmedDate": "2021-06-15T00:00:00.000Z"
-    }
-  ],
+  "assets": [],
   "departments": [
     {
       "id": 1,
@@ -290,11 +341,17 @@
     "address": "الرياض، المملكة العربية السعودية",
     "taxNumber": "300000000000003"
   },
-  "userIdCounter": 5,
-  "employeeIdCounter": 5,
+  "attendances": [],
+  "payrollRecords": [],
+  "notifications": [],
+  "userIdCounter": 8,
+  "employeeIdCounter": 8,
   "leaveIdCounter": 6,
   "advanceIdCounter": 5,
   "assetIdCounter": 3,
   "departmentIdCounter": 13,
-  "jobTitleIdCounter": 15
+  "jobTitleIdCounter": 15,
+  "attendanceIdCounter": 1,
+  "payrollRecordIdCounter": 1,
+  "notificationIdCounter": 1
 }

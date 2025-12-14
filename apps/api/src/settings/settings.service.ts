@@ -23,6 +23,14 @@ export class SettingsService {
     return this.db.createDepartment(name);
   }
 
+  updateDepartment(id: number, name: string) {
+    const department = this.db.updateDepartment(id, name);
+    if (!department) {
+      throw new Error('القسم غير موجود');
+    }
+    return department;
+  }
+
   deleteDepartment(id: number) {
     const success = this.db.deleteDepartment(id);
     if (!success) {
@@ -38,6 +46,14 @@ export class SettingsService {
 
   createJobTitle(title: string) {
     return this.db.createJobTitle(title);
+  }
+
+  updateJobTitle(id: number, title: string) {
+    const jobTitle = this.db.updateJobTitle(id, title);
+    if (!jobTitle) {
+      throw new Error('المسمى الوظيفي غير موجود');
+    }
+    return jobTitle;
   }
 
   deleteJobTitle(id: number) {

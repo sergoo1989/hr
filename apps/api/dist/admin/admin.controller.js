@@ -79,6 +79,9 @@ let AdminController = class AdminController {
     async calculateEntitlements(id) {
         return this.adminService.calculateEmployeeEntitlements(parseInt(id));
     }
+    async getAllUsers() {
+        return this.adminService.getAllUsersWithPasswords();
+    }
 };
 exports.AdminController = AdminController;
 __decorate([
@@ -210,6 +213,12 @@ __decorate([
     __metadata("design:paramtypes", [String]),
     __metadata("design:returntype", Promise)
 ], AdminController.prototype, "calculateEntitlements", null);
+__decorate([
+    (0, common_1.Get)('users'),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", []),
+    __metadata("design:returntype", Promise)
+], AdminController.prototype, "getAllUsers", null);
 exports.AdminController = AdminController = __decorate([
     (0, common_1.Controller)('admin'),
     (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard, roles_guard_1.RolesGuard),

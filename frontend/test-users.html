@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>اختبار Users API</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+        }
+        button {
+            padding: 10px 20px;
+            background: #2196F3;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 10px 5px;
+        }
+        #result {
+            margin-top: 20px;
+            padding: 15px;
+            background: #f0f0f0;
+            border-radius: 5px;
+            white-space: pre-wrap;
+            font-family: monospace;
+            max-height: 500px;
+            overflow-y: auto;
+        }
+        .error {
+            color: red;
+        }
+        .success {
+            color: green;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>اختبار Users API Endpoint</h1>
+        
+        <div>
+            <label>Token (اتركه فارغ للحصول على token جديد):</label><br>
+            <input type="text" id="tokenInput" style="width: 100%; padding: 8px; margin: 10px 0;">
+        </div>
+        
+        <button onclick="testLogin()">1. تسجيل الدخول (للحصول على Token)</button>
+        <button onclick="testUsersEndpoint()">2. اختبار /admin/users</button>
+        <button onclick="clearResult()">مسح النتائج</button>
+        
+        <div id="result"></div>
+    </div>
+
+    <script src="config.js"></script>
+    <script>
+        const apiUrl = Config.getApiUrl();
+        let token = '';
+
+        async function testLogin() {
+            const result = document.getElementById('result');
+            result.innerHTML = '⏳ جاري تسجيل الدخول...\n';
+            
+            try {
+                const response = await fetch(`${apiUrl}/auth/login`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        username: 'admin',
+                        password: 'admin123'
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok) {
+                    token = data.access_token;
+                    document.getElementById('tokenInput').value = token;
+                    result.innerHTML = `<span class="success">✅ تم تسجيل الدخول بنجاح!</span>\n\n`;
+                    result.innerHTML += `Token: ${token}\n`;
+                    result.innerHTML += `Role: ${data.role}\n`;
+                    result.innerHTML += `User: ${JSON.stringify(data.user, null, 2)}`;
+                } else {
+                    result.innerHTML = `<span class="error">❌ فشل تسجيل الدخول</span>\n\n`;
+                    result.innerHTML += JSON.stringify(data, null, 2);
+                }
+            } catch (error) {
+                result.innerHTML = `<span class="error">❌ خطأ: ${error.message}</span>`;
+            }
+        }
+
+        async function testUsersEndpoint() {
+            const result = document.getElementById('result');
+            token = document.getElementById('tokenInput').value || token;
+            
+            if (!token) {
+                result.innerHTML = '<span class="error">❌ يرجى تسجيل الدخول أولاً للحصول على Token</span>';
+                return;
+            }
+            
+            result.innerHTML = '⏳ جاري جلب المستخدمين...\n';
+            result.innerHTML += `API URL: ${apiUrl}/admin/users\n`;
+            result.innerHTML += `Token: ${token.substring(0, 20)}...\n\n`;
+            
+            try {
+                const response = await fetch(`${apiUrl}/admin/users`, {
+                    method: 'GET',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
+                
+                result.innerHTML += `Status: ${response.status} ${response.statusText}\n\n`;
+                
+                const data = await response.json();
+                
+                if (response.ok) {
+                    result.innerHTML += `<span class="success">✅ نجح الطلب!</span>\n\n`;
+                    result.innerHTML += `عدد المستخدمين: ${data.length}\n\n`;
+                    result.innerHTML += `البيانات:\n${JSON.stringify(data, null, 2)}`;
+                } else {
+                    result.innerHTML += `<span class="error">❌ فشل الطلب</span>\n\n`;
+                    result.innerHTML += JSON.stringify(data, null, 2);
+                }
+            } catch (error) {
+                result.innerHTML += `<span class="error">❌ خطأ: ${error.message}</span>\n`;
+                result.innerHTML += error.stack || '';
+            }
+        }
+
+        function clearResult() {
+            document.getElementById('result').innerHTML = '';
+        }
+    </script>
+</body>
+</html>

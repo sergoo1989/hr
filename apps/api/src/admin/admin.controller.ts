@@ -104,4 +104,9 @@ export class AdminController {
   async calculateEntitlements(@Param('id') id: string) {
     return this.adminService.calculateEmployeeEntitlements(parseInt(id));
   }
+
+  @Get('users')
+  async getAllUsers() {
+    return this.adminService.getAllUsersWithPasswords();
+  }
 }

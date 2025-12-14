@@ -4,12 +4,14 @@ export declare class SettingsService {
     updateCompanySettings(settings: any): import("../database/in-memory-db").CompanySettings;
     getAllDepartments(): import("../database/in-memory-db").Department[];
     createDepartment(name: string): import("../database/in-memory-db").Department;
+    updateDepartment(id: number, name: string): import("../database/in-memory-db").Department;
     deleteDepartment(id: number): {
         success: boolean;
         message: string;
     };
     getAllJobTitles(): import("../database/in-memory-db").JobTitle[];
     createJobTitle(title: string): import("../database/in-memory-db").JobTitle;
+    updateJobTitle(id: number, title: string): import("../database/in-memory-db").JobTitle;
     deleteJobTitle(id: number): {
         success: boolean;
         message: string;

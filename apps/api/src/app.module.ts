@@ -10,6 +10,9 @@ import { TerminationModule } from './termination/termination.module';
 import { SchedulerModule } from './scheduler/scheduler.module';
 import { SettingsModule } from './settings/settings.module';
 import { EmailModule } from './email/email.module';
+import { AttendanceModule } from './attendance/attendance.module';
+import { NotificationsModule } from './notifications/notifications.module';
+import { BackupModule } from './backup/backup.module';
 import { AppController } from './app.controller';
 
 @Module({
@@ -25,6 +28,9 @@ import { AppController } from './app.controller';
     TerminationModule,
     SchedulerModule,
     SettingsModule,
+    AttendanceModule,
+    NotificationsModule,
+    BackupModule,
   ],
   controllers: [AppController],
   providers: [],

@@ -84,4 +84,14 @@ export declare class AdminController {
         yearsWorked: string;
         monthsWorked: number;
     }>;
+    getAllUsers(): Promise<{
+        id: number;
+        username: string;
+        password: string;
+        role: "ADMIN" | "EMPLOYEE";
+        email: string;
+        isActive: boolean;
+        employeeName: string;
+        employeeNumber: string;
+    }[]>;
 }

@@ -1,0 +1,746 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>الحضور والانصراف - نظام الموارد البشرية</title>
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Tajawal', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .header {
+            background: white;
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            margin-bottom: 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .header h1 {
+            color: #667eea;
+            font-size: 28px;
+        }
+
+        .nav-buttons {
+            display: flex;
+            gap: 10px;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-family: 'Tajawal', sans-serif;
+            font-size: 16px;
+            font-weight: 500;
+            transition: all 0.3s;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-secondary {
+            background: #f0f0f0;
+            color: #333;
+        }
+
+        .btn-success {
+            background: #10b981;
+            color: white;
+        }
+
+        .btn-danger {
+            background: #ef4444;
+            color: white;
+        }
+
+        .btn-info {
+            background: #3b82f6;
+            color: white;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 36px;
+            font-weight: 700;
+            margin: 10px 0;
+        }
+
+        .stat-label {
+            color: #666;
+            font-size: 16px;
+        }
+
+        .check-in-card { border-top: 4px solid #10b981; }
+        .check-out-card { border-top: 4px solid #ef4444; }
+        .late-card { border-top: 4px solid #f59e0b; }
+        .absent-card { border-top: 4px solid #8b5cf6; }
+        .attendance-rate-card { border-top: 4px solid #3b82f6; }
+
+        .main-section {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            margin-bottom: 30px;
+        }
+
+        .check-section {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+            margin-bottom: 40px;
+        }
+
+        .check-box {
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            padding: 30px;
+            border-radius: 15px;
+            text-align: center;
+        }
+
+        .check-box h3 {
+            margin-bottom: 20px;
+            color: #333;
+            font-size: 22px;
+        }
+
+        .time-display {
+            font-size: 48px;
+            font-weight: 700;
+            color: #667eea;
+            margin: 20px 0;
+            font-family: 'Courier New', monospace;
+        }
+
+        .date-display {
+            font-size: 18px;
+            color: #666;
+            margin-bottom: 20px;
+        }
+
+        .filters {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 25px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        .filter-group {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        .filter-group label {
+            font-size: 14px;
+            color: #666;
+            font-weight: 500;
+        }
+
+        select, input[type="date"], input[type="month"] {
+            padding: 10px 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-family: 'Tajawal', sans-serif;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+
+        select:focus, input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        thead {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        th, td {
+            padding: 15px;
+            text-align: center;
+            border-bottom: 1px solid #f0f0f0;
+        }
+
+        th {
+            font-weight: 600;
+            font-size: 16px;
+        }
+
+        tbody tr:hover {
+            background: #f8f9fa;
+        }
+
+        .status-badge {
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: 600;
+            display: inline-block;
+        }
+
+        .status-present { background: #d1fae5; color: #065f46; }
+        .status-late { background: #fed7aa; color: #92400e; }
+        .status-absent { background: #fecaca; color: #991b1b; }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #666;
+            font-size: 18px;
+        }
+
+        .error {
+            background: #fee2e2;
+            color: #991b1b;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            border-right: 4px solid #ef4444;
+        }
+
+        .success {
+            background: #d1fae5;
+            color: #065f46;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            border-right: 4px solid #10b981;
+        }
+
+        .employee-select {
+            margin-bottom: 25px;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+        }
+
+        @media (max-width: 768px) {
+            .header {
+                flex-direction: column;
+                gap: 15px;
+            }
+
+            .nav-buttons {
+                flex-direction: column;
+                width: 100%;
+            }
+
+            .btn {
+                width: 100%;
+            }
+
+            .filters {
+                flex-direction: column;
+            }
+
+            table {
+                font-size: 14px;
+            }
+
+            th, td {
+                padding: 10px 5px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>⏰ الحضور والانصراف</h1>
+            <div class="nav-buttons">
+                <button class="btn btn-secondary" onclick="location.href='admin-dashboard.html'">العودة للوحة التحكم</button>
+                <button class="btn btn-danger" onclick="logout()">تسجيل الخروج</button>
+            </div>
+        </div>
+
+        <!-- إحصائيات اليوم -->
+        <div class="stats-grid" id="todayStats">
+            <div class="stat-card attendance-rate-card">
+                <div class="stat-label">📊 نسبة الحضور</div>
+                <div class="stat-value" id="attendanceRate">0%</div>
+            </div>
+            <div class="stat-card check-in-card">
+                <div class="stat-label">✅ حاضر</div>
+                <div class="stat-value" id="presentCount">0</div>
+            </div>
+            <div class="stat-card late-card">
+                <div class="stat-label">⏱️ متأخر</div>
+                <div class="stat-value" id="lateCount">0</div>
+            </div>
+            <div class="stat-card absent-card">
+                <div class="stat-label">❌ غائب</div>
+                <div class="stat-value" id="absentCount">0</div>
+            </div>
+        </div>
+
+        <!-- قسم التسجيل -->
+        <div class="main-section">
+            <h2 style="margin-bottom: 25px; color: #333;">🎯 تسجيل الحضور والانصراف</h2>
+            
+            <div class="employee-select">
+                <label style="display: block; margin-bottom: 10px; font-weight: 600;">اختر الموظف:</label>
+                <select id="selectedEmployee" style="width: 100%; max-width: 400px;">
+                    <option value="">-- اختر موظف --</option>
+                </select>
+            </div>
+
+            <div class="check-section">
+                <!-- تسجيل حضور -->
+                <div class="check-box" style="background: linear-gradient(135deg, #d1fae5 0%, #10b981 100%);">
+                    <h3>✅ تسجيل حضور</h3>
+                    <div class="date-display" id="checkInDate"></div>
+                    <div class="time-display" id="checkInTime">--:--:--</div>
+                    <button class="btn btn-success" onclick="checkIn()" style="width: 100%; padding: 15px; font-size: 18px;">
+                        تسجيل الحضور
+                    </button>
+                </div>
+
+                <!-- تسجيل انصراف -->
+                <div class="check-box" style="background: linear-gradient(135deg, #fecaca 0%, #ef4444 100%);">
+                    <h3>🚪 تسجيل انصراف</h3>
+                    <div class="date-display" id="checkOutDate"></div>
+                    <div class="time-display" id="checkOutTime">--:--:--</div>
+                    <button class="btn btn-danger" onclick="checkOut()" style="width: 100%; padding: 15px; font-size: 18px;">
+                        تسجيل الانصراف
+                    </button>
+                </div>
+            </div>
+
+            <div id="message"></div>
+        </div>
+
+        <!-- سجل الحضور -->
+        <div class="main-section">
+            <h2 style="margin-bottom: 25px; color: #333;">📋 سجل الحضور</h2>
+            
+            <div class="filters">
+                <div class="filter-group">
+                    <label>📅 اختر شهر</label>
+                    <input type="month" id="monthFilter">
+                </div>
+                <div class="filter-group">
+                    <label>🔍 فلترة</label>
+                    <select id="statusFilter">
+                        <option value="">الكل</option>
+                        <option value="PRESENT">حاضر</option>
+                        <option value="LATE">متأخر</option>
+                        <option value="ABSENT">غائب</option>
+                    </select>
+                </div>
+                <button class="btn btn-primary" onclick="loadAttendanceRecords()" style="margin-top: 20px;">
+                    🔄 تحديث البيانات
+                </button>
+                <button class="btn btn-info" onclick="exportToExcel()" style="margin-top: 20px;">
+                    📥 تصدير Excel
+                </button>
+            </div>
+
+            <div id="attendanceTable">
+                <div class="loading">جاري تحميل البيانات...</div>
+            </div>
+        </div>
+    </div>
+
+    <script src="config.js"></script>
+    <script>
+        let currentUser = null;
+        let selectedEmployeeId = null;
+        let allAttendances = [];
+
+        // تحديث الوقت
+        function updateTime() {
+            const now = new Date();
+            const timeString = now.toLocaleTimeString('ar-SA', { hour12: false });
+            const dateString = now.toLocaleDateString('ar-SA', { 
+                weekday: 'long', 
+                year: 'numeric', 
+                month: 'long', 
+                day: 'numeric' 
+            });
+
+            document.getElementById('checkInTime').textContent = timeString;
+            document.getElementById('checkOutTime').textContent = timeString;
+            document.getElementById('checkInDate').textContent = dateString;
+            document.getElementById('checkOutDate').textContent = dateString;
+        }
+
+        setInterval(updateTime, 1000);
+        updateTime();
+
+        // تحميل بيانات المستخدم
+        async function loadUserData() {
+            const token = localStorage.getItem('token');
+            if (!token) {
+                location.href = 'login.html';
+                return;
+            }
+
+            try {
+                const response = await fetch(`${API_BASE_URL}/auth/me`, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+
+                if (response.ok) {
+                    currentUser = await response.json();
+                    await loadEmployees();
+                    await loadTodayStats();
+                    await loadAttendanceRecords();
+                } else {
+                    logout();
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                showMessage('حدث خطأ في تحميل البيانات', 'error');
+            }
+        }
+
+        // تحميل قائمة الموظفين
+        async function loadEmployees() {
+            const token = localStorage.getItem('token');
+            try {
+                const response = await fetch(`${API_BASE_URL}/employees`, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+
+                if (response.ok) {
+                    const employees = await response.json();
+                    const select = document.getElementById('selectedEmployee');
+                    select.innerHTML = '<option value="">-- اختر موظف --</option>';
+                    
+                    employees.forEach(emp => {
+                        const option = document.createElement('option');
+                        option.value = emp.id;
+                        option.textContent = `${emp.fullName} (${emp.employeeNumber})`;
+                        select.appendChild(option);
+                    });
+
+                    select.addEventListener('change', (e) => {
+                        selectedEmployeeId = e.target.value;
+                        if (selectedEmployeeId) {
+                            loadAttendanceRecords();
+                        }
+                    });
+                }
+            } catch (error) {
+                console.error('Error:', error);
+            }
+        }
+
+        // تحميل إحصائيات اليوم
+        async function loadTodayStats() {
+            const token = localStorage.getItem('token');
+            try {
+                const response = await fetch(`${API_BASE_URL}/attendance/statistics/today`, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+
+                if (response.ok) {
+                    const stats = await response.json();
+                    document.getElementById('attendanceRate').textContent = stats.attendanceRate + '%';
+                    document.getElementById('presentCount').textContent = stats.present;
+                    document.getElementById('lateCount').textContent = stats.late;
+                    document.getElementById('absentCount').textContent = stats.absent;
+                }
+            } catch (error) {
+                console.error('Error:', error);
+            }
+        }
+
+        // تسجيل حضور
+        async function checkIn() {
+            if (!selectedEmployeeId) {
+                showMessage('الرجاء اختيار موظف أولاً', 'error');
+                return;
+            }
+
+            const token = localStorage.getItem('token');
+            try {
+                const response = await fetch(`${API_BASE_URL}/attendance/check-in/${selectedEmployeeId}`, {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    showMessage('✅ تم تسجيل الحضور بنجاح', 'success');
+                    await loadTodayStats();
+                    await loadAttendanceRecords();
+                } else {
+                    const error = await response.json();
+                    showMessage(error.message || 'حدث خطأ في تسجيل الحضور', 'error');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                showMessage('حدث خطأ في الاتصال بالخادم', 'error');
+            }
+        }
+
+        // تسجيل انصراف
+        async function checkOut() {
+            if (!selectedEmployeeId) {
+                showMessage('الرجاء اختيار موظف أولاً', 'error');
+                return;
+            }
+
+            const token = localStorage.getItem('token');
+            try {
+                const response = await fetch(`${API_BASE_URL}/attendance/check-out/${selectedEmployeeId}`, {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    showMessage('🚪 تم تسجيل الانصراف بنجاح', 'success');
+                    await loadTodayStats();
+                    await loadAttendanceRecords();
+                } else {
+                    const error = await response.json();
+                    showMessage(error.message || 'حدث خطأ في تسجيل الانصراف', 'error');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                showMessage('حدث خطأ في الاتصال بالخادم', 'error');
+            }
+        }
+
+        // تحميل سجلات الحضور
+        async function loadAttendanceRecords() {
+            const token = localStorage.getItem('token');
+            const monthFilter = document.getElementById('monthFilter').value;
+            let url = `${API_BASE_URL}/attendance`;
+
+            if (selectedEmployeeId) {
+                url = `${API_BASE_URL}/attendance/employee/${selectedEmployeeId}`;
+                if (monthFilter) {
+                    const [year, month] = monthFilter.split('-');
+                    url += `?month=${month}&year=${year}`;
+                }
+            } else if (monthFilter) {
+                const [year, month] = monthFilter.split('-');
+                url += `?month=${month}&year=${year}`;
+            }
+
+            try {
+                const response = await fetch(url, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    allAttendances = Array.isArray(data) ? data : (data.attendances || []);
+                    renderAttendanceTable();
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                document.getElementById('attendanceTable').innerHTML = 
+                    '<div class="error">حدث خطأ في تحميل البيانات</div>';
+            }
+        }
+
+        // عرض جدول الحضور
+        function renderAttendanceTable() {
+            const statusFilter = document.getElementById('statusFilter').value;
+            let filteredData = allAttendances;
+
+            if (statusFilter) {
+                filteredData = allAttendances.filter(a => a.status === statusFilter);
+            }
+
+            if (filteredData.length === 0) {
+                document.getElementById('attendanceTable').innerHTML = 
+                    '<div class="loading">لا توجد بيانات</div>';
+                return;
+            }
+
+            let html = `
+                <table>
+                    <thead>
+                        <tr>
+                            <th>التاريخ</th>
+                            <th>الموظف</th>
+                            <th>وقت الحضور</th>
+                            <th>وقت الانصراف</th>
+                            <th>ساعات العمل</th>
+                            <th>التأخير (دقيقة)</th>
+                            <th>الإضافي (ساعة)</th>
+                            <th>الحالة</th>
+                            <th>إجراءات</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+            `;
+
+            filteredData.forEach(record => {
+                const date = new Date(record.date).toLocaleDateString('ar-SA');
+                const checkIn = record.checkIn ? new Date(record.checkIn).toLocaleTimeString('ar-SA', { hour12: false }) : '-';
+                const checkOut = record.checkOut ? new Date(record.checkOut).toLocaleTimeString('ar-SA', { hour12: false }) : '-';
+                const employeeName = record.employee ? record.employee.fullName : 'غير معروف';
+                
+                let statusClass = 'status-present';
+                let statusText = '✅ حاضر';
+                if (record.status === 'LATE') {
+                    statusClass = 'status-late';
+                    statusText = '⏱️ متأخر';
+                } else if (record.status === 'ABSENT') {
+                    statusClass = 'status-absent';
+                    statusText = '❌ غائب';
+                }
+
+                html += `
+                    <tr>
+                        <td>${date}</td>
+                        <td>${employeeName}</td>
+                        <td>${checkIn}</td>
+                        <td>${checkOut}</td>
+                        <td>${record.workHours || 0}</td>
+                        <td>${record.lateMinutes || 0}</td>
+                        <td>${record.overtimeHours || 0}</td>
+                        <td><span class="status-badge ${statusClass}">${statusText}</span></td>
+                        <td>
+                            <div class="action-buttons">
+                                <button class="btn btn-danger" onclick="deleteRecord(${record.id})" style="padding: 6px 12px;">حذف</button>
+                            </div>
+                        </td>
+                    </tr>
+                `;
+            });
+
+            html += '</tbody></table>';
+            document.getElementById('attendanceTable').innerHTML = html;
+        }
+
+        // حذف سجل
+        async function deleteRecord(id) {
+            if (!confirm('هل أنت متأكد من حذف هذا السجل؟')) return;
+
+            const token = localStorage.getItem('token');
+            try {
+                const response = await fetch(`${API_BASE_URL}/attendance/${id}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+
+                if (response.ok) {
+                    showMessage('تم حذف السجل بنجاح', 'success');
+                    await loadAttendanceRecords();
+                    await loadTodayStats();
+                } else {
+                    showMessage('حدث خطأ في الحذف', 'error');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                showMessage('حدث خطأ في الاتصال بالخادم', 'error');
+            }
+        }
+
+        // تصدير إلى Excel
+        function exportToExcel() {
+            // يمكن إضافة مكتبة SheetJS هنا لاحقاً
+            showMessage('سيتم إضافة ميزة التصدير قريباً', 'success');
+        }
+
+        // عرض الرسائل
+        function showMessage(msg, type) {
+            const messageDiv = document.getElementById('message');
+            messageDiv.className = type;
+            messageDiv.textContent = msg;
+            messageDiv.style.display = 'block';
+
+            setTimeout(() => {
+                messageDiv.style.display = 'none';
+            }, 4000);
+        }
+
+        // تسجيل الخروج
+        function logout() {
+            localStorage.removeItem('token');
+            location.href = 'login.html';
+        }
+
+        // تحميل البيانات عند فتح الصفحة
+        window.onload = () => {
+            loadUserData();
+            
+            // تعيين الشهر الحالي كقيمة افتراضية
+            const now = new Date();
+            const month = (now.getMonth() + 1).toString().padStart(2, '0');
+            const year = now.getFullYear();
+            document.getElementById('monthFilter').value = `${year}-${month}`;
+        };
+    </script>
+</body>
+</html>

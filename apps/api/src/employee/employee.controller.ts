@@ -76,9 +76,19 @@ export class EmployeeController {
     return this.employeeService.requestLeave(req.user.employeeId, leaveData);
   }
 
+  @Delete('me/leaves/:id')
+  async deleteMyLeave(@Request() req, @Param('id') id: string) {
+    return this.employeeService.deleteLeave(req.user.employeeId, parseInt(id));
+  }
+
   @Post('me/advances')
   async requestAdvance(@Request() req, @Body() advanceData: any) {
     return this.employeeService.requestAdvance(req.user.employeeId, advanceData);
+  }
+
+  @Delete('me/advances/:id')
+  async deleteMyAdvance(@Request() req, @Param('id') id: string) {
+    return this.employeeService.deleteAdvance(req.user.employeeId, parseInt(id));
   }
 
   /**
@@ -127,6 +137,12 @@ export class EmployeeController {
   @Roles('ADMIN')
   async createEmployee(@Body() employeeData: any) {
     return this.employeeService.createEmployee(employeeData);
+  }
+
+  @Post('bulk')
+  @Roles('ADMIN')
+  async createEmployeesBulk(@Body() body: { employees: any[] }) {
+    return this.employeeService.createEmployeesBulk(body.employees);
   }
 
   @Put(':id')

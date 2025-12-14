@@ -107,6 +107,64 @@ export interface CompanySettings {
   taxNumber?: string;
 }
 
+export interface Attendance {
+  id: number;
+  employeeId: number;
+  date: Date | string;
+  checkIn?: Date | string;
+  checkOut?: Date | string;
+  workHours?: number;
+  lateMinutes?: number;
+  overtimeHours?: number;
+  earlyLeaveMinutes?: number;
+  status: 'PRESENT' | 'ABSENT' | 'LATE' | 'HALF_DAY';
+  notes?: string;
+}
+
+export interface PayrollRecord {
+  id: number;
+  employeeId: number;
+  month: number;
+  year: number;
+  basicSalary: number;
+  housingAllowance: number;
+  transportAllowance: number;
+  totalAllowances: number;
+  grossSalary: number;
+  // الحضور والغياب
+  presentDays: number;
+  absentDays: number;
+  lateDays: number;
+  lateDeduction: number;
+  absentDeduction: number;
+  // الإضافي
+  overtimeHours: number;
+  overtimeAmount: number;
+  // السلف والخصومات
+  advanceDeduction: number;
+  // التأمينات الاجتماعية
+  gosiDeduction: number; // 10% للموظف السعودي
+  // الخصومات الأخرى
+  otherDeductions: number;
+  totalDeductions: number;
+  netSalary: number;
+  status: 'DRAFT' | 'APPROVED' | 'PAID';
+  paidDate?: Date | string;
+  notes?: string;
+  createdAt: Date | string;
+}
+
+export interface Notification {
+  id: number;
+  userId: number;
+  title: string;
+  message: string;
+  type: 'INFO' | 'SUCCESS' | 'WARNING' | 'ERROR';
+  read: boolean;
+  createdAt: Date | string;
+  link?: string;
+}
+
 export class InMemoryDatabase {
   private static instance: InMemoryDatabase;
   private storage: DataStorage;
@@ -119,6 +177,9 @@ export class InMemoryDatabase {
   public departments: Department[] = [];
   public jobTitles: JobTitle[] = [];
   public companySettings: CompanySettings | null = null;
+  public attendances: Attendance[] = [];
+  public payrollRecords: PayrollRecord[] = [];
+  public notifications: Notification[] = [];
 
   private userIdCounter = 1;
   private employeeIdCounter = 1;
@@ -127,6 +188,9 @@ export class InMemoryDatabase {
   private assetIdCounter = 1;
   private departmentIdCounter = 1;
   private jobTitleIdCounter = 1;
+  private attendanceIdCounter = 1;
+  private payrollRecordIdCounter = 1;
+  private notificationIdCounter = 1;
 
   private constructor() {
     this.storage = DataStorage.getInstance();
@@ -174,6 +238,9 @@ export class InMemoryDatabase {
       this.departments = data.departments || [];
       this.jobTitles = data.jobTitles || [];
       this.companySettings = data.companySettings || null;
+      this.attendances = data.attendances || [];
+      this.payrollRecords = data.payrollRecords || [];
+      this.notifications = data.notifications || [];
       
       // استعادة الـ Counters
       this.userIdCounter = data.userIdCounter || 1;
@@ -183,6 +250,9 @@ export class InMemoryDatabase {
       this.assetIdCounter = data.assetIdCounter || 1;
       this.departmentIdCounter = data.departmentIdCounter || 1;
       this.jobTitleIdCounter = data.jobTitleIdCounter || 1;
+      this.attendanceIdCounter = data.attendanceIdCounter || 1;
+      this.payrollRecordIdCounter = data.payrollRecordIdCounter || 1;
+      this.notificationIdCounter = data.notificationIdCounter || 1;
       
       console.log('✅ تم تحميل البيانات المحفوظة');
     }
@@ -199,6 +269,9 @@ export class InMemoryDatabase {
       departments: this.departments,
       jobTitles: this.jobTitles,
       companySettings: this.companySettings,
+      attendances: this.attendances,
+      payrollRecords: this.payrollRecords,
+      notifications: this.notifications,
       userIdCounter: this.userIdCounter,
       employeeIdCounter: this.employeeIdCounter,
       leaveIdCounter: this.leaveIdCounter,
@@ -206,8 +279,89 @@ export class InMemoryDatabase {
       assetIdCounter: this.assetIdCounter,
       departmentIdCounter: this.departmentIdCounter,
       jobTitleIdCounter: this.jobTitleIdCounter,
+      attendanceIdCounter: this.attendanceIdCounter,
+      payrollRecordIdCounter: this.payrollRecordIdCounter,
+      notificationIdCounter: this.notificationIdCounter,
     };
     this.storage.saveData(data);
+  }
+
+  // الحصول على جميع البيانات
+  public getAllData() {
+    return {
+      users: this.users,
+      employees: this.employees,
+      leaves: this.leaves,
+      advances: this.advances,
+      assets: this.assets,
+      departments: this.departments,
+      jobTitles: this.jobTitles,
+      companySettings: this.companySettings,
+      attendances: this.attendances,
+      payrollRecords: this.payrollRecords,
+      notifications: this.notifications,
+      counters: {
+        userIdCounter: this.userIdCounter,
+        employeeIdCounter: this.employeeIdCounter,
+        leaveIdCounter: this.leaveIdCounter,
+        advanceIdCounter: this.advanceIdCounter,
+        assetIdCounter: this.assetIdCounter,
+        departmentIdCounter: this.departmentIdCounter,
+        jobTitleIdCounter: this.jobTitleIdCounter,
+        attendanceIdCounter: this.attendanceIdCounter,
+        payrollRecordIdCounter: this.payrollRecordIdCounter,
+        notificationIdCounter: this.notificationIdCounter,
+      }
+    };
+  }
+
+  // استعادة البيانات من نسخة احتياطية
+  public loadFromBackup(backupData: any) {
+    try {
+      this.users = backupData.users || [];
+      this.employees = backupData.employees || [];
+      this.leaves = backupData.leaves || [];
+      this.advances = backupData.advances || [];
+      this.assets = backupData.assets || [];
+      this.departments = backupData.departments || [];
+      this.jobTitles = backupData.jobTitles || [];
+      this.companySettings = backupData.companySettings || this.companySettings;
+      this.attendances = backupData.attendances || [];
+      this.payrollRecords = backupData.payrollRecords || [];
+      this.notifications = backupData.notifications || [];
+      
+      // استعادة العدادات
+      if (backupData.counters) {
+        this.userIdCounter = backupData.counters.userIdCounter || this.userIdCounter;
+        this.employeeIdCounter = backupData.counters.employeeIdCounter || this.employeeIdCounter;
+        this.leaveIdCounter = backupData.counters.leaveIdCounter || this.leaveIdCounter;
+        this.advanceIdCounter = backupData.counters.advanceIdCounter || this.advanceIdCounter;
+        this.assetIdCounter = backupData.counters.assetIdCounter || this.assetIdCounter;
+        this.departmentIdCounter = backupData.counters.departmentIdCounter || this.departmentIdCounter;
+        this.jobTitleIdCounter = backupData.counters.jobTitleIdCounter || this.jobTitleIdCounter;
+        this.attendanceIdCounter = backupData.counters.attendanceIdCounter || this.attendanceIdCounter;
+        this.payrollRecordIdCounter = backupData.counters.payrollRecordIdCounter || this.payrollRecordIdCounter;
+        this.notificationIdCounter = backupData.counters.notificationIdCounter || this.notificationIdCounter;
+      } else {
+        // للتوافق مع النسخ القديمة
+        this.userIdCounter = backupData.userIdCounter || this.userIdCounter;
+        this.employeeIdCounter = backupData.employeeIdCounter || this.employeeIdCounter;
+        this.leaveIdCounter = backupData.leaveIdCounter || this.leaveIdCounter;
+        this.advanceIdCounter = backupData.advanceIdCounter || this.advanceIdCounter;
+        this.assetIdCounter = backupData.assetIdCounter || this.assetIdCounter;
+        this.departmentIdCounter = backupData.departmentIdCounter || this.departmentIdCounter;
+        this.jobTitleIdCounter = backupData.jobTitleIdCounter || this.jobTitleIdCounter;
+        this.attendanceIdCounter = backupData.attendanceIdCounter || this.attendanceIdCounter;
+        this.payrollRecordIdCounter = backupData.payrollRecordIdCounter || this.payrollRecordIdCounter;
+        this.notificationIdCounter = backupData.notificationIdCounter || this.notificationIdCounter;
+      }
+
+      console.log('✅ تم استعادة البيانات بنجاح');
+      return { success: true };
+    } catch (error) {
+      console.error('❌ فشل في استعادة البيانات:', error);
+      throw error;
+    }
   }
 
   async seedInitialData() {
@@ -436,6 +590,10 @@ export class InMemoryDatabase {
     return this.users.find(u => u.username === username);
   }
 
+  findAllUsers(): User[] {
+    return this.users;
+  }
+
   findUserById(id: number): User | undefined {
     return this.users.find(u => u.id === id);
   }
@@ -503,6 +661,26 @@ export class InMemoryDatabase {
     return undefined;
   }
 
+  deleteEmployee(id: number): boolean {
+    const index = this.employees.findIndex(e => e.id === id);
+    if (index > -1) {
+      this.employees.splice(index, 1);
+      this.saveToStorage(); // حفظ البيانات
+      return true;
+    }
+    return false;
+  }
+
+  deleteUserByEmployeeId(employeeId: number): boolean {
+    const index = this.users.findIndex(u => u.employeeId === employeeId);
+    if (index > -1) {
+      this.users.splice(index, 1);
+      this.saveToStorage(); // حفظ البيانات
+      return true;
+    }
+    return false;
+  }
+
   // Leave Methods
   createLeave(data: Omit<Leave, 'id'>): Leave {
     const leave: Leave = {
@@ -536,6 +714,16 @@ export class InMemoryDatabase {
     return undefined;
   }
 
+  deleteLeave(id: number): boolean {
+    const index = this.leaves.findIndex(l => l.id === id);
+    if (index > -1) {
+      this.leaves.splice(index, 1);
+      this.saveToStorage(); // حفظ البيانات
+      return true;
+    }
+    return false;
+  }
+
   // Advance Methods
   createAdvance(data: Omit<Advance, 'id'>): Advance {
     const advance: Advance = {
@@ -563,6 +751,16 @@ export class InMemoryDatabase {
       return advance;
     }
     return undefined;
+  }
+
+  deleteAdvance(id: number): boolean {
+    const index = this.advances.findIndex(a => a.id === id);
+    if (index > -1) {
+      this.advances.splice(index, 1);
+      this.saveToStorage(); // حفظ البيانات
+      return true;
+    }
+    return false;
   }
 
   // Asset Methods
@@ -662,6 +860,16 @@ export class InMemoryDatabase {
     return dept;
   }
 
+  updateDepartment(id: number, name: string): Department | undefined {
+    const dept = this.departments.find(d => d.id === id);
+    if (dept) {
+      dept.name = name;
+      this.saveToStorage(); // حفظ البيانات
+      return dept;
+    }
+    return undefined;
+  }
+
   deleteDepartment(id: number): boolean {
     const index = this.departments.findIndex(d => d.id === id);
     if (index !== -1) {
@@ -686,6 +894,16 @@ export class InMemoryDatabase {
     this.jobTitles.push(jobTitle);
     this.saveToStorage(); // حفظ البيانات
     return jobTitle;
+  }
+
+  updateJobTitle(id: number, title: string): JobTitle | undefined {
+    const jobTitle = this.jobTitles.find(j => j.id === id);
+    if (jobTitle) {
+      jobTitle.title = title;
+      this.saveToStorage(); // حفظ البيانات
+      return jobTitle;
+    }
+    return undefined;
   }
 
   deleteJobTitle(id: number): boolean {
@@ -715,5 +933,204 @@ export class InMemoryDatabase {
     }
     this.saveToStorage(); // حفظ البيانات
     return this.companySettings;
+  }
+
+  // ========== Attendance Methods ==========
+  
+  // إنشاء سجل حضور
+  createAttendance(attendanceData: Partial<Attendance>): Attendance {
+    const attendance: Attendance = {
+      id: this.attendanceIdCounter++,
+      employeeId: attendanceData.employeeId!,
+      date: attendanceData.date || new Date(),
+      checkIn: attendanceData.checkIn,
+      checkOut: attendanceData.checkOut,
+      workHours: attendanceData.workHours,
+      lateMinutes: attendanceData.lateMinutes || 0,
+      overtimeHours: attendanceData.overtimeHours,
+      earlyLeaveMinutes: attendanceData.earlyLeaveMinutes,
+      status: attendanceData.status || 'PRESENT',
+      notes: attendanceData.notes,
+    };
+    this.attendances.push(attendance);
+    this.saveToStorage();
+    return attendance;
+  }
+
+  // الحصول على سجل حضور بالـ ID
+  getAttendanceById(id: number): Attendance | undefined {
+    return this.attendances.find(a => a.id === id);
+  }
+
+  // الحصول على سجلات حضور موظف معين
+  getAttendancesByEmployeeId(employeeId: number): Attendance[] {
+    return this.attendances.filter(a => a.employeeId === employeeId);
+  }
+
+  // الحصول على سجل حضور موظف في تاريخ معين
+  getAttendanceByEmployeeAndDate(employeeId: number, date: Date): Attendance | undefined {
+    const searchDate = new Date(date);
+    searchDate.setHours(0, 0, 0, 0);
+    
+    return this.attendances.find(a => {
+      const attDate = new Date(a.date);
+      attDate.setHours(0, 0, 0, 0);
+      return a.employeeId === employeeId && attDate.getTime() === searchDate.getTime();
+    });
+  }
+
+  // الحصول على جميع سجلات الحضور
+  getAllAttendances(): Attendance[] {
+    return this.attendances;
+  }
+
+  // تحديث سجل حضور
+  updateAttendance(id: number, updates: Partial<Attendance>): Attendance | undefined {
+    const attendance = this.attendances.find(a => a.id === id);
+    if (attendance) {
+      Object.assign(attendance, updates);
+      this.saveToStorage();
+      return attendance;
+    }
+    return undefined;
+  }
+
+  // حذف سجل حضور
+  deleteAttendance(id: number): boolean {
+    const index = this.attendances.findIndex(a => a.id === id);
+    if (index !== -1) {
+      this.attendances.splice(index, 1);
+      this.saveToStorage();
+      return true;
+    }
+    return false;
+  }
+
+  // ========== Payroll Records Methods ==========
+  
+  createPayrollRecord(data: Partial<PayrollRecord>): PayrollRecord {
+    const record: PayrollRecord = {
+      id: this.payrollRecordIdCounter++,
+      employeeId: data.employeeId!,
+      month: data.month!,
+      year: data.year!,
+      basicSalary: data.basicSalary || 0,
+      housingAllowance: data.housingAllowance || 0,
+      transportAllowance: data.transportAllowance || 0,
+      totalAllowances: data.totalAllowances || 0,
+      grossSalary: data.grossSalary || 0,
+      presentDays: data.presentDays || 0,
+      absentDays: data.absentDays || 0,
+      lateDays: data.lateDays || 0,
+      lateDeduction: data.lateDeduction || 0,
+      absentDeduction: data.absentDeduction || 0,
+      overtimeHours: data.overtimeHours || 0,
+      overtimeAmount: data.overtimeAmount || 0,
+      advanceDeduction: data.advanceDeduction || 0,
+      gosiDeduction: data.gosiDeduction || 0,
+      otherDeductions: data.otherDeductions || 0,
+      totalDeductions: data.totalDeductions || 0,
+      netSalary: data.netSalary || 0,
+      status: data.status || 'DRAFT',
+      paidDate: data.paidDate,
+      notes: data.notes,
+      createdAt: new Date(),
+    };
+    this.payrollRecords.push(record);
+    this.saveToStorage();
+    return record;
+  }
+
+  getPayrollRecordById(id: number): PayrollRecord | undefined {
+    return this.payrollRecords.find(p => p.id === id);
+  }
+
+  getPayrollRecordsByEmployee(employeeId: number): PayrollRecord[] {
+    return this.payrollRecords.filter(p => p.employeeId === employeeId);
+  }
+
+  getPayrollRecordByEmployeeAndPeriod(employeeId: number, month: number, year: number): PayrollRecord | undefined {
+    return this.payrollRecords.find(p => 
+      p.employeeId === employeeId && p.month === month && p.year === year
+    );
+  }
+
+  getAllPayrollRecords(): PayrollRecord[] {
+    return this.payrollRecords;
+  }
+
+  updatePayrollRecord(id: number, updates: Partial<PayrollRecord>): PayrollRecord | undefined {
+    const record = this.payrollRecords.find(p => p.id === id);
+    if (record) {
+      Object.assign(record, updates);
+      this.saveToStorage();
+      return record;
+    }
+    return undefined;
+  }
+
+  deletePayrollRecord(id: number): boolean {
+    const index = this.payrollRecords.findIndex(p => p.id === id);
+    if (index !== -1) {
+      this.payrollRecords.splice(index, 1);
+      this.saveToStorage();
+      return true;
+    }
+    return false;
+  }
+
+  // ========== Notifications Methods ==========
+  
+  createNotification(data: Partial<Notification>): Notification {
+    const notification: Notification = {
+      id: this.notificationIdCounter++,
+      userId: data.userId!,
+      title: data.title!,
+      message: data.message!,
+      type: data.type || 'INFO',
+      read: false,
+      createdAt: new Date(),
+      link: data.link,
+    };
+    this.notifications.push(notification);
+    this.saveToStorage();
+    return notification;
+  }
+
+  getNotificationsByUserId(userId: number): Notification[] {
+    return this.notifications.filter(n => n.userId === userId)
+      .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+  }
+
+  getUnreadNotificationsByUserId(userId: number): Notification[] {
+    return this.notifications.filter(n => n.userId === userId && !n.read)
+      .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+  }
+
+  markNotificationAsRead(id: number): boolean {
+    const notification = this.notifications.find(n => n.id === id);
+    if (notification) {
+      notification.read = true;
+      this.saveToStorage();
+      return true;
+    }
+    return false;
+  }
+
+  markAllNotificationsAsRead(userId: number): boolean {
+    const userNotifications = this.notifications.filter(n => n.userId === userId);
+    userNotifications.forEach(n => n.read = true);
+    this.saveToStorage();
+    return true;
+  }
+
+  deleteNotification(id: number): boolean {
+    const index = this.notifications.findIndex(n => n.id === id);
+    if (index !== -1) {
+      this.notifications.splice(index, 1);
+      this.saveToStorage();
+      return true;
+    }
+    return false;
   }
 }

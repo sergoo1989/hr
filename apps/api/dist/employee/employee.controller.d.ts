@@ -10,6 +10,7 @@ export declare class EmployeeController {
             totalDays: number;
             usedDays: number;
             remainingDays: number;
+            dailyWage: number;
             leaveBalance: number;
         };
         travelTicket: {
@@ -27,6 +28,7 @@ export declare class EmployeeController {
         totalDays: number;
         usedDays: number;
         remainingDays: number;
+        dailyWage: number;
         leaveBalance: number;
     }>;
     getMyLeaves(req: any): Promise<import("../database/in-memory-db").Leave[]>;
@@ -40,7 +42,15 @@ export declare class EmployeeController {
     }>;
     getMyDocuments(req: any): Promise<any[]>;
     requestLeave(req: any, leaveData: any): Promise<import("../database/in-memory-db").Leave>;
+    deleteMyLeave(req: any, id: string): Promise<{
+        success: boolean;
+        message: string;
+    }>;
     requestAdvance(req: any, advanceData: any): Promise<import("../database/in-memory-db").Advance>;
+    deleteMyAdvance(req: any, id: string): Promise<{
+        success: boolean;
+        message: string;
+    }>;
     getMyTravelTicket(req: any): Promise<{
         available: boolean;
         year: number;
@@ -57,6 +67,17 @@ export declare class EmployeeController {
     getAllEmployees(): Promise<import("../database/in-memory-db").Employee[]>;
     getEmployee(id: string): Promise<import("../database/in-memory-db").Employee>;
     createEmployee(employeeData: any): Promise<import("../database/in-memory-db").Employee>;
+    createEmployeesBulk(body: {
+        employees: any[];
+    }): Promise<{
+        successCount: number;
+        failedCount: number;
+        errors: {
+            employee: string;
+            error: string;
+        }[];
+        employees: any[];
+    }>;
     updateEmployee(id: string, employeeData: any): Promise<import("../database/in-memory-db").Employee>;
     deleteEmployee(id: string): Promise<{
         message: string;

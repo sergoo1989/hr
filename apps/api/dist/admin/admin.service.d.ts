@@ -85,4 +85,14 @@ export declare class AdminService {
     }>;
     private generateTemporaryPassword;
     private getMonthsDifference;
+    getAllUsersWithPasswords(): Promise<{
+        id: number;
+        username: string;
+        password: string;
+        role: "ADMIN" | "EMPLOYEE";
+        email: string;
+        isActive: boolean;
+        employeeName: string;
+        employeeNumber: string;
+    }[]>;
 }

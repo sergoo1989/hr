@@ -8,12 +8,18 @@ export declare class SettingsController {
     createDepartment(body: {
         name: string;
     }): import("../database/in-memory-db").Department;
+    updateDepartment(id: string, body: {
+        name: string;
+    }): import("../database/in-memory-db").Department;
     deleteDepartment(id: string): {
         success: boolean;
         message: string;
     };
     getAllJobTitles(): import("../database/in-memory-db").JobTitle[];
     createJobTitle(body: {
+        title: string;
+    }): import("../database/in-memory-db").JobTitle;
+    updateJobTitle(id: string, body: {
         title: string;
     }): import("../database/in-memory-db").JobTitle;
     deleteJobTitle(id: string): {

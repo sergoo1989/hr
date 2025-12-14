@@ -33,8 +33,8 @@ let AdminDashboardService = class AdminDashboardService {
         const expiringDocuments = this.getExpiringDocumentsCount(employees);
         const monthlyPayroll = employees.reduce((sum, emp) => {
             const basicSalary = emp.basicSalary || 0;
-            const housing = emp.housingAllowance || 0;
-            const transport = emp.transportAllowance || 0;
+            const housing = emp.housingAllowance || (basicSalary * 0.25);
+            const transport = emp.transportAllowance || (basicSalary * 0.10);
             return sum + basicSalary + housing + transport;
         }, 0);
         const saudiCount = employees.filter(e => e.nationality === 'SAUDI').length;
@@ -259,7 +259,11 @@ let AdminDashboardService = class AdminDashboardService {
             const empLeaves = leaves.filter(l => l.employeeId === emp.id && l.status === 'APPROVED');
             const usedDays = empLeaves.reduce((sum, l) => sum + (l.daysCount || l.days || 0), 0);
             const remainingDays = annualLeaveDays - usedDays;
-            const dailyRate = (emp.basicSalary || 0) / 30;
+            const basicSalary = emp.basicSalary || 0;
+            const housingAllowance = emp.housingAllowance || (basicSalary * 0.25);
+            const transportAllowance = emp.transportAllowance || (basicSalary * 0.10);
+            const actualWage = basicSalary + housingAllowance + transportAllowance;
+            const dailyRate = actualWage / 30;
             const leaveBalanceAmount = remainingDays * dailyRate;
             return {
                 employeeId: emp.id,
@@ -279,8 +283,12 @@ let AdminDashboardService = class AdminDashboardService {
             const hireDate = emp.hireDate ? new Date(emp.hireDate) : today;
             const yearsWorked = (today.getTime() - hireDate.getTime()) / (365.25 * 24 * 60 * 60 * 1000);
             const monthsWorked = yearsWorked * 12;
+            const basicSalary = emp.basicSalary || 0;
+            const housingAllowance = emp.housingAllowance || (basicSalary * 0.25);
+            const transportAllowance = emp.transportAllowance || (basicSalary * 0.10);
+            const actualWage = basicSalary + housingAllowance + transportAllowance;
             let endOfServiceAmount = 0;
-            const monthlySalary = emp.basicSalary || 0;
+            const monthlySalary = actualWage;
             if (yearsWorked >= 10) {
                 endOfServiceAmount = yearsWorked * monthlySalary;
             }

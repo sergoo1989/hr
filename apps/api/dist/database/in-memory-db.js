@@ -13,6 +13,9 @@ class InMemoryDatabase {
         this.departments = [];
         this.jobTitles = [];
         this.companySettings = null;
+        this.attendances = [];
+        this.payrollRecords = [];
+        this.notifications = [];
         this.userIdCounter = 1;
         this.employeeIdCounter = 1;
         this.leaveIdCounter = 1;
@@ -20,9 +23,28 @@ class InMemoryDatabase {
         this.assetIdCounter = 1;
         this.departmentIdCounter = 1;
         this.jobTitleIdCounter = 1;
+        this.attendanceIdCounter = 1;
+        this.payrollRecordIdCounter = 1;
+        this.notificationIdCounter = 1;
         this.storage = data_storage_1.DataStorage.getInstance();
         this.loadFromStorage();
         this.seedInitialData();
+        setInterval(() => {
+            this.saveToStorage();
+            console.log('🔄 حفظ تلقائي للبيانات - ' + new Date().toLocaleTimeString('ar-SA'));
+        }, 30000);
+        process.on('SIGINT', () => {
+            console.log('\n⚠️ جاري إيقاف السيرفر...');
+            this.saveToStorage();
+            console.log('✅ تم حفظ البيانات بنجاح قبل الإغلاق');
+            process.exit(0);
+        });
+        process.on('SIGTERM', () => {
+            console.log('\n⚠️ جاري إيقاف السيرفر...');
+            this.saveToStorage();
+            console.log('✅ تم حفظ البيانات بنجاح قبل الإغلاق');
+            process.exit(0);
+        });
     }
     static getInstance() {
         if (!InMemoryDatabase.instance) {
@@ -41,6 +63,9 @@ class InMemoryDatabase {
             this.departments = data.departments || [];
             this.jobTitles = data.jobTitles || [];
             this.companySettings = data.companySettings || null;
+            this.attendances = data.attendances || [];
+            this.payrollRecords = data.payrollRecords || [];
+            this.notifications = data.notifications || [];
             this.userIdCounter = data.userIdCounter || 1;
             this.employeeIdCounter = data.employeeIdCounter || 1;
             this.leaveIdCounter = data.leaveIdCounter || 1;
@@ -48,6 +73,9 @@ class InMemoryDatabase {
             this.assetIdCounter = data.assetIdCounter || 1;
             this.departmentIdCounter = data.departmentIdCounter || 1;
             this.jobTitleIdCounter = data.jobTitleIdCounter || 1;
+            this.attendanceIdCounter = data.attendanceIdCounter || 1;
+            this.payrollRecordIdCounter = data.payrollRecordIdCounter || 1;
+            this.notificationIdCounter = data.notificationIdCounter || 1;
             console.log('✅ تم تحميل البيانات المحفوظة');
         }
     }
@@ -61,6 +89,9 @@ class InMemoryDatabase {
             departments: this.departments,
             jobTitles: this.jobTitles,
             companySettings: this.companySettings,
+            attendances: this.attendances,
+            payrollRecords: this.payrollRecords,
+            notifications: this.notifications,
             userIdCounter: this.userIdCounter,
             employeeIdCounter: this.employeeIdCounter,
             leaveIdCounter: this.leaveIdCounter,
@@ -68,8 +99,83 @@ class InMemoryDatabase {
             assetIdCounter: this.assetIdCounter,
             departmentIdCounter: this.departmentIdCounter,
             jobTitleIdCounter: this.jobTitleIdCounter,
+            attendanceIdCounter: this.attendanceIdCounter,
+            payrollRecordIdCounter: this.payrollRecordIdCounter,
+            notificationIdCounter: this.notificationIdCounter,
         };
         this.storage.saveData(data);
+    }
+    getAllData() {
+        return {
+            users: this.users,
+            employees: this.employees,
+            leaves: this.leaves,
+            advances: this.advances,
+            assets: this.assets,
+            departments: this.departments,
+            jobTitles: this.jobTitles,
+            companySettings: this.companySettings,
+            attendances: this.attendances,
+            payrollRecords: this.payrollRecords,
+            notifications: this.notifications,
+            counters: {
+                userIdCounter: this.userIdCounter,
+                employeeIdCounter: this.employeeIdCounter,
+                leaveIdCounter: this.leaveIdCounter,
+                advanceIdCounter: this.advanceIdCounter,
+                assetIdCounter: this.assetIdCounter,
+                departmentIdCounter: this.departmentIdCounter,
+                jobTitleIdCounter: this.jobTitleIdCounter,
+                attendanceIdCounter: this.attendanceIdCounter,
+                payrollRecordIdCounter: this.payrollRecordIdCounter,
+                notificationIdCounter: this.notificationIdCounter,
+            }
+        };
+    }
+    loadFromBackup(backupData) {
+        try {
+            this.users = backupData.users || [];
+            this.employees = backupData.employees || [];
+            this.leaves = backupData.leaves || [];
+            this.advances = backupData.advances || [];
+            this.assets = backupData.assets || [];
+            this.departments = backupData.departments || [];
+            this.jobTitles = backupData.jobTitles || [];
+            this.companySettings = backupData.companySettings || this.companySettings;
+            this.attendances = backupData.attendances || [];
+            this.payrollRecords = backupData.payrollRecords || [];
+            this.notifications = backupData.notifications || [];
+            if (backupData.counters) {
+                this.userIdCounter = backupData.counters.userIdCounter || this.userIdCounter;
+                this.employeeIdCounter = backupData.counters.employeeIdCounter || this.employeeIdCounter;
+                this.leaveIdCounter = backupData.counters.leaveIdCounter || this.leaveIdCounter;
+                this.advanceIdCounter = backupData.counters.advanceIdCounter || this.advanceIdCounter;
+                this.assetIdCounter = backupData.counters.assetIdCounter || this.assetIdCounter;
+                this.departmentIdCounter = backupData.counters.departmentIdCounter || this.departmentIdCounter;
+                this.jobTitleIdCounter = backupData.counters.jobTitleIdCounter || this.jobTitleIdCounter;
+                this.attendanceIdCounter = backupData.counters.attendanceIdCounter || this.attendanceIdCounter;
+                this.payrollRecordIdCounter = backupData.counters.payrollRecordIdCounter || this.payrollRecordIdCounter;
+                this.notificationIdCounter = backupData.counters.notificationIdCounter || this.notificationIdCounter;
+            }
+            else {
+                this.userIdCounter = backupData.userIdCounter || this.userIdCounter;
+                this.employeeIdCounter = backupData.employeeIdCounter || this.employeeIdCounter;
+                this.leaveIdCounter = backupData.leaveIdCounter || this.leaveIdCounter;
+                this.advanceIdCounter = backupData.advanceIdCounter || this.advanceIdCounter;
+                this.assetIdCounter = backupData.assetIdCounter || this.assetIdCounter;
+                this.departmentIdCounter = backupData.departmentIdCounter || this.departmentIdCounter;
+                this.jobTitleIdCounter = backupData.jobTitleIdCounter || this.jobTitleIdCounter;
+                this.attendanceIdCounter = backupData.attendanceIdCounter || this.attendanceIdCounter;
+                this.payrollRecordIdCounter = backupData.payrollRecordIdCounter || this.payrollRecordIdCounter;
+                this.notificationIdCounter = backupData.notificationIdCounter || this.notificationIdCounter;
+            }
+            console.log('✅ تم استعادة البيانات بنجاح');
+            return { success: true };
+        }
+        catch (error) {
+            console.error('❌ فشل في استعادة البيانات:', error);
+            throw error;
+        }
     }
     async seedInitialData() {
         if (this.storage.hasData() && this.employees.length > 0) {
@@ -258,6 +364,9 @@ class InMemoryDatabase {
     findUserByUsername(username) {
         return this.users.find(u => u.username === username);
     }
+    findAllUsers() {
+        return this.users;
+    }
     findUserById(id) {
         return this.users.find(u => u.id === id);
     }
@@ -308,6 +417,24 @@ class InMemoryDatabase {
         }
         return undefined;
     }
+    deleteEmployee(id) {
+        const index = this.employees.findIndex(e => e.id === id);
+        if (index > -1) {
+            this.employees.splice(index, 1);
+            this.saveToStorage();
+            return true;
+        }
+        return false;
+    }
+    deleteUserByEmployeeId(employeeId) {
+        const index = this.users.findIndex(u => u.employeeId === employeeId);
+        if (index > -1) {
+            this.users.splice(index, 1);
+            this.saveToStorage();
+            return true;
+        }
+        return false;
+    }
     createLeave(data) {
         const leave = Object.assign({ id: this.leaveIdCounter++ }, data);
         this.leaves.push(leave);
@@ -332,6 +459,15 @@ class InMemoryDatabase {
         }
         return undefined;
     }
+    deleteLeave(id) {
+        const index = this.leaves.findIndex(l => l.id === id);
+        if (index > -1) {
+            this.leaves.splice(index, 1);
+            this.saveToStorage();
+            return true;
+        }
+        return false;
+    }
     createAdvance(data) {
         const advance = Object.assign({ id: this.advanceIdCounter++ }, data);
         this.advances.push(advance);
@@ -352,6 +488,15 @@ class InMemoryDatabase {
             return advance;
         }
         return undefined;
+    }
+    deleteAdvance(id) {
+        const index = this.advances.findIndex(a => a.id === id);
+        if (index > -1) {
+            this.advances.splice(index, 1);
+            this.saveToStorage();
+            return true;
+        }
+        return false;
     }
     createAsset(data) {
         const asset = Object.assign({ id: this.assetIdCounter++ }, data);
@@ -427,6 +572,15 @@ class InMemoryDatabase {
         this.saveToStorage();
         return dept;
     }
+    updateDepartment(id, name) {
+        const dept = this.departments.find(d => d.id === id);
+        if (dept) {
+            dept.name = name;
+            this.saveToStorage();
+            return dept;
+        }
+        return undefined;
+    }
     deleteDepartment(id) {
         const index = this.departments.findIndex(d => d.id === id);
         if (index !== -1) {
@@ -449,6 +603,15 @@ class InMemoryDatabase {
         this.saveToStorage();
         return jobTitle;
     }
+    updateJobTitle(id, title) {
+        const jobTitle = this.jobTitles.find(j => j.id === id);
+        if (jobTitle) {
+            jobTitle.title = title;
+            this.saveToStorage();
+            return jobTitle;
+        }
+        return undefined;
+    }
     deleteJobTitle(id) {
         const index = this.jobTitles.findIndex(j => j.id === id);
         if (index !== -1) {
@@ -470,6 +633,169 @@ class InMemoryDatabase {
         }
         this.saveToStorage();
         return this.companySettings;
+    }
+    createAttendance(attendanceData) {
+        const attendance = {
+            id: this.attendanceIdCounter++,
+            employeeId: attendanceData.employeeId,
+            date: attendanceData.date || new Date(),
+            checkIn: attendanceData.checkIn,
+            checkOut: attendanceData.checkOut,
+            workHours: attendanceData.workHours,
+            lateMinutes: attendanceData.lateMinutes || 0,
+            overtimeHours: attendanceData.overtimeHours,
+            earlyLeaveMinutes: attendanceData.earlyLeaveMinutes,
+            status: attendanceData.status || 'PRESENT',
+            notes: attendanceData.notes,
+        };
+        this.attendances.push(attendance);
+        this.saveToStorage();
+        return attendance;
+    }
+    getAttendanceById(id) {
+        return this.attendances.find(a => a.id === id);
+    }
+    getAttendancesByEmployeeId(employeeId) {
+        return this.attendances.filter(a => a.employeeId === employeeId);
+    }
+    getAttendanceByEmployeeAndDate(employeeId, date) {
+        const searchDate = new Date(date);
+        searchDate.setHours(0, 0, 0, 0);
+        return this.attendances.find(a => {
+            const attDate = new Date(a.date);
+            attDate.setHours(0, 0, 0, 0);
+            return a.employeeId === employeeId && attDate.getTime() === searchDate.getTime();
+        });
+    }
+    getAllAttendances() {
+        return this.attendances;
+    }
+    updateAttendance(id, updates) {
+        const attendance = this.attendances.find(a => a.id === id);
+        if (attendance) {
+            Object.assign(attendance, updates);
+            this.saveToStorage();
+            return attendance;
+        }
+        return undefined;
+    }
+    deleteAttendance(id) {
+        const index = this.attendances.findIndex(a => a.id === id);
+        if (index !== -1) {
+            this.attendances.splice(index, 1);
+            this.saveToStorage();
+            return true;
+        }
+        return false;
+    }
+    createPayrollRecord(data) {
+        const record = {
+            id: this.payrollRecordIdCounter++,
+            employeeId: data.employeeId,
+            month: data.month,
+            year: data.year,
+            basicSalary: data.basicSalary || 0,
+            housingAllowance: data.housingAllowance || 0,
+            transportAllowance: data.transportAllowance || 0,
+            totalAllowances: data.totalAllowances || 0,
+            grossSalary: data.grossSalary || 0,
+            presentDays: data.presentDays || 0,
+            absentDays: data.absentDays || 0,
+            lateDays: data.lateDays || 0,
+            lateDeduction: data.lateDeduction || 0,
+            absentDeduction: data.absentDeduction || 0,
+            overtimeHours: data.overtimeHours || 0,
+            overtimeAmount: data.overtimeAmount || 0,
+            advanceDeduction: data.advanceDeduction || 0,
+            gosiDeduction: data.gosiDeduction || 0,
+            otherDeductions: data.otherDeductions || 0,
+            totalDeductions: data.totalDeductions || 0,
+            netSalary: data.netSalary || 0,
+            status: data.status || 'DRAFT',
+            paidDate: data.paidDate,
+            notes: data.notes,
+            createdAt: new Date(),
+        };
+        this.payrollRecords.push(record);
+        this.saveToStorage();
+        return record;
+    }
+    getPayrollRecordById(id) {
+        return this.payrollRecords.find(p => p.id === id);
+    }
+    getPayrollRecordsByEmployee(employeeId) {
+        return this.payrollRecords.filter(p => p.employeeId === employeeId);
+    }
+    getPayrollRecordByEmployeeAndPeriod(employeeId, month, year) {
+        return this.payrollRecords.find(p => p.employeeId === employeeId && p.month === month && p.year === year);
+    }
+    getAllPayrollRecords() {
+        return this.payrollRecords;
+    }
+    updatePayrollRecord(id, updates) {
+        const record = this.payrollRecords.find(p => p.id === id);
+        if (record) {
+            Object.assign(record, updates);
+            this.saveToStorage();
+            return record;
+        }
+        return undefined;
+    }
+    deletePayrollRecord(id) {
+        const index = this.payrollRecords.findIndex(p => p.id === id);
+        if (index !== -1) {
+            this.payrollRecords.splice(index, 1);
+            this.saveToStorage();
+            return true;
+        }
+        return false;
+    }
+    createNotification(data) {
+        const notification = {
+            id: this.notificationIdCounter++,
+            userId: data.userId,
+            title: data.title,
+            message: data.message,
+            type: data.type || 'INFO',
+            read: false,
+            createdAt: new Date(),
+            link: data.link,
+        };
+        this.notifications.push(notification);
+        this.saveToStorage();
+        return notification;
+    }
+    getNotificationsByUserId(userId) {
+        return this.notifications.filter(n => n.userId === userId)
+            .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+    }
+    getUnreadNotificationsByUserId(userId) {
+        return this.notifications.filter(n => n.userId === userId && !n.read)
+            .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+    }
+    markNotificationAsRead(id) {
+        const notification = this.notifications.find(n => n.id === id);
+        if (notification) {
+            notification.read = true;
+            this.saveToStorage();
+            return true;
+        }
+        return false;
+    }
+    markAllNotificationsAsRead(userId) {
+        const userNotifications = this.notifications.filter(n => n.userId === userId);
+        userNotifications.forEach(n => n.read = true);
+        this.saveToStorage();
+        return true;
+    }
+    deleteNotification(id) {
+        const index = this.notifications.findIndex(n => n.id === id);
+        if (index !== -1) {
+            this.notifications.splice(index, 1);
+            this.saveToStorage();
+            return true;
+        }
+        return false;
     }
 }
 exports.InMemoryDatabase = InMemoryDatabase;

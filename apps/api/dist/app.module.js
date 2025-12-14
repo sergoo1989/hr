@@ -19,6 +19,9 @@ const termination_module_1 = require("./termination/termination.module");
 const scheduler_module_1 = require("./scheduler/scheduler.module");
 const settings_module_1 = require("./settings/settings.module");
 const email_module_1 = require("./email/email.module");
+const attendance_module_1 = require("./attendance/attendance.module");
+const notifications_module_1 = require("./notifications/notifications.module");
+const backup_module_1 = require("./backup/backup.module");
 const app_controller_1 = require("./app.controller");
 let AppModule = class AppModule {
 };
@@ -37,6 +40,9 @@ exports.AppModule = AppModule = __decorate([
             termination_module_1.TerminationModule,
             scheduler_module_1.SchedulerModule,
             settings_module_1.SettingsModule,
+            attendance_module_1.AttendanceModule,
+            notifications_module_1.NotificationsModule,
+            backup_module_1.BackupModule,
         ],
         controllers: [app_controller_1.AppController],
         providers: [],

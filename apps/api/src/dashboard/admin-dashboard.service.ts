@@ -30,11 +30,11 @@ export class AdminDashboardService {
     // حساب الوثائق القريبة من الانتهاء
     const expiringDocuments = this.getExpiringDocumentsCount(employees);
     
-    // حساب كشف الرواتب الشهري
+    // حساب كشف الرواتب الشهري (مع البدلات الافتراضية حسب قانون العمل السعودي)
     const monthlyPayroll = employees.reduce((sum, emp) => {
       const basicSalary = emp.basicSalary || 0;
-      const housing = emp.housingAllowance || 0;
-      const transport = emp.transportAllowance || 0;
+      const housing = emp.housingAllowance || (basicSalary * 0.25);
+      const transport = emp.transportAllowance || (basicSalary * 0.10);
       return sum + basicSalary + housing + transport;
     }, 0);
     
@@ -313,7 +313,14 @@ export class AdminDashboardService {
       const usedDays = empLeaves.reduce((sum, l) => sum + (l.daysCount || l.days || 0), 0);
       
       const remainingDays = annualLeaveDays - usedDays;
-      const dailyRate = (emp.basicSalary || 0) / 30;
+      
+      // حساب الأجر الفعلي (الأساسي + البدلات) حسب قانون العمل السعودي المادة 111
+      const basicSalary = emp.basicSalary || 0;
+      const housingAllowance = emp.housingAllowance || (basicSalary * 0.25);
+      const transportAllowance = emp.transportAllowance || (basicSalary * 0.10);
+      const actualWage = basicSalary + housingAllowance + transportAllowance;
+      
+      const dailyRate = actualWage / 30;
       const leaveBalanceAmount = remainingDays * dailyRate;
       
       return {
@@ -338,8 +345,14 @@ export class AdminDashboardService {
       const monthsWorked = yearsWorked * 12;
       
       // حساب مكافأة نهاية الخدمة حسب نظام العمل السعودي
+      // يجب استخدام الأجر الفعلي (الأساسي + البدلات) حسب المادة 84
+      const basicSalary = emp.basicSalary || 0;
+      const housingAllowance = emp.housingAllowance || (basicSalary * 0.25);
+      const transportAllowance = emp.transportAllowance || (basicSalary * 0.10);
+      const actualWage = basicSalary + housingAllowance + transportAllowance;
+      
       let endOfServiceAmount = 0;
-      const monthlySalary = emp.basicSalary || 0;
+      const monthlySalary = actualWage;
       
       if (yearsWorked >= 10) {
         // كامل الراتب عن كل سنة

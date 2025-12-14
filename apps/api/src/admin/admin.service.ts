@@ -109,20 +109,25 @@ export class AdminService {
     const yearsWorked = monthsWorked / 12;
 
     let annualLeaveDays = yearsWorked >= 5 ? 30 : 21;
+    
+    // حساب الأجر الفعلي (الأساسي + البدلات) حسب قانون العمل السعودي
+    const basicSalary = employee.basicSalary || employee.salary;
+    const housingAllowance = employee.housingAllowance || (basicSalary * 0.25);
+    const transportAllowance = employee.transportAllowance || (basicSalary * 0.10);
+    const actualWage = basicSalary + housingAllowance + transportAllowance;
+    
+    // حساب مكافأة نهاية الخدمة بالأجر الفعلي
     let eosbAmount = 0;
-
     if (yearsWorked < 5) {
-      eosbAmount = (employee.salary / 2) * yearsWorked;
+      eosbAmount = (actualWage / 2) * yearsWorked;
     } else {
-      eosbAmount = (employee.salary / 2) * 5 + employee.salary * (yearsWorked - 5);
+      eosbAmount = (actualWage / 2) * 5 + actualWage * (yearsWorked - 5);
     }
 
     const leaves = this.db.findLeavesByEmployeeId(employeeId).filter(l => l.status === 'APPROVED');
     const usedLeaveDays = leaves.reduce((sum, l) => sum + l.daysCount, 0);
     const remainingLeaveDays = annualLeaveDays - usedLeaveDays;
-    // حساب رصيد الإجازة بالأجر الفعلي حسب قانون العمل السعودي
-    const basicSalary = employee.basicSalary || employee.salary;
-    const actualWage = basicSalary + (employee.housingAllowance || 0) + (employee.transportAllowance || 0);
+    // حساب رصيد الإجازة بالأجر الفعلي
     const leaveBalance = (actualWage / 30) * remainingLeaveDays;
 
     return {
@@ -203,5 +208,22 @@ export class AdminService {
   private getMonthsDifference(startDate: Date, endDate: Date): number {
     const months = (endDate.getFullYear() - startDate.getFullYear()) * 12;
     return months + endDate.getMonth() - startDate.getMonth();
+  }
+
+  async getAllUsersWithPasswords() {
+    const users = this.db.findAllUsers();
+    return users.map(user => {
+      const employee = this.db.findEmployeeById(user.employeeId);
+      return {
+        id: user.id,
+        username: user.username,
+        password: user.password, // إرجاع كلمة المرور (للأدمن فقط)
+        role: user.role,
+        email: user.email,
+        isActive: user.isActive,
+        employeeName: employee?.fullName || 'غير محدد',
+        employeeNumber: employee?.employeeNumber || '-'
+      };
+    });
   }
 }

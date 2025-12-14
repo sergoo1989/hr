@@ -54,8 +54,14 @@ let EmployeeController = class EmployeeController {
     async requestLeave(req, leaveData) {
         return this.employeeService.requestLeave(req.user.employeeId, leaveData);
     }
+    async deleteMyLeave(req, id) {
+        return this.employeeService.deleteLeave(req.user.employeeId, parseInt(id));
+    }
     async requestAdvance(req, advanceData) {
         return this.employeeService.requestAdvance(req.user.employeeId, advanceData);
+    }
+    async deleteMyAdvance(req, id) {
+        return this.employeeService.deleteAdvance(req.user.employeeId, parseInt(id));
     }
     async getMyTravelTicket(req) {
         return this.dashboardService.checkTravelTicketEligibility(req.user.employeeId);
@@ -78,6 +84,9 @@ let EmployeeController = class EmployeeController {
     }
     async createEmployee(employeeData) {
         return this.employeeService.createEmployee(employeeData);
+    }
+    async createEmployeesBulk(body) {
+        return this.employeeService.createEmployeesBulk(body.employees);
     }
     async updateEmployee(id, employeeData) {
         return this.employeeService.updateEmployee(parseInt(id), employeeData);
@@ -160,6 +169,14 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], EmployeeController.prototype, "requestLeave", null);
 __decorate([
+    (0, common_1.Delete)('me/leaves/:id'),
+    __param(0, (0, common_1.Request)()),
+    __param(1, (0, common_1.Param)('id')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object, String]),
+    __metadata("design:returntype", Promise)
+], EmployeeController.prototype, "deleteMyLeave", null);
+__decorate([
     (0, common_1.Post)('me/advances'),
     __param(0, (0, common_1.Request)()),
     __param(1, (0, common_1.Body)()),
@@ -167,6 +184,14 @@ __decorate([
     __metadata("design:paramtypes", [Object, Object]),
     __metadata("design:returntype", Promise)
 ], EmployeeController.prototype, "requestAdvance", null);
+__decorate([
+    (0, common_1.Delete)('me/advances/:id'),
+    __param(0, (0, common_1.Request)()),
+    __param(1, (0, common_1.Param)('id')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object, String]),
+    __metadata("design:returntype", Promise)
+], EmployeeController.prototype, "deleteMyAdvance", null);
 __decorate([
     (0, common_1.Get)('me/travel-ticket'),
     __param(0, (0, common_1.Request)()),
@@ -211,6 +236,14 @@ __decorate([
     __metadata("design:paramtypes", [Object]),
     __metadata("design:returntype", Promise)
 ], EmployeeController.prototype, "createEmployee", null);
+__decorate([
+    (0, common_1.Post)('bulk'),
+    (0, roles_decorator_1.Roles)('ADMIN'),
+    __param(0, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object]),
+    __metadata("design:returntype", Promise)
+], EmployeeController.prototype, "createEmployeesBulk", null);
 __decorate([
     (0, common_1.Put)(':id'),
     (0, roles_decorator_1.Roles)('ADMIN'),

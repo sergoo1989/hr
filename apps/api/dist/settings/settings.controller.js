@@ -37,6 +37,9 @@ let SettingsController = class SettingsController {
         console.log('✅ Department created:', result);
         return result;
     }
+    updateDepartment(id, body) {
+        return this.settingsService.updateDepartment(parseInt(id), body.name);
+    }
     deleteDepartment(id) {
         return this.settingsService.deleteDepartment(parseInt(id));
     }
@@ -48,6 +51,9 @@ let SettingsController = class SettingsController {
         const result = this.settingsService.createJobTitle(body.title);
         console.log('✅ Job title created:', result);
         return result;
+    }
+    updateJobTitle(id, body) {
+        return this.settingsService.updateJobTitle(parseInt(id), body.title);
     }
     deleteJobTitle(id) {
         return this.settingsService.deleteJobTitle(parseInt(id));
@@ -81,6 +87,14 @@ __decorate([
     __metadata("design:returntype", void 0)
 ], SettingsController.prototype, "createDepartment", null);
 __decorate([
+    (0, common_1.Put)('departments/:id'),
+    __param(0, (0, common_1.Param)('id')),
+    __param(1, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, Object]),
+    __metadata("design:returntype", void 0)
+], SettingsController.prototype, "updateDepartment", null);
+__decorate([
     (0, common_1.Delete)('departments/:id'),
     __param(0, (0, common_1.Param)('id')),
     __metadata("design:type", Function),
@@ -100,6 +114,14 @@ __decorate([
     __metadata("design:paramtypes", [Object]),
     __metadata("design:returntype", void 0)
 ], SettingsController.prototype, "createJobTitle", null);
+__decorate([
+    (0, common_1.Put)('job-titles/:id'),
+    __param(0, (0, common_1.Param)('id')),
+    __param(1, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, Object]),
+    __metadata("design:returntype", void 0)
+], SettingsController.prototype, "updateJobTitle", null);
 __decorate([
     (0, common_1.Delete)('job-titles/:id'),
     __param(0, (0, common_1.Param)('id')),

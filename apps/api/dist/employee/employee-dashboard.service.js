@@ -26,12 +26,17 @@ let EmployeeDashboardService = class EmployeeDashboardService {
             .filter(l => l.status === 'APPROVED');
         const usedDays = approvedLeaves.reduce((sum, l) => sum + (l.daysCount || l.days || 0), 0);
         const remainingDays = totalDays - usedDays;
-        const dailyWage = (employee.basicSalary || employee.salary || 0) / 30;
+        const basicSalary = employee.basicSalary || employee.salary || 0;
+        const housingAllowance = employee.housingAllowance || (basicSalary * 0.25);
+        const transportAllowance = employee.transportAllowance || (basicSalary * 0.10);
+        const actualWage = basicSalary + housingAllowance + transportAllowance;
+        const dailyWage = Math.round(actualWage / 30);
         const leaveBalance = remainingDays * dailyWage;
         return {
             totalDays,
             usedDays,
             remainingDays,
+            dailyWage,
             leaveBalance,
         };
     }
@@ -49,13 +54,16 @@ let EmployeeDashboardService = class EmployeeDashboardService {
         const hireDate = new Date(employee.hireDate);
         const now = new Date();
         const yearsWorked = (now.getTime() - hireDate.getTime()) / (1000 * 60 * 60 * 24 * 365);
-        const salary = employee.basicSalary || employee.salary || 0;
+        const basicSalary = employee.basicSalary || employee.salary || 0;
+        const housingAllowance = employee.housingAllowance || (basicSalary * 0.25);
+        const transportAllowance = employee.transportAllowance || (basicSalary * 0.10);
+        const actualWage = basicSalary + housingAllowance + transportAllowance;
         let amount = 0;
         if (yearsWorked <= 5) {
-            amount = (salary / 2) * yearsWorked;
+            amount = (actualWage / 2) * yearsWorked;
         }
         else {
-            amount = (salary / 2) * 5 + salary * (yearsWorked - 5);
+            amount = (actualWage / 2) * 5 + actualWage * (yearsWorked - 5);
         }
         return {
             yearsWorked: Math.round(yearsWorked * 100) / 100,

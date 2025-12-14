@@ -25,10 +25,21 @@ class DataStorage {
         try {
             const jsonData = JSON.stringify(data, null, 2);
             fs.writeFileSync(DATA_FILE, jsonData, 'utf8');
-            console.log('💾 تم حفظ البيانات بنجاح');
+            const fd = fs.openSync(DATA_FILE, 'r+');
+            fs.fsyncSync(fd);
+            fs.closeSync(fd);
+            console.log('💾 تم حفظ البيانات بنجاح - ' + new Date().toLocaleTimeString('ar-SA'));
         }
         catch (error) {
             console.error('❌ خطأ في حفظ البيانات:', error);
+            try {
+                const backupFile = DATA_FILE + '.backup';
+                fs.writeFileSync(backupFile, JSON.stringify(data, null, 2), 'utf8');
+                console.log('✅ تم حفظ نسخة احتياطية');
+            }
+            catch (backupError) {
+                console.error('❌ فشل حفظ النسخة الاحتياطية:', backupError);
+            }
         }
     }
     loadData() {

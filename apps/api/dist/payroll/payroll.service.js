@@ -14,27 +14,55 @@ let PayrollService = class PayrollService {
         const db = in_memory_db_1.InMemoryDatabase.getInstance();
         const employees = db.getAllEmployees();
         const payrollData = employees.map((emp) => {
-            const basicSalary = emp.salary;
+            const basicSalary = emp.basicSalary || emp.salary || 0;
+            const housingAllowance = emp.housingAllowance || (basicSalary * 0.25);
+            const transportAllowance = emp.transportAllowance || (basicSalary * 0.10);
+            const totalAllowances = housingAllowance + transportAllowance;
+            const grossSalary = basicSalary + totalAllowances;
+            const attendances = db.getAttendancesByEmployeeId(emp.id).filter(a => {
+                const date = new Date(a.date);
+                return date.getMonth() + 1 === month && date.getFullYear() === year;
+            });
+            const presentDays = attendances.filter(a => a.status === 'PRESENT' || a.status === 'LATE').length;
+            const absentDays = attendances.filter(a => a.status === 'ABSENT').length;
+            const lateDays = attendances.filter(a => a.status === 'LATE').length;
+            const totalLateMinutes = attendances.reduce((sum, a) => sum + (a.lateMinutes || 0), 0);
+            const totalOvertimeHours = attendances.reduce((sum, a) => sum + (a.overtimeHours || 0), 0);
+            const dailySalary = grossSalary / 30;
+            const absentDeduction = absentDays * dailySalary;
+            const lateDeduction = (totalLateMinutes / 480) * dailySalary;
+            const hourlyRate = grossSalary / 240;
+            const overtimeAmount = totalOvertimeHours * hourlyRate * 1.5;
             const advances = db.findAdvancesByEmployeeId(emp.id)
                 .filter(a => a.status === 'APPROVED');
             const totalAdvances = advances.reduce((sum, a) => sum + a.amount, 0);
             const advanceDeduction = totalAdvances > 0 ? totalAdvances / 12 : 0;
-            const assets = db.findAssetsByEmployeeId(emp.id)
-                .filter(a => !a.returned);
-            const assetCharges = assets.length * 0;
-            const totalDeductions = advanceDeduction + assetCharges;
-            const netSalary = basicSalary - totalDeductions;
+            const gosiDeduction = emp.nationality === 'سعودي' ? grossSalary * 0.10 : 0;
+            const totalDeductions = absentDeduction + lateDeduction + advanceDeduction + gosiDeduction;
+            const netSalary = grossSalary + overtimeAmount - totalDeductions;
             return {
                 employeeId: emp.id,
                 employeeName: emp.fullName,
+                employeeNumber: emp.employeeNumber,
+                department: emp.department,
                 month,
                 year,
                 basicSalary,
-                advances: totalAdvances,
-                advanceDeduction,
-                assetCharges,
-                totalDeductions,
-                netSalary,
+                housingAllowance,
+                transportAllowance,
+                totalAllowances,
+                grossSalary,
+                presentDays,
+                absentDays,
+                lateDays,
+                lateDeduction: Math.round(lateDeduction * 100) / 100,
+                absentDeduction: Math.round(absentDeduction * 100) / 100,
+                overtimeHours: totalOvertimeHours,
+                overtimeAmount: Math.round(overtimeAmount * 100) / 100,
+                advanceDeduction: Math.round(advanceDeduction * 100) / 100,
+                gosiDeduction: Math.round(gosiDeduction * 100) / 100,
+                totalDeductions: Math.round(totalDeductions * 100) / 100,
+                netSalary: Math.round(netSalary * 100) / 100,
             };
         });
         return payrollData;
@@ -45,53 +73,73 @@ let PayrollService = class PayrollService {
         if (!employee) {
             throw new Error('الموظف غير موجود');
         }
-        const basicSalary = employee.basicSalary || employee.salary;
-        const housingAllowance = employee.housingAllowance || 0;
-        const transportAllowance = employee.transportAllowance || 0;
-        const actualWage = basicSalary + housingAllowance + transportAllowance;
-        const leaves = db.findLeavesByEmployeeId(employeeId)
-            .filter(l => l.status === 'APPROVED');
-        const leaveDays = leaves.reduce((sum, l) => sum + l.daysCount, 0);
-        const leaveDeduction = (actualWage / 30) * leaveDays;
+        const basicSalary = employee.basicSalary || employee.salary || 0;
+        const housingAllowance = employee.housingAllowance || (basicSalary * 0.25);
+        const transportAllowance = employee.transportAllowance || (basicSalary * 0.10);
+        const totalAllowances = housingAllowance + transportAllowance;
+        const grossSalary = basicSalary + totalAllowances;
+        const attendances = db.getAttendancesByEmployeeId(employeeId).filter(a => {
+            const date = new Date(a.date);
+            return date.getMonth() + 1 === month && date.getFullYear() === year;
+        });
+        const presentDays = attendances.filter(a => a.status === 'PRESENT' || a.status === 'LATE').length;
+        const absentDays = attendances.filter(a => a.status === 'ABSENT').length;
+        const lateDays = attendances.filter(a => a.status === 'LATE').length;
+        const totalLateMinutes = attendances.reduce((sum, a) => sum + (a.lateMinutes || 0), 0);
+        const totalOvertimeHours = attendances.reduce((sum, a) => sum + (a.overtimeHours || 0), 0);
+        const dailySalary = grossSalary / 30;
+        const absentDeduction = absentDays * dailySalary;
+        const lateDeduction = (totalLateMinutes / 480) * dailySalary;
+        const hourlyRate = grossSalary / 240;
+        const overtimeAmount = totalOvertimeHours * hourlyRate * 1.5;
         const advances = db.findAdvancesByEmployeeId(employeeId)
             .filter(a => a.status === 'APPROVED');
         const totalAdvances = advances.reduce((sum, a) => sum + a.amount, 0);
         const advanceDeduction = totalAdvances > 0 ? totalAdvances / 12 : 0;
-        const assets = db.findAssetsByEmployeeId(employeeId)
-            .filter(a => !a.returned);
-        const assetCharges = assets.length * 0;
-        const totalDeductions = leaveDeduction + advanceDeduction + assetCharges;
-        const netSalary = basicSalary - totalDeductions;
+        const gosiDeduction = employee.nationality === 'سعودي' ? grossSalary * 0.10 : 0;
+        const totalDeductions = absentDeduction + lateDeduction + advanceDeduction + gosiDeduction;
+        const netSalary = grossSalary + overtimeAmount - totalDeductions;
         return {
             employeeId: employee.id,
             employeeName: employee.fullName,
+            employeeNumber: employee.employeeNumber,
+            department: employee.department,
             month,
             year,
             basicSalary,
             housingAllowance,
             transportAllowance,
-            actualWage,
-            leaveDays,
-            leaveDeduction,
+            totalAllowances,
+            grossSalary,
+            presentDays,
+            absentDays,
+            lateDays,
+            lateMinutes: totalLateMinutes,
+            lateDeduction: Math.round(lateDeduction * 100) / 100,
+            absentDeduction: Math.round(absentDeduction * 100) / 100,
+            overtimeHours: totalOvertimeHours,
+            overtimeAmount: Math.round(overtimeAmount * 100) / 100,
             advances: totalAdvances,
-            advanceDeduction,
-            assetCharges,
-            totalDeductions,
-            netSalary,
+            advanceDeduction: Math.round(advanceDeduction * 100) / 100,
+            gosiDeduction: Math.round(gosiDeduction * 100) / 100,
+            totalDeductions: Math.round(totalDeductions * 100) / 100,
+            netSalary: Math.round(netSalary * 100) / 100,
         };
     }
     async getPayrollSummary(month, year) {
         const payrollData = await this.generateMonthlyPayroll(month, year);
-        const totalBasicSalary = payrollData.reduce((sum, p) => sum + p.basicSalary, 0);
+        const totalGrossSalary = payrollData.reduce((sum, p) => sum + p.grossSalary, 0);
+        const totalOvertimeAmount = payrollData.reduce((sum, p) => sum + p.overtimeAmount, 0);
         const totalDeductions = payrollData.reduce((sum, p) => sum + p.totalDeductions, 0);
         const totalNetSalary = payrollData.reduce((sum, p) => sum + p.netSalary, 0);
         return {
             month,
             year,
-            totalEmployees: payrollData.length,
-            totalBasicSalary,
-            totalDeductions,
-            totalNetSalary,
+            employeeCount: payrollData.length,
+            totalGrossSalary: Math.round(totalGrossSalary * 100) / 100,
+            totalOvertimeAmount: Math.round(totalOvertimeAmount * 100) / 100,
+            totalDeductions: Math.round(totalDeductions * 100) / 100,
+            totalNetSalary: Math.round(totalNetSalary * 100) / 100,
             employees: payrollData,
         };
     }

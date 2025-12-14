@@ -25,13 +25,21 @@ export class EmployeeDashboardService {
     const usedDays = approvedLeaves.reduce((sum, l) => sum + (l.daysCount || l.days || 0), 0);
 
     const remainingDays = totalDays - usedDays;
-    const dailyWage = (employee.basicSalary || employee.salary || 0) / 30;
+    
+    // حساب الأجر الفعلي (الراتب الأساسي + البدلات) حسب قانون العمل السعودي المادة 111
+    const basicSalary = employee.basicSalary || employee.salary || 0;
+    const housingAllowance = employee.housingAllowance || (basicSalary * 0.25);
+    const transportAllowance = employee.transportAllowance || (basicSalary * 0.10);
+    const actualWage = basicSalary + housingAllowance + transportAllowance;
+    
+    const dailyWage = Math.round(actualWage / 30);
     const leaveBalance = remainingDays * dailyWage;
 
     return {
       totalDays,
       usedDays,
       remainingDays,
+      dailyWage,
       leaveBalance,
     };
   }
@@ -58,13 +66,18 @@ export class EmployeeDashboardService {
     // حساب مكافأة نهاية الخدمة حسب قانون العمل السعودي
     // أول 5 سنوات: نصف راتب شهر عن كل سنة
     // بعد 5 سنوات: راتب شهر كامل عن كل سنة
-    const salary = employee.basicSalary || employee.salary || 0;
+    // يجب استخدام الأجر الفعلي (الأساسي + البدلات) حسب المادة 84
+    const basicSalary = employee.basicSalary || employee.salary || 0;
+    const housingAllowance = employee.housingAllowance || (basicSalary * 0.25);
+    const transportAllowance = employee.transportAllowance || (basicSalary * 0.10);
+    const actualWage = basicSalary + housingAllowance + transportAllowance;
+    
     let amount = 0;
 
     if (yearsWorked <= 5) {
-      amount = (salary / 2) * yearsWorked;
+      amount = (actualWage / 2) * yearsWorked;
     } else {
-      amount = (salary / 2) * 5 + salary * (yearsWorked - 5);
+      amount = (actualWage / 2) * 5 + actualWage * (yearsWorked - 5);
     }
 
     return {

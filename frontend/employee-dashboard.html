@@ -415,6 +415,7 @@
 
                 // Update cards
                 const leaveBalance = dashboardData.leaveBalance || {};
+                console.log('Leave Balance Data:', leaveBalance); // للتحقق من البيانات
                 const remainingDays = leaveBalance.remainingDays || 0;
                 const totalDays = leaveBalance.totalDays || 21;
                 const usedDays = leaveBalance.usedDays || 0;
@@ -428,9 +429,13 @@
                 
                 document.getElementById('usedLeaves').textContent = usedDays;
                 
-                // حساب المبلغ المستلم من الإجازات المستخدمة
+                // عرض المبلغ المستلم من الإجازات المستخدمة (باستخدام الأجر الفعلي)
                 const employee = dashboardData.employee || {};
-                const dailyWage = ((employee.basicSalary || employee.salary || 0) / 30);
+                const basicSalary = employee.basicSalary || employee.salary || 0;
+                const housingAllowance = employee.housingAllowance || (basicSalary * 0.25);
+                const transportAllowance = employee.transportAllowance || (basicSalary * 0.10);
+                const actualWage = basicSalary + housingAllowance + transportAllowance;
+                const dailyWage = actualWage / 30;
                 const usedLeavesAmount = usedDays * dailyWage;
                 document.getElementById('usedLeavesAmount').textContent = Math.round(usedLeavesAmount).toLocaleString('ar-SA');
                 
@@ -444,11 +449,8 @@
                 // Display employee info
                 displayEmployeeInfo(dashboardData.employee);
 
-                // Save data for allowances table
-                localStorage.setItem('leaveBalanceData', JSON.stringify(leaveBalance));
-
-                // Display allowances table
-                displayAllowancesTable();
+                // Display allowances table with fresh data
+                displayAllowancesTable(leaveBalance, employee);
 
                 // Fetch and display leaves
                 const leavesResponse = await fetch(`${apiUrl}/employees/me/leaves`, { headers });
@@ -501,9 +503,59 @@
                     <div class="info-label">تاريخ التعيين</div>
                     <div class="info-value">${employee.hireDate ? new Date(employee.hireDate).toLocaleDateString('ar-SA') : 'غير متوفر'}</div>
                 </div>
+                
+                <!-- تفاصيل الراتب -->
+                <div class="info-item" style="grid-column: 1 / -1; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border-radius: 8px; padding: 15px; margin-top: 10px;">
+                    <div class="info-label" style="color: white; font-weight: bold; font-size: 16px; margin-bottom: 10px;">💰 تفاصيل الراتب</div>
+                </div>
                 <div class="info-item">
                     <div class="info-label">الراتب الأساسي</div>
-                    <div class="info-value">${employee.basicSalary || 'غير متوفر'}</div>
+                    <div class="info-value" style="color: #667eea; font-weight: bold;">${(employee.basicSalary || employee.salary || 0).toLocaleString('ar-SA')} ريال</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">بدل السكن 🏠</div>
+                    <div class="info-value" style="color: #4caf50; font-weight: bold;">
+                        ${(() => {
+                            const basic = employee.basicSalary || employee.salary || 0;
+                            const housing = employee.housingAllowance || (basic * 0.25);
+                            return housing.toLocaleString('ar-SA');
+                        })()} ريال
+                    </div>
+                    <div style="font-size: 11px; color: #666; margin-top: 3px;">
+                        ${employee.housingAllowance ? 
+                            '✓ قيمة محددة' : 
+                            `📊 ${(employee.basicSalary || employee.salary || 0).toLocaleString('ar-SA')} × 25% = ${((employee.basicSalary || employee.salary || 0) * 0.25).toLocaleString('ar-SA')} ريال`
+                        }
+                    </div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">بدل النقل 🚗</div>
+                    <div class="info-value" style="color: #ff9800; font-weight: bold;">
+                        ${(() => {
+                            const basic = employee.basicSalary || employee.salary || 0;
+                            const transport = employee.transportAllowance || (basic * 0.10);
+                            return transport.toLocaleString('ar-SA');
+                        })()} ريال
+                    </div>
+                    <div style="font-size: 11px; color: #666; margin-top: 3px;">
+                        ${employee.transportAllowance ? 
+                            '✓ قيمة محددة' : 
+                            `📊 ${(employee.basicSalary || employee.salary || 0).toLocaleString('ar-SA')} × 10% = ${((employee.basicSalary || employee.salary || 0) * 0.10).toLocaleString('ar-SA')} ريال`
+                        }
+                    </div>
+                </div>
+                <div class="info-item" style="grid-column: 1 / -1; background: #f8f9fa; border-radius: 8px; padding: 15px;">
+                    <div class="info-label" style="font-size: 16px; color: #333;">الراتب الإجمالي</div>
+                    <div class="info-value" style="font-size: 28px; color: #667eea; font-weight: bold;">
+                        ${(() => {
+                            const basic = employee.basicSalary || employee.salary || 0;
+                            const housing = employee.housingAllowance || (basic * 0.25);
+                            const transport = employee.transportAllowance || (basic * 0.10);
+                            const total = basic + housing + transport;
+                            return total.toLocaleString('ar-SA');
+                        })()} ريال
+                    </div>
+                    <div style="font-size: 12px; color: #999; margin-top: 5px;">الراتب الأساسي + بدل السكن + بدل النقل</div>
                 </div>
             `;
             
@@ -846,12 +898,32 @@
             }
         }
 
-        function displayAllowancesTable() {
+        function displayAllowancesTable(leaveBalanceData, employeeData) {
             const container = document.getElementById('allowancesTable');
             
-            // البيانات من localStorage أو الحسابات السابقة
-            const leaveBalanceData = JSON.parse(localStorage.getItem('leaveBalanceData') || '{}');
-            const employeeData = JSON.parse(localStorage.getItem('user') || '{}');
+            // إذا لم يتم تمرير البيانات، نستخدم localStorage كخيار احتياطي
+            if (!leaveBalanceData) {
+                leaveBalanceData = JSON.parse(localStorage.getItem('leaveBalanceData') || '{}');
+            }
+            if (!employeeData) {
+                employeeData = JSON.parse(localStorage.getItem('user') || '{}');
+            }
+            
+            console.log('Allowances - leaveBalanceData:', leaveBalanceData);
+            console.log('Allowances - employeeData:', employeeData);
+            
+            // استخدام القيمة اليومية من API أو حسابها إذا لم تكن موجودة
+            let dailyWage = leaveBalanceData.dailyWage;
+            
+            if (!dailyWage || dailyWage === 0) {
+                // حساب الأجر اليومي من بيانات الموظف
+                const basicSalary = employeeData.basicSalary || employeeData.salary || 0;
+                const housingAllowance = employeeData.housingAllowance || (basicSalary * 0.25);
+                const transportAllowance = employeeData.transportAllowance || (basicSalary * 0.10);
+                const actualWage = basicSalary + housingAllowance + transportAllowance;
+                dailyWage = Math.round(actualWage / 30);
+                console.log('Calculated dailyWage:', dailyWage);
+            }
             
             const allowances = [
                 {
@@ -859,7 +931,7 @@
                     amount: Math.round(leaveBalanceData.leaveBalance || 0),
                     status: 'متاح',
                     date: new Date().toLocaleDateString('ar-SA'),
-                    reason: `${leaveBalanceData.remainingDays || 0} يوم × ${Math.round((employeeData.basicSalary || 0) / 30)} ريال`
+                    reason: `${leaveBalanceData.remainingDays || 0} يوم × ${dailyWage.toLocaleString('ar-SA')} ريال`
                 }
             ];
 

@@ -25,6 +25,13 @@ let SettingsService = class SettingsService {
     createDepartment(name) {
         return this.db.createDepartment(name);
     }
+    updateDepartment(id, name) {
+        const department = this.db.updateDepartment(id, name);
+        if (!department) {
+            throw new Error('القسم غير موجود');
+        }
+        return department;
+    }
     deleteDepartment(id) {
         const success = this.db.deleteDepartment(id);
         if (!success) {
@@ -37,6 +44,13 @@ let SettingsService = class SettingsService {
     }
     createJobTitle(title) {
         return this.db.createJobTitle(title);
+    }
+    updateJobTitle(id, title) {
+        const jobTitle = this.db.updateJobTitle(id, title);
+        if (!jobTitle) {
+            throw new Error('المسمى الوظيفي غير موجود');
+        }
+        return jobTitle;
     }
     deleteJobTitle(id) {
         const success = this.db.deleteJobTitle(id);

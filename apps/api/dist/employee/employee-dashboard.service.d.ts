@@ -4,6 +4,7 @@ export declare class EmployeeDashboardService {
         totalDays: number;
         usedDays: number;
         remainingDays: number;
+        dailyWage: number;
         leaveBalance: number;
     }>;
     getAvailableTravelTicket(employeeId: number): Promise<{
@@ -44,6 +45,7 @@ export declare class EmployeeDashboardService {
             totalDays: number;
             usedDays: number;
             remainingDays: number;
+            dailyWage: number;
             leaveBalance: number;
         };
         travelTicket: {

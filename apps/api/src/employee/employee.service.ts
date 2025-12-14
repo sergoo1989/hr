@@ -40,7 +40,9 @@ export class EmployeeService {
     const usedDays = leaves.reduce((sum, l) => sum + l.daysCount, 0);
     // حساب رصيد الإجازة بالأجر الفعلي حسب قانون العمل السعودي
     const basicSalary = employee.basicSalary || employee.salary;
-    const actualWage = basicSalary + (employee.housingAllowance || 0) + (employee.transportAllowance || 0);
+    const housingAllowance = employee.housingAllowance || (basicSalary * 0.25);
+    const transportAllowance = employee.transportAllowance || (basicSalary * 0.10);
+    const actualWage = basicSalary + housingAllowance + transportAllowance;
     const leaveBalance = (actualWage / 30) * (totalDays - usedDays);
 
     return {
@@ -112,6 +114,42 @@ export class EmployeeService {
     });
   }
 
+  async deleteLeave(employeeId: number, leaveId: number) {
+    // التحقق من أن الطلب ينتمي للموظف وأنه معلق
+    const leave = this.db.findLeavesByEmployeeId(employeeId).find(l => l.id === leaveId);
+    if (!leave) {
+      throw new Error('طلب الإجازة غير موجود');
+    }
+    if (leave.status !== 'PENDING') {
+      throw new Error('لا يمكن حذف طلب إجازة تمت الموافقة عليه أو رفضه');
+    }
+    
+    const success = this.db.deleteLeave(leaveId);
+    if (!success) {
+      throw new Error('فشل في حذف طلب الإجازة');
+    }
+    
+    return { success: true, message: 'تم حذف طلب الإجازة بنجاح' };
+  }
+
+  async deleteAdvance(employeeId: number, advanceId: number) {
+    // التحقق من أن الطلب ينتمي للموظف وأنه معلق
+    const advance = this.db.findAdvancesByEmployeeId(employeeId).find(a => a.id === advanceId);
+    if (!advance) {
+      throw new Error('طلب السلفة غير موجود');
+    }
+    if (advance.status !== 'PENDING') {
+      throw new Error('لا يمكن حذف طلب سلفة تمت الموافقة عليه أو رفضه');
+    }
+    
+    const success = this.db.deleteAdvance(advanceId);
+    if (!success) {
+      throw new Error('فشل في حذف طلب السلفة');
+    }
+    
+    return { success: true, message: 'تم حذف طلب السلفة بنجاح' };
+  }
+
   async getAllEmployees() {
     return this.db.findAllEmployees();
   }
@@ -152,47 +190,47 @@ export class EmployeeService {
     const employee = this.db.createEmployee(employeeRecord);
     
     // إنشاء حساب مستخدم للموظف
-    if (employeeData.email) {
+    if (employeeData.username && employeeData.password) {
       try {
-        // إنشاء اسم مستخدم من الاسم الكامل (بدون مسافات وأحرف صغيرة)
-        const username = employeeData.fullName
-          .toLowerCase()
-          .replace(/\s+/g, '.')
-          .replace(/[^a-z0-9.]/g, '');
-        
-        // كلمة مرور مؤقتة
-        const temporaryPassword = this.generateTemporaryPassword();
+        // استخدام اليوزر والباسورد والصلاحية المدخلة من الفورم
+        const username = employeeData.username;
+        const password = employeeData.password;
+        const role = employeeData.role || 'EMPLOYEE'; // افتراضي موظف إذا لم يتم تحديد الصلاحية
         
         // إنشاء المستخدم
         const user = await this.db.createUser(
           username,
-          temporaryPassword,
-          'EMPLOYEE',
+          password,
+          role,
           employee.id,
           employeeData.email,
           true, // isActive = true
-          true  // mustChangePassword = true
+          false  // mustChangePassword = false (لأن المدير أدخل الباسورد مباشرة)
         );
         
-        // رابط التفعيل
-        const activationLink = `http://localhost:3000/frontend/change-password.html`;
-        
-        // إرسال البريد الإلكتروني
-        await this.emailService.sendEmployeeActivationEmail(
-          employeeData.email,
-          employeeData.fullName,
-          username,
-          temporaryPassword,
-          activationLink
-        );
-        
-        console.log(`✅ تم إرسال بريد التفعيل إلى: ${employeeData.email}`);
+        console.log(`✅ تم إنشاء حساب للموظف: ${employeeData.fullName}`);
         console.log(`👤 اسم المستخدم: ${username}`);
-        console.log(`🔑 كلمة المرور المؤقتة: ${temporaryPassword}`);
+        console.log(`🔐 الصلاحية: ${role}`);
+        
+        // إرسال بريد إلكتروني اختياري بالبيانات
+        if (employeeData.email) {
+          try {
+            await this.emailService.sendEmployeeActivationEmail(
+              employeeData.email,
+              employeeData.fullName,
+              username,
+              password,
+              `http://localhost:3000/frontend/login.html`
+            );
+            console.log(`📧 تم إرسال البيانات إلى: ${employeeData.email}`);
+          } catch (emailError) {
+            console.error('⚠️ خطأ في إرسال البريد:', emailError);
+          }
+        }
         
       } catch (error) {
-        console.error('❌ خطأ في إنشاء حساب أو إرسال بريد:', error);
-        // نكمل إنشاء الموظف حتى لو فشل إرسال البريد
+        console.error('❌ خطأ في إنشاء حساب المستخدم:', error);
+        // نكمل إنشاء الموظف حتى لو فشل إنشاء الحساب
       }
     }
     
@@ -244,26 +282,53 @@ export class EmployeeService {
   }
 
   async deleteEmployee(employeeId: number) {
-    const employee = this.db.employees.find(e => e.id === employeeId);
+    const employee = this.db.findEmployeeById(employeeId);
     if (!employee) {
       throw new Error('الموظف غير موجود');
     }
 
-    // Remove employee from the array
-    const index = this.db.employees.findIndex(e => e.id === employeeId);
-    if (index > -1) {
-      this.db.employees.splice(index, 1);
-    }
+    // استخدام دوال قاعدة البيانات بدلاً من التعديل المباشر
+    const employeeDeleted = this.db.deleteEmployee(employeeId);
+    const userDeleted = this.db.deleteUserByEmployeeId(employeeId);
 
-    // Remove associated user
-    const userIndex = this.db.users.findIndex(u => u.employeeId === employeeId);
-    if (userIndex > -1) {
-      this.db.users.splice(userIndex, 1);
+    if (!employeeDeleted) {
+      throw new Error('فشل في حذف الموظف');
     }
-
-    // حفظ البيانات بعد الحذف
-    this.db.saveToStorage();
 
     return { message: 'تم حذف الموظف بنجاح', success: true };
+  }
+
+  async createEmployeesBulk(employeesData: any[]) {
+    const results = {
+      successCount: 0,
+      failedCount: 0,
+      errors: [] as Array<{ employee: string; error: string }>,
+      employees: [] as any[]
+    };
+
+    for (const employeeData of employeesData) {
+      try {
+        // Validate required fields
+        if (!employeeData.fullName || !employeeData.nationalId || !employeeData.department || 
+            !employeeData.jobTitle || !employeeData.hireDate || !employeeData.basicSalary) {
+          throw new Error('الحقول المطلوبة مفقودة');
+        }
+
+        // Create employee
+        const employee = await this.createEmployee(employeeData);
+        results.employees.push(employee);
+        results.successCount++;
+        
+      } catch (error) {
+        results.failedCount++;
+        results.errors.push({
+          employee: employeeData.fullName || 'غير محدد',
+          error: error.message || 'خطأ غير معروف'
+        });
+        console.error(`❌ فشل إضافة الموظف ${employeeData.fullName}:`, error);
+      }
+    }
+
+    return results;
   }
 }

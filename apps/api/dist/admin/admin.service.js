@@ -92,18 +92,20 @@ let AdminService = class AdminService {
         const monthsWorked = this.getMonthsDifference(startDate, now);
         const yearsWorked = monthsWorked / 12;
         let annualLeaveDays = yearsWorked >= 5 ? 30 : 21;
+        const basicSalary = employee.basicSalary || employee.salary;
+        const housingAllowance = employee.housingAllowance || (basicSalary * 0.25);
+        const transportAllowance = employee.transportAllowance || (basicSalary * 0.10);
+        const actualWage = basicSalary + housingAllowance + transportAllowance;
         let eosbAmount = 0;
         if (yearsWorked < 5) {
-            eosbAmount = (employee.salary / 2) * yearsWorked;
+            eosbAmount = (actualWage / 2) * yearsWorked;
         }
         else {
-            eosbAmount = (employee.salary / 2) * 5 + employee.salary * (yearsWorked - 5);
+            eosbAmount = (actualWage / 2) * 5 + actualWage * (yearsWorked - 5);
         }
         const leaves = this.db.findLeavesByEmployeeId(employeeId).filter(l => l.status === 'APPROVED');
         const usedLeaveDays = leaves.reduce((sum, l) => sum + l.daysCount, 0);
         const remainingLeaveDays = annualLeaveDays - usedLeaveDays;
-        const basicSalary = employee.basicSalary || employee.salary;
-        const actualWage = basicSalary + (employee.housingAllowance || 0) + (employee.transportAllowance || 0);
         const leaveBalance = (actualWage / 30) * remainingLeaveDays;
         return {
             endOfServiceBenefit: eosbAmount,
@@ -161,6 +163,22 @@ let AdminService = class AdminService {
     getMonthsDifference(startDate, endDate) {
         const months = (endDate.getFullYear() - startDate.getFullYear()) * 12;
         return months + endDate.getMonth() - startDate.getMonth();
+    }
+    async getAllUsersWithPasswords() {
+        const users = this.db.findAllUsers();
+        return users.map(user => {
+            const employee = this.db.findEmployeeById(user.employeeId);
+            return {
+                id: user.id,
+                username: user.username,
+                password: user.password,
+                role: user.role,
+                email: user.email,
+                isActive: user.isActive,
+                employeeName: (employee === null || employee === void 0 ? void 0 : employee.fullName) || 'غير محدد',
+                employeeNumber: (employee === null || employee === void 0 ? void 0 : employee.employeeNumber) || '-'
+            };
+        });
     }
 };
 exports.AdminService = AdminService;

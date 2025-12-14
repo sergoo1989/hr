@@ -35,6 +35,11 @@ export class SettingsController {
     return result;
   }
 
+  @Put('departments/:id')
+  updateDepartment(@Param('id') id: string, @Body() body: { name: string }) {
+    return this.settingsService.updateDepartment(parseInt(id), body.name);
+  }
+
   @Delete('departments/:id')
   deleteDepartment(@Param('id') id: string) {
     return this.settingsService.deleteDepartment(parseInt(id));
@@ -52,6 +57,11 @@ export class SettingsController {
     const result = this.settingsService.createJobTitle(body.title);
     console.log('✅ Job title created:', result);
     return result;
+  }
+
+  @Put('job-titles/:id')
+  updateJobTitle(@Param('id') id: string, @Body() body: { title: string }) {
+    return this.settingsService.updateJobTitle(parseInt(id), body.title);
   }
 
   @Delete('job-titles/:id')

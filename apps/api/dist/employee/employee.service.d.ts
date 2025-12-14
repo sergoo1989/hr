@@ -23,6 +23,14 @@ export declare class EmployeeService {
     getEmployeeDocuments(employeeId: number): Promise<any[]>;
     requestLeave(employeeId: number, leaveData: any): Promise<import("../database/in-memory-db").Leave>;
     requestAdvance(employeeId: number, advanceData: any): Promise<import("../database/in-memory-db").Advance>;
+    deleteLeave(employeeId: number, leaveId: number): Promise<{
+        success: boolean;
+        message: string;
+    }>;
+    deleteAdvance(employeeId: number, advanceId: number): Promise<{
+        success: boolean;
+        message: string;
+    }>;
     getAllEmployees(): Promise<import("../database/in-memory-db").Employee[]>;
     createEmployee(employeeData: any): Promise<import("../database/in-memory-db").Employee>;
     private generateTemporaryPassword;
@@ -30,5 +38,14 @@ export declare class EmployeeService {
     deleteEmployee(employeeId: number): Promise<{
         message: string;
         success: boolean;
+    }>;
+    createEmployeesBulk(employeesData: any[]): Promise<{
+        successCount: number;
+        failedCount: number;
+        errors: Array<{
+            employee: string;
+            error: string;
+        }>;
+        employees: any[];
     }>;
 }
