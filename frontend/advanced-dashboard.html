@@ -487,31 +487,60 @@
                 return;
             }
 
+            const today = new Date();
+
             const html = `
+                <div style="background: #fff3cd; padding: 15px; border-radius: 8px; margin-bottom: 20px; border-right: 4px solid #ffc107;">
+                    <p style="color: #856404; margin: 0;"><strong>⚠️ ملاحظة:</strong> بدل الإجازة يظهر فقط للموظفين الذين أكملوا سنة كاملة من تاريخ التعيين. الموظفون الجدد يظهرون بخلفية صفراء.</p>
+                </div>
                 <table>
                     <thead>
                         <tr>
                             <th>رقم الموظف</th>
                             <th>الاسم</th>
+                            <th>تاريخ التعيين</th>
                             <th>الأيام المستحقة</th>
                             <th>الأيام المستخدمة</th>
                             <th>الأيام المتبقية</th>
                             <th>الأجر اليومي</th>
                             <th>رصيد الإجازات (ريال)</th>
+                            <th>الحالة</th>
                         </tr>
                     </thead>
                     <tbody>
-                        ${data.map(item => `
-                            <tr>
+                        ${data.map(item => {
+                            const hireDate = item.hireDate ? new Date(item.hireDate) : null;
+                            let hasCompletedOneYear = false;
+                            if (hireDate) {
+                                const diffDays = Math.floor((today - hireDate) / (1000 * 60 * 60 * 24));
+                                hasCompletedOneYear = diffDays >= 365;
+                            }
+                            
+                            const hireDateStr = hireDate ? hireDate.toLocaleDateString('ar-SA') : 'غير محدد';
+                            const remainingToYear = hireDate ? Math.max(0, 365 - Math.floor((today - hireDate) / (1000 * 60 * 60 * 24))) : 365;
+                            
+                            let statusHtml = '';
+                            if (!hireDate) {
+                                statusHtml = '<span style="color: #dc3545;">⚠️ تاريخ غير محدد</span>';
+                            } else if (!hasCompletedOneYear) {
+                                statusHtml = '<span style="color: #ffc107;">⏳ متبقي ' + remainingToYear + ' يوم</span>';
+                            } else {
+                                statusHtml = '<span style="color: #28a745;">✅ مستحق</span>';
+                            }
+                            
+                            return `
+                            <tr style="${!hasCompletedOneYear ? 'background: #fff3cd;' : ''}">
                                 <td>${item.employeeNumber}</td>
                                 <td>${item.fullName}</td>
+                                <td>${hireDateStr}</td>
                                 <td><span class="badge badge-info">${item.annualLeaveDays} يوم</span></td>
                                 <td><span class="badge badge-warning">${item.usedDays} يوم</span></td>
                                 <td><span class="badge badge-success">${item.remainingDays} يوم</span></td>
                                 <td>${item.dailyRate.toLocaleString()} ريال</td>
-                                <td><strong>${item.leaveBalanceAmount.toLocaleString()} ريال</strong></td>
-                            </tr>
-                        `).join('')}
+                                <td><strong style="color: ${hasCompletedOneYear ? '#1565c0' : '#999'};">${hasCompletedOneYear ? item.leaveBalanceAmount.toLocaleString() + ' ريال' : 'غير مستحق'}</strong></td>
+                                <td>${statusHtml}</td>
+                            </tr>`;
+                        }).join('')}
                     </tbody>
                 </table>
             `;

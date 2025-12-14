@@ -233,22 +233,22 @@
             </div>
 
             <div class="dashboard-grid">
-                <div class="card">
+                <div class="card" id="leaveBalanceCard">
                     <h3>رصيد الإجازات (أيام)</h3>
                     <div class="card-value" id="leaveBalance">-</div>
                     <div class="card-label" id="leaveBalanceLabel">يوم متبقي</div>
                 </div>
-                <div class="card" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white;">
+                <div class="card" id="leaveBalanceAmountCard" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white;">
                     <h3 style="color: white;">💰 رصيد الإجازات (فلوس)</h3>
                     <div class="card-value" style="color: white;" id="leaveBalanceAmount">-</div>
                     <div class="card-label" style="color: rgba(255,255,255,0.8);">ريال</div>
                 </div>
-                <div class="card">
+                <div class="card" id="usedLeavesCard">
                     <h3>الإجازات المستخدمة</h3>
                     <div class="card-value" id="usedLeaves">-</div>
                     <div class="card-label">يوم</div>
                 </div>
-                <div class="card" style="background: linear-gradient(135deg, #28a745 0%, #20c997 100%); color: white;">
+                <div class="card" id="usedLeavesAmountCard" style="background: linear-gradient(135deg, #28a745 0%, #20c997 100%); color: white;">
                     <h3 style="color: white;">💵 المبلغ المستلم من الإجازات</h3>
                     <div class="card-value" style="color: white;" id="usedLeavesAmount">-</div>
                     <div class="card-label" style="color: rgba(255,255,255,0.8);">ريال</div>
@@ -420,24 +420,69 @@
                 const totalDays = leaveBalance.totalDays || 21;
                 const usedDays = leaveBalance.usedDays || 0;
                 
-                document.getElementById('leaveBalance').textContent = remainingDays;
-                document.getElementById('leaveBalanceLabel').textContent = `من ${totalDays} يوم سنوياً`;
-                
-                // عرض المبلغ المالي لرصيد الإجازات المتبقية
-                const leaveBalanceAmount = leaveBalance.leaveBalance || 0;
-                document.getElementById('leaveBalanceAmount').textContent = Math.round(leaveBalanceAmount).toLocaleString('ar-SA');
-                
-                document.getElementById('usedLeaves').textContent = usedDays;
-                
-                // عرض المبلغ المستلم من الإجازات المستخدمة (باستخدام الأجر الفعلي)
+                // التحقق من إكمال سنة من تاريخ التعيين
                 const employee = dashboardData.employee || {};
-                const basicSalary = employee.basicSalary || employee.salary || 0;
-                const housingAllowance = employee.housingAllowance || (basicSalary * 0.25);
-                const transportAllowance = employee.transportAllowance || (basicSalary * 0.10);
-                const actualWage = basicSalary + housingAllowance + transportAllowance;
-                const dailyWage = actualWage / 30;
-                const usedLeavesAmount = usedDays * dailyWage;
-                document.getElementById('usedLeavesAmount').textContent = Math.round(usedLeavesAmount).toLocaleString('ar-SA');
+                const hireDate = employee.hireDate ? new Date(employee.hireDate) : null;
+                const today = new Date();
+                let hasCompletedOneYear = false;
+                
+                if (hireDate) {
+                    const diffTime = today - hireDate;
+                    const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+                    hasCompletedOneYear = diffDays >= 365;
+                }
+                
+                // إخفاء بطاقات الإجازات إذا لم يكمل سنة
+                if (!hasCompletedOneYear) {
+                    const remainingToYear = hireDate ? Math.max(0, 365 - Math.floor((today - hireDate) / (1000 * 60 * 60 * 24))) : 365;
+                    
+                    // تغيير محتوى البطاقات لإظهار رسالة
+                    document.getElementById('leaveBalanceCard').innerHTML = `
+                        <h3>⏳ رصيد الإجازات</h3>
+                        <div class="card-value" style="font-size: 16px; color: #856404;">غير متاح</div>
+                        <div class="card-label" style="color: #856404;">متبقي ${remainingToYear} يوم لإكمال سنة</div>
+                    `;
+                    document.getElementById('leaveBalanceCard').style.background = '#fff3cd';
+                    
+                    document.getElementById('leaveBalanceAmountCard').innerHTML = `
+                        <h3 style="color: #856404;">💰 بدل الإجازات</h3>
+                        <div class="card-value" style="font-size: 16px; color: #856404;">غير مستحق</div>
+                        <div class="card-label" style="color: #856404;">يجب إكمال سنة أولاً</div>
+                    `;
+                    document.getElementById('leaveBalanceAmountCard').style.background = '#fff3cd';
+                    
+                    document.getElementById('usedLeavesCard').innerHTML = `
+                        <h3>⏳ الإجازات المستخدمة</h3>
+                        <div class="card-value" style="font-size: 16px; color: #856404;">غير متاح</div>
+                        <div class="card-label" style="color: #856404;">-</div>
+                    `;
+                    document.getElementById('usedLeavesCard').style.background = '#fff3cd';
+                    
+                    document.getElementById('usedLeavesAmountCard').innerHTML = `
+                        <h3 style="color: #856404;">💵 مبلغ الإجازات</h3>
+                        <div class="card-value" style="font-size: 16px; color: #856404;">غير مستحق</div>
+                        <div class="card-label" style="color: #856404;">-</div>
+                    `;
+                    document.getElementById('usedLeavesAmountCard').style.background = '#fff3cd';
+                } else {
+                    document.getElementById('leaveBalance').textContent = remainingDays;
+                    document.getElementById('leaveBalanceLabel').textContent = `من ${totalDays} يوم سنوياً`;
+                    
+                    // عرض المبلغ المالي لرصيد الإجازات المتبقية
+                    const leaveBalanceAmount = leaveBalance.leaveBalance || 0;
+                    document.getElementById('leaveBalanceAmount').textContent = Math.round(leaveBalanceAmount).toLocaleString('ar-SA');
+                    
+                    document.getElementById('usedLeaves').textContent = usedDays;
+                    
+                    // عرض المبلغ المستلم من الإجازات المستخدمة (باستخدام الأجر الفعلي)
+                    const basicSalary = employee.basicSalary || employee.salary || 0;
+                    const housingAllowance = employee.housingAllowance || (basicSalary * 0.25);
+                    const transportAllowance = employee.transportAllowance || (basicSalary * 0.10);
+                    const actualWage = basicSalary + housingAllowance + transportAllowance;
+                    const dailyWage = actualWage / 30;
+                    const usedLeavesAmount = usedDays * dailyWage;
+                    document.getElementById('usedLeavesAmount').textContent = Math.round(usedLeavesAmount).toLocaleString('ar-SA');
+                }
                 
                 const advances = await (await fetch(`${apiUrl}/employees/me/advances`, { headers })).json();
                 const pendingAdvancesCount = advances.filter(a => a.status === 'PENDING').length;
