@@ -1358,6 +1358,7 @@
                                 <th>من تاريخ</th>
                                 <th>إلى تاريخ</th>
                                 <th>عدد الأيام</th>
+                                <th>السبب</th>
                                 <th>الإجراءات</th>
                             </tr>
                         </thead>
@@ -1371,10 +1372,11 @@
                                 return `
                                 <tr>
                                     <td>${leave.employee?.fullName || 'غير محدد'}</td>
-                                    <td>${getLeaveTypeName(leave.type)}</td>
+                                    <td>${getLeaveTypeName(leave.type || leave.leaveType)}</td>
                                     <td>${start.toLocaleDateString('ar-SA')}</td>
                                     <td>${end.toLocaleDateString('ar-SA')}</td>
                                     <td>${days}</td>
+                                    <td>${leave.reason || '-'}</td>
                                     <td>
                                         <button class="action-btn approve-btn" onclick="approveLeave(${leave.id})">موافقة</button>
                                         <button class="action-btn reject-btn" onclick="rejectLeave(${leave.id})">رفض</button>

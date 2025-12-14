@@ -722,16 +722,18 @@
                             <th>تاريخ البداية</th>
                             <th>تاريخ النهاية</th>
                             <th>عدد الأيام</th>
+                            <th>السبب</th>
                             <th>الحالة</th>
                         </tr>
                     </thead>
                     <tbody>
                         ${leaves.slice(0, 5).map(leave => `
                             <tr>
-                                <td>${getLeaveTypeName(leave.type)}</td>
+                                <td>${getLeaveTypeName(leave.type || leave.leaveType)}</td>
                                 <td>${new Date(leave.startDate).toLocaleDateString('ar-SA')}</td>
                                 <td>${new Date(leave.endDate).toLocaleDateString('ar-SA')}</td>
-                                <td>${leave.days || '-'}</td>
+                                <td>${leave.days || leave.daysCount || '-'}</td>
+                                <td>${leave.reason || '-'}</td>
                                 <td><span class="status-badge status-${leave.status.toLowerCase()}">${getStatusName(leave.status)}</span></td>
                             </tr>
                         `).join('')}

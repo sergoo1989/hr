@@ -537,7 +537,10 @@
                                 <td><span class="badge badge-warning">${item.usedDays} يوم</span></td>
                                 <td><span class="badge badge-success">${item.remainingDays} يوم</span></td>
                                 <td>${item.dailyRate.toLocaleString()} ريال</td>
-                                <td><strong style="color: ${hasCompletedOneYear ? '#1565c0' : '#999'};">${hasCompletedOneYear ? item.leaveBalanceAmount.toLocaleString() + ' ريال' : 'غير مستحق'}</strong></td>
+                                <td>
+                                    <strong style="color: ${hasCompletedOneYear ? '#1565c0' : '#999'};">${hasCompletedOneYear ? item.leaveBalanceAmount.toLocaleString() + ' ريال' : 'غير مستحق'}</strong>
+                                    <br><small style="color: #667eea;">(${item.remainingDays} يوم)</small>
+                                </td>
                                 <td>${statusHtml}</td>
                             </tr>`;
                         }).join('')}

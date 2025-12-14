@@ -262,7 +262,10 @@ function loadLeaveBalancesAnalytics() {
             <td><strong style="color: #667eea;">${balance} يوم</strong></td>
             <td><strong style="color: #2e7d32;">${actualWage.toFixed(2)} ر.س</strong></td>
             <td>${dailyWage.toFixed(2)} ر.س</td>
-            <td><strong style="color: ${hasCompletedOneYear ? '#1565c0' : '#999'}; font-size: 16px;">${hasCompletedOneYear ? leavePayValue.toFixed(2) + ' ر.س' : 'غير مستحق'}</strong></td>
+            <td>
+                <strong style="color: ${hasCompletedOneYear ? '#1565c0' : '#999'}; font-size: 16px;">${hasCompletedOneYear ? leavePayValue.toFixed(2) + ' ر.س' : 'غير مستحق'}</strong>
+                <br><small style="color: #667eea;">(${balance} يوم)</small>
+            </td>
             <td>${statusHtml}</td>
         </tr>`;
     }).join('')}</tbody></table>

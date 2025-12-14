@@ -1,8 +1,19 @@
 // نظام التخزين الدائم للبيانات - Persistent Storage System
+// ⚠️ تحذير: هذا النظام لا يعمل على Vercel لأن Vercel يستخدم نظام ملفات مؤقت
+// ✅ يعمل بشكل ممتاز على: Railway (مع Volume), Render, VPS, Local Server
 import * as fs from 'fs';
 import * as path from 'path';
 
-const DATA_DIR = path.join(process.cwd(), 'data');
+// دعم Railway Volume - إذا كان موجوداً استخدمه، وإلا استخدم المجلد المحلي
+// لإعداد Volume في Railway: أضف Volume وحدد mount path كـ /app/data
+const RAILWAY_VOLUME_PATH = process.env.RAILWAY_VOLUME_MOUNT_PATH || '/app/data';
+const IS_RAILWAY = !!process.env.RAILWAY_ENVIRONMENT;
+const IS_PRODUCTION = process.env.NODE_ENV === 'production';
+
+// تحديد مسار البيانات بناءً على البيئة
+const DATA_DIR = IS_RAILWAY && IS_PRODUCTION 
+  ? RAILWAY_VOLUME_PATH 
+  : path.join(process.cwd(), 'data');
 const DATA_FILE = path.join(DATA_DIR, 'hr-database.json');
 
 export class DataStorage {
@@ -20,6 +31,20 @@ export class DataStorage {
   }
 
   private ensureDataDirectory() {
+    // طباعة معلومات البيئة للتشخيص
+    console.log('🔧 بيئة التشغيل:', IS_PRODUCTION ? 'إنتاج' : 'تطوير');
+    console.log('🔧 Railway:', IS_RAILWAY ? 'نعم' : 'لا');
+    console.log('📁 مسار البيانات:', DATA_DIR);
+    console.log('📄 ملف البيانات:', DATA_FILE);
+    
+    // تحذير لمنصة Vercel
+    if (process.env.VERCEL) {
+      console.warn('⚠️⚠️⚠️ تحذير هام: أنت تعمل على Vercel!');
+      console.warn('⚠️ Vercel لا يدعم التخزين الدائم للملفات');
+      console.warn('⚠️ البيانات ستُفقد عند كل deployment جديد');
+      console.warn('⚠️ الحل: استخدم Railway أو Render للـ API');
+    }
+    
     if (!fs.existsSync(DATA_DIR)) {
       fs.mkdirSync(DATA_DIR, { recursive: true });
       console.log('📁 تم إنشاء مجلد البيانات');
