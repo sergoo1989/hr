@@ -4,9 +4,9 @@
   "description": "HR Management System API",
   "scripts": {
     "build": "nest build",
-    "start": "node dist/src/main.js",
+    "start": "node dist/main.js",
     "start:dev": "nest start --watch",
-    "start:prod": "node dist/src/main.js",
+    "start:prod": "node dist/main.js",
     "payroll:report": "ts-node src/reports/payroll.service.ts",
     "payroll:excel": "ts-node scripts/generatePayroll.ts"
   },
