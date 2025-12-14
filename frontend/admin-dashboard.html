@@ -389,35 +389,12 @@
         <div id="dashboard" class="tab-content active">
             <!-- Sub Navigation -->
             <div style="display: flex; gap: 10px; margin-bottom: 25px; flex-wrap: wrap; background: white; padding: 15px; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.08);">
-                <button id="overviewBtn" class="sub-tab-btn" style="background: #667eea; color: white; padding: 12px 24px; border: none; border-radius: 8px; cursor: pointer; font-weight: 600; transition: all 0.3s;" onclick="switchDashboardSection('overview')">📊 نظرة عامة</button>
-                <button id="historyBtn" class="sub-tab-btn" style="background: #f8f9fa; color: #667eea; padding: 12px 24px; border: 2px solid #e0e0e0; border-radius: 8px; cursor: pointer; font-weight: 600; transition: all 0.3s;" onclick="switchDashboardSection('history')">📋 السجل التاريخي</button>
+                <button id="historyBtn" class="sub-tab-btn" style="background: #667eea; color: white; padding: 12px 24px; border: none; border-radius: 8px; cursor: pointer; font-weight: 600; transition: all 0.3s;" onclick="switchDashboardSection('history')">📋 السجل التاريخي</button>
                 <button id="analyticsBtn" class="sub-tab-btn" style="background: #f8f9fa; color: #667eea; padding: 12px 24px; border: 2px solid #e0e0e0; border-radius: 8px; cursor: pointer; font-weight: 600; transition: all 0.3s;" onclick="switchDashboardSection('analytics')">📈 التحليلات المتقدمة</button>
             </div>
 
-            <!-- Overview Section -->
-            <div id="dashboardOverview" class="dashboard-subsection" style="display: block;">
-                <div class="stats-grid">
-                    <div class="stat-card">
-                        <div class="stat-value" id="totalEmployees">-</div>
-                        <div class="stat-label">إجمالي الموظفين</div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-value" id="pendingLeaves">-</div>
-                        <div class="stat-label">إجازات معلقة</div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-value" id="pendingAdvancesCount">-</div>
-                        <div class="stat-label">سلف معلقة</div>
-                    </div>
-                    <div class="stat-card" style="background: linear-gradient(135deg, #ff6b6b 0%, #ee5a6f 100%);">
-                        <div class="stat-value" id="expiringDocuments" style="color: white;">-</div>
-                        <div class="stat-label" style="color: rgba(255,255,255,0.9);">وثائق قريبة الانتهاء</div>
-                    </div>
-                </div>
-            </div>
-
             <!-- History Section -->
-            <div id="dashboardHistory" class="dashboard-subsection" style="display: none;">
+            <div id="dashboardHistory" class="dashboard-subsection" style="display: block;">
                 <div class="section">
                     <h2>📋 السجل التاريخي الشامل</h2>
                     
@@ -1034,8 +1011,7 @@
 
             // Load data for specific tabs
             if (tabName === 'dashboard') {
-                loadDashboard();
-                switchDashboardSection('overview'); // Show overview by default
+                switchDashboardSection('history'); // Show history by default
             }
             if (tabName === 'employees') loadEmployees();
             if (tabName === 'users') {
@@ -1060,12 +1036,7 @@
             });
             
             // Show selected section
-            if (section === 'overview') {
-                document.getElementById('dashboardOverview').style.display = 'block';
-                document.getElementById('overviewBtn').style.background = '#667eea';
-                document.getElementById('overviewBtn').style.color = 'white';
-                document.getElementById('overviewBtn').style.border = 'none';
-            } else if (section === 'history') {
+            if (section === 'history') {
                 document.getElementById('dashboardHistory').style.display = 'block';
                 document.getElementById('historyBtn').style.background = '#667eea';
                 document.getElementById('historyBtn').style.color = 'white';
