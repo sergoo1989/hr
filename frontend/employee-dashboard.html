@@ -511,8 +511,8 @@
                     
                     // عرض المبلغ المستلم من الإجازات المستخدمة (باستخدام الأجر الفعلي)
                     const basicSalary = employee.basicSalary || employee.salary || 0;
-                    const housingAllowance = employee.housingAllowance || (basicSalary * 0.25);
-                    const transportAllowance = employee.transportAllowance || (basicSalary * 0.10);
+                    const housingAllowance = employee.housingAllowance || 0;
+                    const transportAllowance = employee.transportAllowance || 0;
                     const actualWage = basicSalary + housingAllowance + transportAllowance;
                     const dailyWage = actualWage / 30;
                     const usedLeavesAmount = usedDays * dailyWage;
@@ -610,15 +610,14 @@
                     <div class="info-label">بدل السكن 🏠</div>
                     <div class="info-value" style="color: #4caf50; font-weight: bold;">
                         ${(() => {
-                            const basic = employee.basicSalary || employee.salary || 0;
-                            const housing = employee.housingAllowance || (basic * 0.25);
-                            return housing.toLocaleString('ar-SA');
-                        })()} ريال
+                            const housing = employee.housingAllowance || 0;
+                            return housing > 0 ? housing.toLocaleString('ar-SA') + ' ريال' : 'غير محدد';
+                        })()}
                     </div>
                     <div style="font-size: 11px; color: #666; margin-top: 3px;">
                         ${employee.housingAllowance ? 
                             '✓ قيمة محددة' : 
-                            `📊 ${(employee.basicSalary || employee.salary || 0).toLocaleString('ar-SA')} × 25% = ${((employee.basicSalary || employee.salary || 0) * 0.25).toLocaleString('ar-SA')} ريال`
+                            '❌ غير مدخل في النظام'
                         }
                     </div>
                 </div>
@@ -626,15 +625,14 @@
                     <div class="info-label">بدل النقل 🚗</div>
                     <div class="info-value" style="color: #ff9800; font-weight: bold;">
                         ${(() => {
-                            const basic = employee.basicSalary || employee.salary || 0;
-                            const transport = employee.transportAllowance || (basic * 0.10);
-                            return transport.toLocaleString('ar-SA');
-                        })()} ريال
+                            const transport = employee.transportAllowance || 0;
+                            return transport > 0 ? transport.toLocaleString('ar-SA') + ' ريال' : 'غير محدد';
+                        })()}
                     </div>
                     <div style="font-size: 11px; color: #666; margin-top: 3px;">
                         ${employee.transportAllowance ? 
                             '✓ قيمة محددة' : 
-                            `📊 ${(employee.basicSalary || employee.salary || 0).toLocaleString('ar-SA')} × 10% = ${((employee.basicSalary || employee.salary || 0) * 0.10).toLocaleString('ar-SA')} ريال`
+                            '❌ غير مدخل في النظام'
                         }
                     </div>
                 </div>
@@ -643,8 +641,8 @@
                     <div class="info-value" style="font-size: 28px; color: #667eea; font-weight: bold;">
                         ${(() => {
                             const basic = employee.basicSalary || employee.salary || 0;
-                            const housing = employee.housingAllowance || (basic * 0.25);
-                            const transport = employee.transportAllowance || (basic * 0.10);
+                            const housing = employee.housingAllowance || 0;
+                            const transport = employee.transportAllowance || 0;
                             const total = basic + housing + transport;
                             return total.toLocaleString('ar-SA');
                         })()} ريال

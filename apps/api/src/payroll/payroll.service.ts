@@ -10,8 +10,8 @@ export class PayrollService {
     const payrollData = employees.map((emp) => {
       // الراتب الأساسي والبدلات (مع القيم الافتراضية حسب قانون العمل السعودي)
       const basicSalary = emp.basicSalary || emp.salary || 0;
-      const housingAllowance = emp.housingAllowance || (basicSalary * 0.25);
-      const transportAllowance = emp.transportAllowance || (basicSalary * 0.10);
+      const housingAllowance = emp.housingAllowance || 0;
+      const transportAllowance = emp.transportAllowance || 0;
       const totalAllowances = housingAllowance + transportAllowance;
       const grossSalary = basicSalary + totalAllowances;
 
@@ -85,10 +85,10 @@ export class PayrollService {
       throw new Error('الموظف غير موجود');
     }
 
-    // الراتب الأساسي والبدلات (مع القيم الافتراضية حسب قانون العمل السعودي)
+    // الراتب الأساسي والبدلات من قاعدة البيانات
     const basicSalary = employee.basicSalary || employee.salary || 0;
-    const housingAllowance = employee.housingAllowance || (basicSalary * 0.25);
-    const transportAllowance = employee.transportAllowance || (basicSalary * 0.10);
+    const housingAllowance = employee.housingAllowance || 0;
+    const transportAllowance = employee.transportAllowance || 0;
     const totalAllowances = housingAllowance + transportAllowance;
     const grossSalary = basicSalary + totalAllowances;
 

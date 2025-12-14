@@ -316,8 +316,8 @@ export class AdminDashboardService {
       
       // حساب الأجر الفعلي (الأساسي + البدلات) حسب قانون العمل السعودي المادة 111
       const basicSalary = emp.basicSalary || 0;
-      const housingAllowance = emp.housingAllowance || (basicSalary * 0.25);
-      const transportAllowance = emp.transportAllowance || (basicSalary * 0.10);
+      const housingAllowance = emp.housingAllowance || 0;
+      const transportAllowance = emp.transportAllowance || 0;
       const actualWage = basicSalary + housingAllowance + transportAllowance;
       
       const dailyRate = actualWage / 30;
@@ -347,8 +347,8 @@ export class AdminDashboardService {
       // حساب مكافأة نهاية الخدمة حسب نظام العمل السعودي
       // يجب استخدام الأجر الفعلي (الأساسي + البدلات) حسب المادة 84
       const basicSalary = emp.basicSalary || 0;
-      const housingAllowance = emp.housingAllowance || (basicSalary * 0.25);
-      const transportAllowance = emp.transportAllowance || (basicSalary * 0.10);
+      const housingAllowance = emp.housingAllowance || 0;
+      const transportAllowance = emp.transportAllowance || 0;
       const actualWage = basicSalary + housingAllowance + transportAllowance;
       
       let endOfServiceAmount = 0;

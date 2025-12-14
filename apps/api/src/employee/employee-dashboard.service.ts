@@ -28,8 +28,8 @@ export class EmployeeDashboardService {
     
     // حساب الأجر الفعلي (الراتب الأساسي + البدلات) حسب قانون العمل السعودي المادة 111
     const basicSalary = employee.basicSalary || employee.salary || 0;
-    const housingAllowance = employee.housingAllowance || (basicSalary * 0.25);
-    const transportAllowance = employee.transportAllowance || (basicSalary * 0.10);
+    const housingAllowance = employee.housingAllowance || 0;
+    const transportAllowance = employee.transportAllowance || 0;
     const actualWage = basicSalary + housingAllowance + transportAllowance;
     
     const dailyWage = Math.round(actualWage / 30);
@@ -68,8 +68,8 @@ export class EmployeeDashboardService {
     // بعد 5 سنوات: راتب شهر كامل عن كل سنة
     // يجب استخدام الأجر الفعلي (الأساسي + البدلات) حسب المادة 84
     const basicSalary = employee.basicSalary || employee.salary || 0;
-    const housingAllowance = employee.housingAllowance || (basicSalary * 0.25);
-    const transportAllowance = employee.transportAllowance || (basicSalary * 0.10);
+    const housingAllowance = employee.housingAllowance || 0;
+    const transportAllowance = employee.transportAllowance || 0;
     const actualWage = basicSalary + housingAllowance + transportAllowance;
     
     let amount = 0;

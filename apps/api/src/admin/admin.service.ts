@@ -119,8 +119,8 @@ export class AdminService {
     
     // حساب الأجر الفعلي (الأساسي + البدلات) حسب قانون العمل السعودي
     const basicSalary = employee.basicSalary || employee.salary;
-    const housingAllowance = employee.housingAllowance || (basicSalary * 0.25);
-    const transportAllowance = employee.transportAllowance || (basicSalary * 0.10);
+    const housingAllowance = employee.housingAllowance || 0;
+    const transportAllowance = employee.transportAllowance || 0;
     const actualWage = basicSalary + housingAllowance + transportAllowance;
     
     // حساب مكافأة نهاية الخدمة بالأجر الفعلي

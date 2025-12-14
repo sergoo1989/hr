@@ -49,9 +49,9 @@ export class EmployeeService {
     const leaves = this.db.findLeavesByEmployeeId(employeeId).filter(l => l.status === 'APPROVED');
     const usedDays = leaves.reduce((sum, l) => sum + l.daysCount, 0);
     // حساب رصيد الإجازة بالأجر الفعلي حسب قانون العمل السعودي
-    const basicSalary = employee.basicSalary || employee.salary;
-    const housingAllowance = employee.housingAllowance || (basicSalary * 0.25);
-    const transportAllowance = employee.transportAllowance || (basicSalary * 0.10);
+    const basicSalary = employee.basicSalary || employee.salary || 0;
+    const housingAllowance = employee.housingAllowance || 0;
+    const transportAllowance = employee.transportAllowance || 0;
     const actualWage = basicSalary + housingAllowance + transportAllowance;
     const leaveBalance = (actualWage / 30) * (totalDays - usedDays);
 
