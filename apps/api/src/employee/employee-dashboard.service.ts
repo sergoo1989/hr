@@ -16,8 +16,16 @@ export class EmployeeDashboardService {
     const now = new Date();
     const yearsWorked = (now.getTime() - hireDate.getTime()) / (1000 * 60 * 60 * 24 * 365);
 
-    // تحديد عدد أيام الإجازة السنوية (21 يوم أول 5 سنوات، 30 يوم بعد ذلك)
-    const totalDays = yearsWorked >= 5 ? 30 : 21;
+    // حساب عدد أيام الإجازة حسب الجنسية ونوع العقد
+    let totalDays = 30; // الافتراضي للسعوديين
+    
+    if (employee.nationality === 'NON_SAUDI') {
+      // للموظفين غير السعوديين: استخدام عدد أيام الإجازة من العقد
+      totalDays = employee.contractLeaveDays || 30;
+    } else if (employee.nationality === 'SAUDI') {
+      // للسعوديين: 21 يوم أول 5 سنوات، ثم 30 يوم
+      totalDays = yearsWorked >= 5 ? 30 : 21;
+    }
 
     // حساب الأيام المستخدمة من الإجازات المعتمدة
     const approvedLeaves = this.db.findLeavesByEmployeeId(employeeId)
