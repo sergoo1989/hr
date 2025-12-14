@@ -1,16 +1,6 @@
 {
   "users": [
     {
-      "id": 2,
-      "username": "admin",
-      "password": "$2b$10$dy7/l21B3Kn3F3JZd3IbS.ykRT.20kHDVKZes6NTD6KX91NkktrVO",
-      "role": "ADMIN",
-      "employeeId": 1,
-      "isActive": true,
-      "mustChangePassword": false,
-      "email": "admin@hr-system.com"
-    },
-    {
       "id": 6,
       "username": "serag",
       "password": "$2b$10$ugpAJa9qVHqEr8AiKadn9u1OOmPa8gyBkUW22exzaxBGZE18pcIIC",
@@ -34,21 +24,6 @@
     }
   ],
   "employees": [
-    {
-      "id": 1,
-      "fullName": "مدير النظام",
-      "employeeNumber": "EMP001",
-      "nationalId": "1234567890",
-      "email": "admin@company.com",
-      "phone": "+966501234567",
-      "department": "الإدارة",
-      "jobTitle": "مدير الموارد البشرية",
-      "hireDate": "2020-01-01T00:00:00.000Z",
-      "basicSalary": 10000,
-      "housingAllowance": 3000,
-      "transportAllowance": 1000,
-      "nationality": "SAUDI"
-    },
     {
       "id": 6,
       "fullName": "احمد سراج",
@@ -100,103 +75,8 @@
       "employeeNumber": "EMP007"
     }
   ],
-  "leaves": [
-    {
-      "id": 1,
-      "employeeId": 2,
-      "type": "ANNUAL",
-      "leaveType": "إجازة سنوية",
-      "startDate": "2024-12-20T00:00:00.000Z",
-      "endDate": "2024-12-25T00:00:00.000Z",
-      "days": 5,
-      "daysCount": 5,
-      "status": "REJECTED",
-      "requestDate": "2024-12-10T00:00:00.000Z",
-      "reason": "عطلة نهاية العام"
-    },
-    {
-      "id": 2,
-      "employeeId": 2,
-      "type": "SICK",
-      "leaveType": "إجازة مرضية",
-      "startDate": "2024-11-15T00:00:00.000Z",
-      "endDate": "2024-11-17T00:00:00.000Z",
-      "days": 2,
-      "daysCount": 2,
-      "status": "APPROVED",
-      "requestDate": "2024-11-14T00:00:00.000Z",
-      "reason": "مرض"
-    },
-    {
-      "id": 3,
-      "employeeId": 4,
-      "type": "ANNUAL",
-      "leaveType": "إجازة سنوية",
-      "startDate": "2024-12-20T00:00:00.000Z",
-      "endDate": "2024-12-25T00:00:00.000Z",
-      "days": 5,
-      "daysCount": 5,
-      "status": "REJECTED",
-      "requestDate": "2024-12-10T00:00:00.000Z",
-      "reason": "عطلة نهاية العام"
-    },
-    {
-      "id": 4,
-      "employeeId": 4,
-      "type": "SICK",
-      "leaveType": "إجازة مرضية",
-      "startDate": "2024-11-15T00:00:00.000Z",
-      "endDate": "2024-11-17T00:00:00.000Z",
-      "days": 2,
-      "daysCount": 2,
-      "status": "APPROVED",
-      "requestDate": "2024-11-14T00:00:00.000Z",
-      "reason": "مرض"
-    },
-    {
-      "id": 5,
-      "employeeId": 2,
-      "startDate": "2026-01-01",
-      "endDate": "2026-01-13",
-      "reason": "h[h.m sk,dm ",
-      "requestDate": "2025-12-13T19:12:38.453Z",
-      "status": "APPROVED"
-    }
-  ],
-  "advances": [
-    {
-      "id": 1,
-      "employeeId": 2,
-      "amount": 5000,
-      "requestDate": "2024-12-01T00:00:00.000Z",
-      "status": "REJECTED",
-      "reason": "احتياجات شخصية"
-    },
-    {
-      "id": 2,
-      "employeeId": 2,
-      "amount": 3000,
-      "requestDate": "2024-11-10T00:00:00.000Z",
-      "status": "APPROVED",
-      "reason": "ظروف طارئة"
-    },
-    {
-      "id": 3,
-      "employeeId": 4,
-      "amount": 5000,
-      "requestDate": "2024-12-01T00:00:00.000Z",
-      "status": "REJECTED",
-      "reason": "احتياجات شخصية"
-    },
-    {
-      "id": 4,
-      "employeeId": 4,
-      "amount": 3000,
-      "requestDate": "2024-11-10T00:00:00.000Z",
-      "status": "APPROVED",
-      "reason": "ظروف طارئة"
-    }
-  ],
+  "leaves": [],
+  "advances": [],
   "assets": [],
   "departments": [
     {

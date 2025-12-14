@@ -364,4 +364,22 @@ export class AdminService {
       message: 'تم حذف الخصم بنجاح'
     };
   }
+
+  async updateLeaveAllowancePaid(employeeId: number, amount: number) {
+    const employee = this.db.findEmployeeById(employeeId);
+    if (!employee) {
+      throw new NotFoundException('الموظف غير موجود');
+    }
+
+    const success = this.db.updateEmployeeLeaveAllowance(employeeId, amount);
+    if (!success) {
+      throw new BadRequestException('فشل تحديث بدل الإجازة');
+    }
+
+    return {
+      success: true,
+      message: 'تم تحديث بدل الإجازة المسدد بنجاح',
+      employee: this.db.findEmployeeById(employeeId)
+    };
+  }
 }

@@ -149,4 +149,9 @@ export class AdminController {
   async deleteDeduction(@Param('id') id: string) {
     return this.adminService.deleteDeduction(parseInt(id));
   }
+
+  @Patch('employees/:id/leave-allowance')
+  async updateLeaveAllowancePaid(@Param('id') id: string, @Body() body: { amount: number }) {
+    return this.adminService.updateLeaveAllowancePaid(parseInt(id), body.amount);
+  }
 }

@@ -196,24 +196,24 @@ function loadLeaveBalancesAnalytics() {
                 <li><strong>المادة 2 - تعريف الأجر:</strong> الأجر = الأجر الفعلي = الأساسي + جميع البدلات المستحقة (سكن، نقل، إلخ)</li>
                 <li><strong>المادة 109:</strong> الإجازة السنوية تُدفع بأجر كامل (الأجر الفعلي)</li>
                 <li><strong>المادة 111:</strong> بدل الإجازة غير المستخدم يُحسب على الأجر الفعلي</li>
-                <li><strong>شرط الاستحقاق:</strong> يجب إكمال سنة كاملة من تاريخ التعيين للحصول على بدل الإجازة</li>
+                <li><strong>حساب البدل السنوي:</strong> يُحسب بدل الإجازة عن كل سنة خدمة من تاريخ التعيين</li>
                 <li><strong>طريقة الحساب:</strong> الأجر اليومي = (الأساسي + السكن + النقل + البدلات) ÷ 30 يوم</li>
-                <li><strong>بدل الإجازة:</strong> عدد أيام الإجازة × الأجر اليومي</li>
+                <li><strong>بدل الإجازة:</strong> (عدد أيام الإجازة × الأجر اليومي) × عدد السنوات</li>
             </ul>
         </div>
     `;
     
-    document.getElementById('leaveBalancesTable').innerHTML = lawNote + `<table class="analytics-table"><thead><tr><th>الموظف</th><th>القسم</th><th>الجنسية</th><th>تاريخ التعيين</th><th>مدة الخدمة</th><th>رصيد الإجازات</th><th>الأجر الفعلي</th><th>الأجر اليومي</th><th>بدل الإجازة</th><th>الحالة</th></tr></thead><tbody>${employees.map(e => {
+    document.getElementById('leaveBalancesTable').innerHTML = lawNote + `<table class="analytics-table"><thead><tr><th>الموظف</th><th>القسم</th><th>الجنسية</th><th>تاريخ التعيين</th><th>مدة الخدمة</th><th>رصيد الإجازات</th><th>الأجر الفعلي</th><th>الأجر اليومي</th><th>بدل السنة الواحدة</th><th>إجمالي المستحق</th><th>المسدد</th><th>المتبقي</th><th>الحالة</th></tr></thead><tbody>${employees.map(e => {
         // حساب مدة الخدمة
         const hireDate = e.hireDate ? new Date(e.hireDate) : null;
         let monthsWorked = 0;
-        let hasCompletedOneYear = false;
+        let yearsCompleted = 0;
         
         if (hireDate) {
             const diffTime = today - hireDate;
             const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
             monthsWorked = Math.floor(diffDays / 30);
-            hasCompletedOneYear = diffDays >= 365;
+            yearsCompleted = Math.floor(diffDays / 365); // عدد السنوات الكاملة
         }
         
         // حساب رصيد الإجازات حسب الجنسية ونوع العقد
@@ -233,8 +233,17 @@ function loadLeaveBalancesAnalytics() {
         // ✅ الأجر اليومي = الأجر الفعلي ÷ 30
         const dailyWage = actualWage / 30;
         
-        // ✅ بدل الإجازة = عدد الأيام × الأجر اليومي (فقط إذا أكمل سنة)
-        const leavePayValue = hasCompletedOneYear ? (balance * dailyWage) : 0;
+        // ✅ بدل الإجازة السنوي = عدد الأيام × الأجر اليومي
+        const yearlyLeaveAllowance = balance * dailyWage;
+        
+        // ✅ إجمالي بدل الإجازة = بدل السنة × عدد السنوات الكاملة
+        const totalLeaveAllowance = yearsCompleted > 0 ? (yearlyLeaveAllowance * yearsCompleted) : 0;
+        
+        // المبلغ المسدد من بدل الإجازة
+        const paidAmount = parseFloat(e.leaveAllowancePaid) || 0;
+        
+        // المتبقي = الإجمالي - المسدد
+        const remaining = totalLeaveAllowance - paidAmount;
         
         const nationalityLabel = e.nationality === 'SAUDI' ? 'سعودي' : 'غير سعودي';
         const hireDateStr = hireDate ? hireDate.toLocaleDateString('ar-SA') : 'غير محدد';
@@ -246,14 +255,14 @@ function loadLeaveBalancesAnalytics() {
         let statusHtml = '';
         if (!hireDate) {
             statusHtml = '<span style="color: #dc3545;">⚠️ تاريخ التعيين غير محدد</span>';
-        } else if (!hasCompletedOneYear) {
+        } else if (yearsCompleted === 0) {
             const remainingDays = 365 - Math.floor((today - hireDate) / (1000 * 60 * 60 * 24));
             statusHtml = `<span style="color: #ffc107;">⏳ متبقي ${remainingDays} يوم</span>`;
         } else {
-            statusHtml = '<span style="color: #28a745;">✅ مستحق</span>';
+            statusHtml = `<span style="color: #28a745;">✅ ${yearsCompleted} ${yearsCompleted === 1 ? 'سنة' : 'سنوات'}</span>`;
         }
         
-        return `<tr style="${!hasCompletedOneYear ? 'background: #fff3cd;' : ''}">
+        return `<tr style="${yearsCompleted === 0 ? 'background: #fff3cd;' : ''}">
             <td><strong>${e.fullName}</strong></td>
             <td>${e.department || '-'}</td>
             <td>${nationalityLabel}</td>
@@ -262,16 +271,21 @@ function loadLeaveBalancesAnalytics() {
             <td><strong style="color: #667eea;">${balance} يوم</strong></td>
             <td><strong style="color: #2e7d32;">${actualWage.toFixed(2)} ر.س</strong></td>
             <td>${dailyWage.toFixed(2)} ر.س</td>
+            <td><strong style="color: #1565c0;">${yearlyLeaveAllowance.toFixed(2)} ر.س</strong><br><small style="color: #667eea;">(${balance} يوم)</small></td>
             <td>
-                <strong style="color: ${hasCompletedOneYear ? '#1565c0' : '#999'}; font-size: 16px;">${hasCompletedOneYear ? leavePayValue.toFixed(2) + ' ر.س' : 'غير مستحق'}</strong>
-                <br><small style="color: #667eea;">(${balance} يوم)</small>
+                <strong style="color: ${yearsCompleted > 0 ? '#1565c0' : '#999'}; font-size: 16px;">${yearsCompleted > 0 ? totalLeaveAllowance.toFixed(2) + ' ر.س' : 'غير مستحق'}</strong>
+            </td>
+            <td><strong style="color: #dc3545;">${paidAmount.toFixed(2)} ر.س</strong></td>
+            <td>
+                <strong style="color: #28a745; font-size: 16px;">${remaining.toFixed(2)} ر.س</strong>
+                <br><button onclick="updateLeaveAllowance(${e.id}, '${e.fullName}')" style="margin-top:5px; padding:5px 10px; background:#667eea; color:white; border:none; border-radius:4px; cursor:pointer; font-size:12px;">💰 تسجيل دفعة</button>
             </td>
             <td>${statusHtml}</td>
         </tr>`;
     }).join('')}</tbody></table>
     
     <div style="background: #fff3cd; padding: 15px; border-radius: 8px; margin-top: 20px; border-right: 4px solid #ffc107;">
-        <p style="color: #856404; margin: 0;"><strong>💡 ملاحظة:</strong> بدل الإجازة يظهر فقط للموظفين الذين أكملوا سنة كاملة من تاريخ التعيين. الموظفون الجدد (أقل من سنة) يظهرون بخلفية صفراء.</p>
+        <p style="color: #856404; margin: 0;"><strong>💡 ملاحظة:</strong> بدل الإجازة يُحسب عن كل سنة خدمة كاملة من تاريخ التعيين. الموظفون الجدد (أقل من سنة) يظهرون بخلفية صفراء.</p>
     </div>`;
 }
 
@@ -576,5 +590,47 @@ async function loadAssetsAnalytics() {
     } catch (error) {
         console.error('Error loading assets analytics:', error);
         document.getElementById('assetsAnalysisTable').innerHTML = '<div style="text-align:center;color:#f44336;padding:20px">حدث خطأ أثناء تحميل تحليل العهد</div>';
+    }
+}
+
+// دالة لتحديث بدل الإجازة المسدد
+async function updateLeaveAllowance(employeeId, employeeName) {
+    const currentPaid = analyticsData.employees.find(e => e.id === employeeId)?.leaveAllowancePaid || 0;
+    
+    const amount = prompt(`تسجيل دفعة بدل إجازة للموظف: ${employeeName}\n\nالمبلغ المسدد حالياً: ${currentPaid.toFixed(2)} ر.س\n\nأدخل إجمالي المبلغ المسدد الجديد (بالريال):`);
+    
+    if (amount === null) return; // ألغى المستخدم
+    
+    const paidAmount = parseFloat(amount);
+    if (isNaN(paidAmount) || paidAmount < 0) {
+        alert('⚠️ الرجاء إدخال مبلغ صحيح');
+        return;
+    }
+    
+    try {
+        const token = localStorage.getItem('token');
+        const response = await fetch(`${API_URL}/admin/employees/${employeeId}/leave-allowance`, {
+            method: 'PATCH',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
+            },
+            body: JSON.stringify({ amount: paidAmount })
+        });
+        
+        if (!response.ok) {
+            throw new Error('فشل تحديث بدل الإجازة');
+        }
+        
+        const data = await response.json();
+        alert('✅ ' + data.message);
+        
+        // إعادة تحميل البيانات
+        await loadAllData();
+        loadLeaveBalancesAnalytics();
+        
+    } catch (error) {
+        console.error('Error:', error);
+        alert('❌ حدث خطأ أثناء تحديث بدل الإجازة');
     }
 }

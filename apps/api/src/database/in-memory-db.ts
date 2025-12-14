@@ -47,6 +47,9 @@ export interface Employee {
   // End of service fields
   terminationReason?: 'NORMAL_END' | 'RESIGNATION' | 'TERMINATION'; // سبب انتهاء الخدمة
   terminationDate?: Date | string; // تاريخ انتهاء الخدمة
+  // Leave allowance fields - بدل الإجازة
+  leaveAllowancePaid?: number; // إجمالي بدل الإجازة المسدد
+  lastLeaveAllowanceUpdate?: Date | string; // آخر تحديث لبدل الإجازة
 }
 
 export interface Leave {
@@ -542,6 +545,18 @@ export class InMemoryDatabase {
       return this.employees[index];
     }
     return undefined;
+  }
+
+  updateEmployeeLeaveAllowance(employeeId: number, paidAmount: number): boolean {
+    const employee = this.employees.find(e => e.id === employeeId);
+    if (!employee) {
+      return false;
+    }
+
+    employee.leaveAllowancePaid = paidAmount;
+    employee.lastLeaveAllowanceUpdate = new Date().toISOString();
+    this.saveToStorage();
+    return true;
   }
 
   deleteEmployee(id: number): boolean {
