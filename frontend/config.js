@@ -2,18 +2,20 @@
 const Config = {
     // سيتم تحديد الـ API URL حسب البيئة
     getApiUrl: function() {
-        // اكتشاف تلقائي للسيرفر
-        // إذا كان النظام يعمل على localhost، استخدم localhost
-        // وإلا، استخدم نفس IP الذي يعمل عليه Frontend
         const hostname = window.location.hostname;
         
-        // إذا كان localhost أو 127.0.0.1، استخدم localhost
+        // للتطوير المحلي
         if (hostname === 'localhost' || hostname === '127.0.0.1') {
             return 'http://localhost:3000';
         }
         
-        // استخدم نفس IP السيرفر مع المنفذ 3000
-        return `http://${hostname}:3000`;
+        // للشبكة المحلية
+        if (hostname.match(/^192\.168\.|^10\.|^172\.(1[6-9]|2[0-9]|3[0-1])\./)) {
+            return `http://${hostname}:3000`;
+        }
+        
+        // للإنتاج (الإنترنت) - Render API
+        return 'https://hr-system-4izb.onrender.com';
     }
 };
 
@@ -24,4 +26,3 @@ const API_URL = Config.getApiUrl();
 console.log('🌐 API Configuration:');
 console.log('   Frontend: ' + window.location.origin);
 console.log('   API URL: ' + API_URL);
-console.log('   Hostname: ' + window.location.hostname);
