@@ -548,9 +548,18 @@
                 displayAssets(assetsData);
 
                 // Fetch and display deductions
-                const deductionsResponse = await fetch(`${apiUrl}/employees/me/deductions`, { headers });
-                const deductionsData = await deductionsResponse.json();
-                displayDeductions(deductionsData);
+                try {
+                    const deductionsResponse = await fetch(`${apiUrl}/employees/me/deductions`, { headers });
+                    if (deductionsResponse.ok) {
+                        const deductionsData = await deductionsResponse.json();
+                        displayDeductions(Array.isArray(deductionsData) ? deductionsData : []);
+                    } else {
+                        displayDeductions([]);
+                    }
+                } catch (err) {
+                    console.error('Error loading deductions:', err);
+                    displayDeductions([]);
+                }
 
                 document.getElementById('loading').style.display = 'none';
                 document.getElementById('content').style.display = 'block';
@@ -949,7 +958,9 @@
 
         function displayDeductions(deductions) {
             const container = document.getElementById('deductionsTable');
-            if (!deductions || deductions.length === 0) {
+            if (!container) return;
+            
+            if (!deductions || !Array.isArray(deductions) || deductions.length === 0) {
                 container.innerHTML = '<p style="color: #999; text-align: center; padding: 20px;">لا توجد خصومات مسجلة</p>';
                 return;
             }
