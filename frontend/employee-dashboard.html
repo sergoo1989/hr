@@ -912,6 +912,50 @@
             console.log('Allowances - leaveBalanceData:', leaveBalanceData);
             console.log('Allowances - employeeData:', employeeData);
             
+            // التحقق من أن الموظف أكمل سنة من تاريخ التعيين
+            const hireDate = employeeData.hireDate ? new Date(employeeData.hireDate) : null;
+            const today = new Date();
+            let hasCompletedOneYear = false;
+            let monthsWorked = 0;
+            
+            if (hireDate) {
+                const diffTime = today - hireDate;
+                const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+                monthsWorked = Math.floor(diffDays / 30);
+                hasCompletedOneYear = diffDays >= 365;
+            }
+            
+            console.log('Hire Date:', hireDate, 'Months Worked:', monthsWorked, 'Has Completed One Year:', hasCompletedOneYear);
+            
+            // إذا لم يكمل سنة، لا نعرض بدل الإجازة
+            if (!hasCompletedOneYear) {
+                const remainingDays = hireDate ? Math.max(0, 365 - Math.floor((today - hireDate) / (1000 * 60 * 60 * 24))) : 365;
+                container.innerHTML = `
+                    <div style="background: #fff3cd; border: 1px solid #ffc107; border-radius: 8px; padding: 20px; text-align: center;">
+                        <h3 style="color: #856404; margin: 0 0 10px 0;">⏳ بدل الإجازة غير متاح حالياً</h3>
+                        <p style="color: #856404; margin: 0;">يجب إكمال سنة كاملة من تاريخ التعيين للحصول على بدل الإجازة</p>
+                        <p style="color: #856404; margin: 10px 0 0 0; font-weight: bold;">
+                            المدة المتبقية: ${remainingDays} يوم (${Math.ceil(remainingDays / 30)} شهر تقريباً)
+                        </p>
+                    </div>
+                `;
+                
+                // إخفاء خيار بدل الإجازة من نموذج الطلب
+                const leaveAllowanceOption = document.querySelector('#allowanceType option[value="leave_allowance"]');
+                if (leaveAllowanceOption) {
+                    leaveAllowanceOption.style.display = 'none';
+                    leaveAllowanceOption.disabled = true;
+                }
+                return;
+            }
+            
+            // إظهار خيار بدل الإجازة في نموذج الطلب (لو كان مخفي)
+            const leaveAllowanceOption = document.querySelector('#allowanceType option[value="leave_allowance"]');
+            if (leaveAllowanceOption) {
+                leaveAllowanceOption.style.display = '';
+                leaveAllowanceOption.disabled = false;
+            }
+            
             // استخدام القيمة اليومية من API أو حسابها إذا لم تكن موجودة
             let dailyWage = leaveBalanceData.dailyWage;
             

@@ -185,6 +185,7 @@ async function loadLeaveTypesChart() {
 
 function loadLeaveBalancesAnalytics() {
     const employees = analyticsData.employees;
+    const today = new Date();
     
     // رسالة توضيحية عن قانون العمل السعودي
     const lawNote = `
@@ -194,13 +195,26 @@ function loadLeaveBalancesAnalytics() {
                 <li><strong>المادة 2 - تعريف الأجر:</strong> الأجر = الأجر الفعلي = الأساسي + جميع البدلات المستحقة (سكن، نقل، إلخ)</li>
                 <li><strong>المادة 109:</strong> الإجازة السنوية تُدفع بأجر كامل (الأجر الفعلي)</li>
                 <li><strong>المادة 111:</strong> بدل الإجازة غير المستخدم يُحسب على الأجر الفعلي</li>
+                <li><strong>شرط الاستحقاق:</strong> يجب إكمال سنة كاملة من تاريخ التعيين للحصول على بدل الإجازة</li>
                 <li><strong>طريقة الحساب:</strong> الأجر اليومي = (الأساسي + السكن + النقل + البدلات) ÷ 30 يوم</li>
                 <li><strong>بدل الإجازة:</strong> عدد أيام الإجازة × الأجر اليومي</li>
             </ul>
         </div>
     `;
     
-    document.getElementById('leaveBalancesTable').innerHTML = lawNote + `<table class="analytics-table"><thead><tr><th>الموظف</th><th>القسم</th><th>الجنسية</th><th>رصيد الإجازات</th><th>الأساسي</th><th>بدل السكن</th><th>بدل النقل</th><th>الأجر الفعلي</th><th>الأجر اليومي</th><th>القيمة المالية</th></tr></thead><tbody>${employees.map(e => {
+    document.getElementById('leaveBalancesTable').innerHTML = lawNote + `<table class="analytics-table"><thead><tr><th>الموظف</th><th>القسم</th><th>الجنسية</th><th>تاريخ التعيين</th><th>مدة الخدمة</th><th>رصيد الإجازات</th><th>الأجر الفعلي</th><th>الأجر اليومي</th><th>بدل الإجازة</th><th>الحالة</th></tr></thead><tbody>${employees.map(e => {
+        // حساب مدة الخدمة
+        const hireDate = e.hireDate ? new Date(e.hireDate) : null;
+        let monthsWorked = 0;
+        let hasCompletedOneYear = false;
+        
+        if (hireDate) {
+            const diffTime = today - hireDate;
+            const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+            monthsWorked = Math.floor(diffDays / 30);
+            hasCompletedOneYear = diffDays >= 365;
+        }
+        
         // حساب رصيد الإجازات حسب الجنسية ونوع العقد
         let balance = 30; // الافتراضي للسعوديين
         
@@ -210,36 +224,50 @@ function loadLeaveBalancesAnalytics() {
         }
         
         // ✅ حساب الأجر الفعلي حسب قانون العمل السعودي (المادة 2)
-        // الأجر الفعلي = الأساسي + جميع البدلات المستحقة
         const basicSalary = parseFloat(e.basicSalary) || parseFloat(e.salary) || 0;
         const housingAllowance = parseFloat(e.housingAllowance) || 0;
         const transportAllowance = parseFloat(e.transportAllowance) || 0;
         const actualWage = basicSalary + housingAllowance + transportAllowance;
         
-        // ✅ الأجر اليومي = الأجر الفعلي ÷ 30 (حسب تعريف الشهر في النظام)
+        // ✅ الأجر اليومي = الأجر الفعلي ÷ 30
         const dailyWage = actualWage / 30;
         
-        // ✅ بدل الإجازة = عدد الأيام × الأجر اليومي
-        const leavePayValue = balance * dailyWage;
+        // ✅ بدل الإجازة = عدد الأيام × الأجر اليومي (فقط إذا أكمل سنة)
+        const leavePayValue = hasCompletedOneYear ? (balance * dailyWage) : 0;
         
         const nationalityLabel = e.nationality === 'SAUDI' ? 'سعودي' : 'غير سعودي';
+        const hireDateStr = hireDate ? hireDate.toLocaleDateString('ar-SA') : 'غير محدد';
+        const serviceYears = Math.floor(monthsWorked / 12);
+        const serviceMonths = monthsWorked % 12;
+        const serviceDuration = serviceYears > 0 ? `${serviceYears} سنة و ${serviceMonths} شهر` : `${serviceMonths} شهر`;
         
-        return `<tr>
+        // حالة الاستحقاق
+        let statusHtml = '';
+        if (!hireDate) {
+            statusHtml = '<span style="color: #dc3545;">⚠️ تاريخ التعيين غير محدد</span>';
+        } else if (!hasCompletedOneYear) {
+            const remainingDays = 365 - Math.floor((today - hireDate) / (1000 * 60 * 60 * 24));
+            statusHtml = `<span style="color: #ffc107;">⏳ متبقي ${remainingDays} يوم</span>`;
+        } else {
+            statusHtml = '<span style="color: #28a745;">✅ مستحق</span>';
+        }
+        
+        return `<tr style="${!hasCompletedOneYear ? 'background: #fff3cd;' : ''}">
             <td><strong>${e.fullName}</strong></td>
             <td>${e.department || '-'}</td>
             <td>${nationalityLabel}</td>
+            <td>${hireDateStr}</td>
+            <td>${serviceDuration}</td>
             <td><strong style="color: #667eea;">${balance} يوم</strong></td>
-            <td>${basicSalary.toFixed(2)} ر.س</td>
-            <td>${housingAllowance.toFixed(2)} ر.س</td>
-            <td>${transportAllowance.toFixed(2)} ر.س</td>
             <td><strong style="color: #2e7d32;">${actualWage.toFixed(2)} ر.س</strong></td>
             <td>${dailyWage.toFixed(2)} ر.س</td>
-            <td><strong style="color: #1565c0; font-size: 16px;">${leavePayValue.toFixed(2)} ر.س</strong></td>
+            <td><strong style="color: ${hasCompletedOneYear ? '#1565c0' : '#999'}; font-size: 16px;">${hasCompletedOneYear ? leavePayValue.toFixed(2) + ' ر.س' : 'غير مستحق'}</strong></td>
+            <td>${statusHtml}</td>
         </tr>`;
     }).join('')}</tbody></table>
     
     <div style="background: #fff3cd; padding: 15px; border-radius: 8px; margin-top: 20px; border-right: 4px solid #ffc107;">
-        <p style="color: #856404; margin: 0;"><strong>💡 ملاحظة:</strong> الحساب متوافق 100% مع نظام العمل السعودي للقطاع الخاص (المواد 2، 109، 111). الأجر الفعلي يشمل الأساسي وجميع البدلات المستحقة.</p>
+        <p style="color: #856404; margin: 0;"><strong>💡 ملاحظة:</strong> بدل الإجازة يظهر فقط للموظفين الذين أكملوا سنة كاملة من تاريخ التعيين. الموظفون الجدد (أقل من سنة) يظهرون بخلفية صفراء.</p>
     </div>`;
 }
 
