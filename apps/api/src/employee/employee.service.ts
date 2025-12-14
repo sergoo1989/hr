@@ -189,50 +189,8 @@ export class EmployeeService {
     
     const employee = this.db.createEmployee(employeeRecord);
     
-    // إنشاء حساب مستخدم للموظف
-    if (employeeData.username && employeeData.password) {
-      try {
-        // استخدام اليوزر والباسورد والصلاحية المدخلة من الفورم
-        const username = employeeData.username;
-        const password = employeeData.password;
-        const role = employeeData.role || 'EMPLOYEE'; // افتراضي موظف إذا لم يتم تحديد الصلاحية
-        
-        // إنشاء المستخدم
-        const user = await this.db.createUser(
-          username,
-          password,
-          role,
-          employee.id,
-          employeeData.email,
-          true, // isActive = true
-          false  // mustChangePassword = false (لأن المدير أدخل الباسورد مباشرة)
-        );
-        
-        console.log(`✅ تم إنشاء حساب للموظف: ${employeeData.fullName}`);
-        console.log(`👤 اسم المستخدم: ${username}`);
-        console.log(`🔐 الصلاحية: ${role}`);
-        
-        // إرسال بريد إلكتروني اختياري بالبيانات
-        if (employeeData.email) {
-          try {
-            await this.emailService.sendEmployeeActivationEmail(
-              employeeData.email,
-              employeeData.fullName,
-              username,
-              password,
-              `http://localhost:3000/frontend/login.html`
-            );
-            console.log(`📧 تم إرسال البيانات إلى: ${employeeData.email}`);
-          } catch (emailError) {
-            console.error('⚠️ خطأ في إرسال البريد:', emailError);
-          }
-        }
-        
-      } catch (error) {
-        console.error('❌ خطأ في إنشاء حساب المستخدم:', error);
-        // نكمل إنشاء الموظف حتى لو فشل إنشاء الحساب
-      }
-    }
+    // لم نعد ننشئ يوزر تلقائياً - سيتم إنشاءه يدوياً من صفحة اليوزرات
+    console.log(`✅ تم إنشاء الموظف: ${employeeData.fullName}`);
     
     return employee;
   }

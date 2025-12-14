@@ -114,4 +114,9 @@ export class AdminController {
   async getAllUsers() {
     return this.adminService.getAllUsersWithPasswords();
   }
+
+  @Post('users')
+  async createUser(@Body() userData: any) {
+    return this.adminService.createUser(userData);
+  }
 }

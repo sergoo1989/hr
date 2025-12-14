@@ -592,22 +592,6 @@
                             <label for="nationalId">رقم الهوية *</label>
                             <input type="text" id="nationalId" required>
                         </div>
-                        <div class="form-group" id="usernameGroup">
-                            <label for="usernameInput">اسم المستخدم *</label>
-                            <input type="text" id="usernameInput" required placeholder="اسم المستخدم للدخول للنظام">
-                        </div>
-                        <div class="form-group" id="passwordGroup">
-                            <label for="userPassword">كلمة المرور *</label>
-                            <input type="password" id="userPassword" required placeholder="كلمة المرور للدخول">
-                        </div>
-                        <div class="form-group" id="roleGroup">
-                            <label for="userRole">الصلاحية *</label>
-                            <select id="userRole" required>
-                                <option value="">-- اختر الصلاحية --</option>
-                                <option value="EMPLOYEE">موظف</option>
-                                <option value="ADMIN">مدير نظام</option>
-                            </select>
-                        </div>
                         <div class="form-group">
                             <label for="email">البريد الإلكتروني</label>
                             <input type="email" id="email">
@@ -776,6 +760,40 @@
                 <p style="color: #d32f2f; padding: 10px; background: #ffebee; border-radius: 5px; margin-bottom: 20px;">
                     ⚠️ <strong>تحذير:</strong> هذه المعلومات سرية للغاية. احفظها في مكان آمن ولا تشاركها مع أحد.
                 </p>
+                
+                <!-- نموذج إضافة يوزر جديد -->
+                <div style="background: #f8f9fa; padding: 20px; border-radius: 8px; margin-bottom: 30px;">
+                    <h3 style="color: #667eea; margin-bottom: 15px;">➕ إضافة يوزر جديد</h3>
+                    <div id="addUserAlert" class="alert"></div>
+                    <form id="addUserForm" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; align-items: end;">
+                        <div class="form-group">
+                            <label for="newUserEmployee">اختر الموظف *</label>
+                            <select id="newUserEmployee" required style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px;">
+                                <option value="">-- اختر موظف --</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="newUsername">اسم المستخدم *</label>
+                            <input type="text" id="newUsername" required placeholder="username" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px;">
+                        </div>
+                        <div class="form-group">
+                            <label for="newPassword">كلمة المرور *</label>
+                            <input type="password" id="newPassword" required placeholder="********" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px;">
+                        </div>
+                        <div class="form-group">
+                            <label for="newUserRole">الصلاحية *</label>
+                            <select id="newUserRole" required style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px;">
+                                <option value="">-- اختر الصلاحية --</option>
+                                <option value="EMPLOYEE">موظف</option>
+                                <option value="ADMIN">مدير نظام</option>
+                            </select>
+                        </div>
+                        <div>
+                            <button type="submit" class="btn" style="width: 100%; padding: 10px;">✓ إضافة اليوزر</button>
+                        </div>
+                    </form>
+                </div>
+                
                 <div id="usersList"></div>
             </div>
         </div>
@@ -1009,7 +1027,10 @@
             // Load data for specific tabs
             if (tabName === 'dashboard') loadDashboard();
             if (tabName === 'employees') loadEmployees();
-            if (tabName === 'users') loadUsers();
+            if (tabName === 'users') {
+                loadUsers();
+                populateEmployeeDropdown();
+            }
             if (tabName === 'leaves') loadPendingLeaves();
             if (tabName === 'advances') loadPendingAdvances();
             if (tabName === 'settings') loadSettings();
@@ -1391,6 +1412,76 @@
                 `;
             }
         }
+
+        // ملء قائمة الموظفين في نموذج إضافة يوزر
+        async function populateEmployeeDropdown() {
+            try {
+                const apiUrl = Config.getApiUrl();
+                const response = await fetch(`${apiUrl}/employees`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                const employees = await response.json();
+                
+                const select = document.getElementById('newUserEmployee');
+                if (!select) return;
+                
+                select.innerHTML = '<option value="">-- اختر موظف --</option>';
+                employees.forEach(emp => {
+                    select.innerHTML += `<option value="${emp.id}">${emp.fullName} (${emp.employeeNumber})</option>`;
+                });
+            } catch (error) {
+                console.error('Error loading employees for dropdown:', error);
+            }
+        }
+
+        // إضافة يوزر جديد
+        document.getElementById('addUserForm')?.addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const employeeId = document.getElementById('newUserEmployee').value;
+            const username = document.getElementById('newUsername').value;
+            const password = document.getElementById('newPassword').value;
+            const role = document.getElementById('newUserRole').value;
+            
+            if (!employeeId || !username || !password || !role) {
+                showAlert('addUserAlert', 'error', 'الرجاء ملء جميع الحقول');
+                return;
+            }
+            
+            try {
+                const apiUrl = Config.getApiUrl();
+                const response = await fetch(`${apiUrl}/admin/users`, {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        employeeId: parseInt(employeeId),
+                        username,
+                        password,
+                        role
+                    })
+                });
+                
+                if (!response.ok) {
+                    const error = await response.json();
+                    throw new Error(error.message || 'فشل في إضافة اليوزر');
+                }
+                
+                showAlert('addUserAlert', 'success', '✅ تم إضافة اليوزر بنجاح!');
+                
+                // إعادة تعيين النموذج
+                document.getElementById('addUserForm').reset();
+                
+                // تحديث قائمة اليوزرات
+                loadUsers();
+                
+            } catch (error) {
+                console.error('Error adding user:', error);
+                showAlert('addUserAlert', 'error', '❌ ' + error.message);
+            }
+        });
 
         async function loadPendingLeaves() {
             try {

@@ -233,4 +233,50 @@ export class AdminService {
       };
     });
   }
+
+  async createUser(userData: any) {
+    const { employeeId, username, password, role } = userData;
+
+    // التحقق من البيانات
+    if (!employeeId || !username || !password || !role) {
+      throw new BadRequestException('جميع الحقول مطلوبة');
+    }
+
+    // التحقق من وجود الموظف
+    const employee = this.db.findEmployeeById(employeeId);
+    if (!employee) {
+      throw new NotFoundException('الموظف غير موجود');
+    }
+
+    // التحقق من عدم وجود اليوزر مسبقاً
+    const existingUser = this.db.findUserByUsername(username);
+    if (existingUser) {
+      throw new BadRequestException('اسم المستخدم موجود مسبقاً');
+    }
+
+    // إنشاء اليوزر
+    const user = await this.db.createUser(
+      username,
+      password,
+      role,
+      employeeId,
+      employee.email,
+      true, // isActive
+      false // mustChangePassword
+    );
+
+    console.log(`✅ تم إنشاء يوزر جديد: ${username} للموظف: ${employee.fullName}`);
+
+    return {
+      success: true,
+      message: 'تم إنشاء اليوزر بنجاح',
+      user: {
+        id: user.id,
+        username: user.username,
+        role: user.role,
+        employeeName: employee.fullName,
+        employeeNumber: employee.employeeNumber
+      }
+    };
+  }
 }
