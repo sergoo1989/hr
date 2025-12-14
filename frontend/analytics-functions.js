@@ -88,7 +88,7 @@ function loadAnalyticsCharts() {
 async function loadLeaveTypesChart() {
     try {
         const token = localStorage.getItem('token');
-        const API_URL = 'http://localhost:3000';
+        const API_URL = Config.getApiUrl();
         
         // جلب جميع طلبات الإجازات من API
         const leavesRes = await fetch(`${API_URL}/admin/leaves`, { 
@@ -436,7 +436,7 @@ function loadDocumentsAlertsAnalytics() {
 async function loadAssetsAnalytics() {
     try {
         const token = localStorage.getItem('token');
-        const API_URL = 'http://localhost:3000';
+        const API_URL = Config.getApiUrl();
         
         // جلب جميع العهد من API
         const assetsRes = await fetch(`${API_URL}/admin/assets`, { 
