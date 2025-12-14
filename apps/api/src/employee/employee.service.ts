@@ -35,7 +35,17 @@ export class EmployeeService {
     const now = new Date();
     const yearsWorked = (now.getTime() - startDate.getTime()) / (365.25 * 24 * 60 * 60 * 1000);
 
-    const totalDays = yearsWorked >= 5 ? 30 : 21;
+    // حساب عدد أيام الإجازة حسب الجنسية ونوع العقد
+    let totalDays = 30; // الافتراضي للسعوديين
+    
+    if (employee.nationality === 'NON_SAUDI') {
+      // للموظفين غير السعوديين: استخدام عدد أيام الإجازة من العقد
+      totalDays = employee.contractLeaveDays || 30;
+    } else if (employee.nationality === 'SAUDI') {
+      // للسعوديين: 21 يوم أول 5 سنوات، ثم 30 يوم
+      totalDays = yearsWorked >= 5 ? 30 : 21;
+    }
+    
     const leaves = this.db.findLeavesByEmployeeId(employeeId).filter(l => l.status === 'APPROVED');
     const usedDays = leaves.reduce((sum, l) => sum + l.daysCount, 0);
     // حساب رصيد الإجازة بالأجر الفعلي حسب قانون العمل السعودي
