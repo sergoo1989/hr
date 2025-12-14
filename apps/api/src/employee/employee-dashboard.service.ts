@@ -27,6 +27,15 @@ export class EmployeeDashboardService {
       totalDays = yearsWorked >= 5 ? 30 : 21;
     }
 
+    // Debug: تتبع مصدر بيانات أيام الإجازة
+    console.log('[LeaveBalance]', {
+      employeeId,
+      fullName: employee.fullName,
+      nationality: employee.nationality,
+      contractLeaveDays: employee.contractLeaveDays,
+      totalDays,
+    });
+
     // حساب الأيام المستخدمة من الإجازات المعتمدة
     const approvedLeaves = this.db.findLeavesByEmployeeId(employeeId)
       .filter(l => l.status === 'APPROVED');
