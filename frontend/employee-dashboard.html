@@ -450,10 +450,17 @@
 
                 // Update cards
                 const leaveBalance = dashboardData.leaveBalance || {};
-                console.log('Leave Balance Data:', leaveBalance); // للتحقق من البيانات
-                const remainingDays = leaveBalance.remainingDays || 0;
-                const totalDays = leaveBalance.totalDays || 30;
-                const usedDays = leaveBalance.usedDays || 0;
+                const employee = dashboardData.employee || {};
+
+                // إعادة الحساب محلياً لضمان استخدام عدد الأيام من العقد لغير السعوديين
+                let totalDays = leaveBalance.totalDays || 30;
+                let usedDays = leaveBalance.usedDays || 0;
+                let remainingDays = leaveBalance.remainingDays || (totalDays - usedDays);
+
+                if (employee.nationality === 'NON_SAUDI' && employee.contractLeaveDays) {
+                    totalDays = employee.contractLeaveDays;
+                    remainingDays = totalDays - usedDays;
+                }
                 
                 // التحقق من إكمال سنة من تاريخ التعيين
                 const employee = dashboardData.employee || {};
@@ -503,18 +510,18 @@
                     document.getElementById('leaveBalance').textContent = remainingDays;
                     document.getElementById('leaveBalanceLabel').textContent = `من ${totalDays} يوم سنوياً`;
                     
-                    // عرض المبلغ المالي لرصيد الإجازات المتبقية
-                    const leaveBalanceAmount = leaveBalance.leaveBalance || 0;
-                    document.getElementById('leaveBalanceAmount').textContent = Math.round(leaveBalanceAmount).toLocaleString('ar-SA');
-                    
-                    document.getElementById('usedLeaves').textContent = usedDays;
-                    
-                    // عرض المبلغ المستلم من الإجازات المستخدمة (باستخدام الأجر الفعلي)
+                    // عرض المبلغ المالي لرصيد الإجازات المتبقية (بحسب التوتال بعد التصحيح)
                     const basicSalary = employee.basicSalary || employee.salary || 0;
                     const housingAllowance = employee.housingAllowance || 0;
                     const transportAllowance = employee.transportAllowance || 0;
                     const actualWage = basicSalary + housingAllowance + transportAllowance;
                     const dailyWage = actualWage / 30;
+                    const leaveBalanceAmount = remainingDays * dailyWage;
+                    document.getElementById('leaveBalanceAmount').textContent = Math.round(leaveBalanceAmount).toLocaleString('ar-SA');
+                    
+                    document.getElementById('usedLeaves').textContent = usedDays;
+                    
+                    // عرض المبلغ المستلم من الإجازات المستخدمة (باستخدام الأجر الفعلي)
                     const usedLeavesAmount = usedDays * dailyWage;
                     document.getElementById('usedLeavesAmount').textContent = Math.round(usedLeavesAmount).toLocaleString('ar-SA');
                 }
