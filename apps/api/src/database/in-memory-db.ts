@@ -681,6 +681,16 @@ export class InMemoryDatabase {
     return false;
   }
 
+  deleteUser(userId: number): boolean {
+    const index = this.users.findIndex(u => u.id === userId);
+    if (index > -1) {
+      this.users.splice(index, 1);
+      this.saveToStorage(); // حفظ البيانات
+      return true;
+    }
+    return false;
+  }
+
   // Leave Methods
   createLeave(data: Omit<Leave, 'id'>): Leave {
     const leave: Leave = {

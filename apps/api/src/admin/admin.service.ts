@@ -279,4 +279,44 @@ export class AdminService {
       }
     };
   }
+
+  async changeUserPassword(userId: number, newPassword: string) {
+    if (!newPassword || newPassword.length < 4) {
+      throw new BadRequestException('كلمة المرور يجب أن تكون 4 أحرف على الأقل');
+    }
+
+    const bcrypt = require('bcrypt');
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
+    
+    const success = await this.db.updateUserPassword(userId, hashedPassword);
+    if (!success) {
+      throw new NotFoundException('اليوزر غير موجود');
+    }
+
+    console.log(`✅ تم تغيير كلمة المرور لليوزر رقم: ${userId}`);
+
+    return {
+      success: true,
+      message: 'تم تغيير كلمة المرور بنجاح'
+    };
+  }
+
+  async deleteUser(userId: number) {
+    const user = this.db.findUserById(userId);
+    if (!user) {
+      throw new NotFoundException('اليوزر غير موجود');
+    }
+
+    const success = this.db.deleteUser(userId);
+    if (!success) {
+      throw new BadRequestException('فشل في حذف اليوزر');
+    }
+
+    console.log(`✅ تم حذف اليوزر: ${user.username}`);
+
+    return {
+      success: true,
+      message: 'تم حذف اليوزر بنجاح'
+    };
+  }
 }

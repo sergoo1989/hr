@@ -119,4 +119,14 @@ export class AdminController {
   async createUser(@Body() userData: any) {
     return this.adminService.createUser(userData);
   }
+
+  @Patch('users/:id/password')
+  async changeUserPassword(@Param('id') id: string, @Body() body: { password: string }) {
+    return this.adminService.changeUserPassword(parseInt(id), body.password);
+  }
+
+  @Delete('users/:id')
+  async deleteUser(@Param('id') id: string) {
+    return this.adminService.deleteUser(parseInt(id));
+  }
 }
