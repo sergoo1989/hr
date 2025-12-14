@@ -11,7 +11,7 @@ async function loadAnalytics() {
     if (analyticsData) return;
     try {
         const token = localStorage.getItem('token');
-        const API_URL = 'http://localhost:3000';
+        const API_URL = Config.getApiUrl();
         const employeesRes = await fetch(`${API_URL}/employees`, { headers: { 'Authorization': `Bearer ${token}` }});
         analyticsData = { employees: await employeesRes.json() };
         document.getElementById('analyticsContent').style.display = 'block';
@@ -25,6 +25,7 @@ async function loadAnalytics() {
         loadDocumentsAlertsAnalytics();
     } catch (error) {
         console.error('Error:', error);
+        document.getElementById('analyticsLoading').innerHTML = '<p style="color: #f44336;">❌ خطأ في تحميل التحليلات. حاول مرة أخرى.</p>';
     }
 }
 
