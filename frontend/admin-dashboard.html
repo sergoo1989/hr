@@ -1202,6 +1202,31 @@
             }
         }
 
+        // دوال إظهار/إخفاء ونسخ كلمة المرور
+        function togglePassword(elementId, password) {
+            const element = document.getElementById(elementId);
+            if (element.textContent === '••••••••') {
+                element.innerHTML = '<strong>' + password + '</strong>';
+            } else {
+                element.innerHTML = '<strong>••••••••</strong>';
+            }
+        }
+
+        function copyPassword(password) {
+            navigator.clipboard.writeText(password).then(() => {
+                alert('✅ تم نسخ كلمة المرور');
+            }).catch(err => {
+                // Fallback for older browsers
+                const textArea = document.createElement('textarea');
+                textArea.value = password;
+                document.body.appendChild(textArea);
+                textArea.select();
+                document.execCommand('copy');
+                document.body.removeChild(textArea);
+                alert('✅ تم نسخ كلمة المرور');
+            });
+        }
+
         async function loadUsers() {
             try {
                 const apiUrl = Config.getApiUrl();
@@ -1253,12 +1278,29 @@
                                         ? '<span style="background: #4caf50; color: white; padding: 4px 8px; border-radius: 4px; font-size: 11px;">نشط</span>'
                                         : '<span style="background: #9e9e9e; color: white; padding: 4px 8px; border-radius: 4px; font-size: 11px;">معطل</span>';
                                     
+                                    const passwordId = 'pwd_' + index;
+                                    const actualPassword = user.password || '••••••••';
+                                    
                                     return `
                                     <tr>
                                         <td><strong>${index + 1}</strong></td>
                                         <td><strong>${user.employeeName || '-'}</strong></td>
                                         <td style="font-family: monospace; color: #2196F3;"><strong>${user.username}</strong></td>
-                                        <td style="font-family: monospace; color: #f44336; background: #fff3e0; padding: 8px;"><strong>${user.password || '••••••••'}</strong></td>
+                                        <td style="font-family: monospace; background: #fff3e0; padding: 8px;">
+                                            <div style="display: flex; align-items: center; gap: 8px;">
+                                                <span id="${passwordId}" style="color: #f44336;"><strong>••••••••</strong></span>
+                                                <button onclick="togglePassword('${passwordId}', '${actualPassword}')" 
+                                                    style="background: none; border: none; cursor: pointer; font-size: 18px; padding: 2px 6px;" 
+                                                    title="إظهار/إخفاء كلمة المرور">
+                                                    👁️
+                                                </button>
+                                                <button onclick="copyPassword('${actualPassword}')" 
+                                                    style="background: none; border: none; cursor: pointer; font-size: 16px; padding: 2px 6px;" 
+                                                    title="نسخ كلمة المرور">
+                                                    📋
+                                                </button>
+                                            </div>
+                                        </td>
                                         <td><span style="background: ${roleColor}; color: white; padding: 4px 12px; border-radius: 4px; font-size: 11px;"><strong>${roleName}</strong></span></td>
                                         <td>${user.email || '-'}</td>
                                         <td>${statusBadge}</td>
