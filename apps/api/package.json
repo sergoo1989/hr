@@ -10,6 +10,9 @@
     "payroll:report": "ts-node src/reports/payroll.service.ts",
     "payroll:excel": "ts-node scripts/generatePayroll.ts"
   },
+  "prisma": {
+    "schema": "prisma/schema.prisma"
+  },
   "dependencies": {
     "@nestjs/common": "^11.1.9",
     "@nestjs/core": "^11.1.9",
