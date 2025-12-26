@@ -1,0 +1,206 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  ADMIN
+  EMPLOYEE
+}
+
+enum EmployeeStatus {
+  ACTIVE
+  INACTIVE
+  TERMINATED
+  RESIGNED
+}
+
+enum Nationality {
+  SAUDI
+  NON_SAUDI
+}
+
+model User {
+  id                 Int      @id @default(autoincrement())
+  username           String   @unique
+  password           String
+  role               Role     @default(EMPLOYEE)
+  isActive           Boolean  @default(true)
+  mustChangePassword Boolean  @default(false)
+  activationToken    String?
+  email              String?
+  employeeId         Int?     @unique
+  employee           Employee? @relation(fields: [employeeId], references: [id])
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+}
+
+model Employee {
+  id                 Int       @id @default(autoincrement())
+  fullName           String
+  employeeNumber     String    @unique
+  nationalId         String?   @unique
+  email              String?
+  phone              String?
+  department         String?
+  jobTitle           String?
+  hireDate           DateTime?
+  salary             Float?
+  basicSalary        Float?
+  housingAllowance   Float?
+  transportAllowance Float?
+  nationality        Nationality?
+  
+  // Work details
+  workType           String?   // FULL_TIME, PART_TIME, etc.
+  sponsorshipType    String?   // COMPANY, PERSONAL, etc.
+  
+  // Non-Saudi specific
+  passportNumber             String?
+  passportExpiryDate         DateTime?
+  workPermitExpiryDate       DateTime?
+  medicalInsuranceExpiryDate DateTime?
+  
+  // End of service
+  terminationDate    DateTime?
+  terminationReason  String?
+  
+  // Relations
+  user               User?
+  leaves             Leave[]
+  advances           Advance[]
+  assets             Asset[]
+  attendances        Attendance[]
+  payrollRecords     PayrollRecord[]
+  deductions         Deduction[]
+
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+}
+
+model Leave {
+  id          Int      @id @default(autoincrement())
+  employeeId  Int
+  employee    Employee @relation(fields: [employeeId], references: [id])
+  type        String   // ANNUAL, SICK, EMERGENCY
+  startDate   DateTime
+  endDate     DateTime
+  days        Int
+  status      String   @default("PENDING") // PENDING, APPROVED, REJECTED
+  reason      String?
+  requestDate DateTime @default(now())
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model Advance {
+  id          Int      @id @default(autoincrement())
+  employeeId  Int
+  employee    Employee @relation(fields: [employeeId], references: [id])
+  amount      Float
+  status      String   @default("PENDING")
+  reason      String?
+  requestDate DateTime @default(now())
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model Asset {
+  id           Int       @id @default(autoincrement())
+  employeeId   Int
+  employee     Employee  @relation(fields: [employeeId], references: [id])
+  assetType    String    // LAPTOP, PHONE, etc.
+  description  String?
+  assignedDate DateTime  @default(now())
+  returned     Boolean   @default(false)
+  returnDate   DateTime?
+  confirmed    Boolean   @default(false)
+  confirmedDate DateTime?
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+}
+
+model Attendance {
+  id              Int      @id @default(autoincrement())
+  employeeId      Int
+  employee        Employee @relation(fields: [employeeId], references: [id])
+  date            DateTime
+  checkIn         DateTime?
+  checkOut        DateTime?
+  status          String   // PRESENT, ABSENT, LATE
+  workHours       Float?
+  lateMinutes     Int?
+  overtimeHours   Float?
+  notes           String?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+}
+
+model PayrollRecord {
+  id                 Int      @id @default(autoincrement())
+  employeeId         Int
+  employee           Employee @relation(fields: [employeeId], references: [id])
+  month              Int
+  year               Int
+  basicSalary        Float
+  housingAllowance   Float
+  transportAllowance Float
+  totalAllowances    Float
+  grossSalary        Float
+  
+  // Deductions details
+  gosiDeduction      Float    @default(0)
+  absentDeduction    Float    @default(0)
+  lateDeduction      Float    @default(0)
+  advanceDeduction   Float    @default(0)
+  otherDeductions    Float    @default(0)
+  totalDeductions    Float
+  
+  netSalary          Float
+  status             String   @default("DRAFT") // DRAFT, APPROVED, PAID
+  paidDate           DateTime?
+  notes              String?
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+}
+
+model Deduction {
+  id          Int      @id @default(autoincrement())
+  employeeId  Int
+  employee    Employee @relation(fields: [employeeId], references: [id])
+  type        String   // ABSENCE, ADVANCE, OTHER
+  amount      Float
+  date        DateTime
+  month       Int
+  year        Int
+  description String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model Department {
+  id        Int      @id @default(autoincrement())
+  name      String   @unique
+  createdAt DateTime @default(now())
+}
+
+model JobTitle {
+  id        Int      @id @default(autoincrement())
+  title     String   @unique
+  createdAt DateTime @default(now())
+}
+
+model CompanySettings {
+  id            Int     @id @default(autoincrement())
+  companyName   String
+  companyNameEn String?
+  email         String?
+  phone         String?
+  address       String?
+  taxNumber     String?
+  logo          String?
+}
